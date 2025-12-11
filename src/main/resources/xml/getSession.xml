@@ -1,0 +1,5 @@
+<SofEnvelope>
+    <sessionID/>
+    <identification>{username}</identification> --Kullanıcı Adı
+    <password>{password}</password> -- Şifre
+</SofEnvelope>
