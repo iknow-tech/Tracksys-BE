@@ -23,4 +23,9 @@ public class DataResponse {
     @JacksonXmlProperty(localName = "PRJ_SM_StockVehicleContract")
     private List<StockVehicleContractResponse> stockVehicleContracts;
 
+    @JsonProperty
+    @JacksonXmlElementWrapper(localName = "PRJ_SM_ContractsToBeRegistered_Set")
+    @JacksonXmlProperty(localName = "PRJ_SM_ContractsToBeRegistered")
+    private List<ContractsToBeRegisteredResponse> contractsToBeRegistered;
+
 }

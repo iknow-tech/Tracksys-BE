@@ -1,5 +1,6 @@
 package com.iknow.iflowtracksysproxy.controller;
 
+import com.iknow.iflowtracksysproxy.integration.miles.model.response.ContractsToBeRegisteredResponse;
 import com.iknow.iflowtracksysproxy.integration.miles.model.response.CustomerContractResponse;
 import com.iknow.iflowtracksysproxy.integration.miles.model.response.StockVehicleContractResponse;
 import com.iknow.iflowtracksysproxy.service.MilesService;
@@ -62,6 +63,21 @@ public class MilesController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error getting stock vehicle contracts", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Get Contracts to be Registered (PRJ_SM_ContractsToBeRegistered)
+     */
+    @GetMapping("contracts-registered")
+    public ResponseEntity<List<ContractsToBeRegisteredResponse>> getContractsRegistered() {
+        try {
+            log.info("Getting contracts to be registered");
+            List<ContractsToBeRegisteredResponse> response = milesService.getContractsRegistered();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error getting contracts to be registered", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

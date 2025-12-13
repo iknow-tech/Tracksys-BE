@@ -1,6 +1,7 @@
 package com.iknow.iflowtracksysproxy.service;
 
 import com.iknow.iflowtracksysproxy.integration.miles.MilesApi;
+import com.iknow.iflowtracksysproxy.integration.miles.model.response.ContractsToBeRegisteredResponse;
 import com.iknow.iflowtracksysproxy.integration.miles.model.response.CustomerContractResponse;
 import com.iknow.iflowtracksysproxy.integration.miles.model.response.StockVehicleContractResponse;
 import lombok.Builder;
@@ -36,6 +37,10 @@ public class MilesService {
 
     public List<StockVehicleContractResponse> getStockVehicleContracts() {
         return milesApi.getStockVehicleContracts();
+    }
+
+    public List<ContractsToBeRegisteredResponse> getContractsRegistered() {
+        return milesApi.getContractsRegistered();
     }
 
     /**

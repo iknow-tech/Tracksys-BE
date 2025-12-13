@@ -1,9 +1,6 @@
 package com.iknow.iflowtracksysproxy.integration.miles;
 
-import com.iknow.iflowtracksysproxy.integration.miles.model.response.BaseResponse;
-import com.iknow.iflowtracksysproxy.integration.miles.model.response.CustomerContractResponse;
-import com.iknow.iflowtracksysproxy.integration.miles.model.response.LogonResponse;
-import com.iknow.iflowtracksysproxy.integration.miles.model.response.StockVehicleContractResponse;
+import com.iknow.iflowtracksysproxy.integration.miles.model.response.*;
 import com.iknow.iflowtracksysproxy.util.ResourceReader;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +23,7 @@ public class MilesApi {
 
     private static final String PRJ_SM_CustomerContractRequest = ResourceReader.asString("xml/PRJ_SM_CustomerContract.xml");
     private static final String PRJ_SM_StockVehicleContractRequest = ResourceReader.asString("xml/PRJ_SM_StockVehicleContract.xml");
+    private static final String PRJ_SM_ContractsToBeRegisteredRequest = ResourceReader.asString("xml/PRJ_SM_ContractsToBeRegistered.xml");
 
 
     private final RestTemplate xmlRestTemplate;
@@ -96,6 +94,25 @@ public class MilesApi {
             return baseResponseResponseEntity;
          } catch (Exception e) {
             log.error("MilesApi.getStockVehicleContracts", e.getStackTrace());
+            return null;
+        }
+    }
+
+    public List<ContractsToBeRegisteredResponse> getContractsRegistered() {
+        log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch?sessionId={}", sessionId);
+        String body = PRJ_SM_ContractsToBeRegisteredRequest
+                .replace("{sessionId}", sessionId);
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_XML);
+            HttpEntity<String> request = new HttpEntity<>(body, headers);
+            List<ContractsToBeRegisteredResponse> baseResponseResponseEntity =  xmlRestTemplate.postForEntity(baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch", request, BaseResponse.class)
+                    .getBody()
+                    .getData()
+                    .getContractsToBeRegistered();
+            return baseResponseResponseEntity;
+        } catch (Exception e) {
+            log.error("MilesApi.getContractsRegistered", e.getStackTrace());
             return null;
         }
     }
