@@ -1,0 +1,57 @@
+package com.iknow.iflowtracksysproxy.service;
+
+import com.iknow.iflowtracksysproxy.integration.miles.MilesApi;
+import com.iknow.iflowtracksysproxy.integration.miles.model.response.CustomerContractResponse;
+import com.iknow.iflowtracksysproxy.integration.miles.model.response.StockVehicleContractResponse;
+import lombok.Builder;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+@Slf4j
+@RequiredArgsConstructor
+public class MilesService {
+
+    private final MilesApi milesApi;
+
+    /**
+     * Get current session ID
+     * @return Current session ID
+     */
+    public String getSessionId() {
+        if (MilesApi.sessionId == null) {
+            log.warn("Session ID is null, attempting to refresh");
+            milesApi.refreshSessionId();
+        }
+        return MilesApi.sessionId;
+    }
+
+    public List<CustomerContractResponse> getCustomerContracts() {
+        return milesApi.getCustomerContracts();
+    }
+
+    public List<StockVehicleContractResponse> getStockVehicleContracts() {
+        return milesApi.getStockVehicleContracts();
+    }
+
+    /**
+     * Get session info
+     */
+    public SessionInfo getSessionInfo() {
+        return SessionInfo.builder()
+                .sessionId(MilesApi.sessionId)
+                .build();
+    }
+
+
+    @Builder
+    @Data
+    public static class SessionInfo {
+        private String sessionId;
+    }
+
+}

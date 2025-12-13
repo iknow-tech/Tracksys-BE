@@ -1,18 +1,32 @@
 package com.iknow.iflowtracksysproxy.integration.miles;
 
 import com.iknow.iflowtracksysproxy.integration.miles.model.response.BaseResponse;
+import com.iknow.iflowtracksysproxy.integration.miles.model.response.CustomerContractResponse;
 import com.iknow.iflowtracksysproxy.integration.miles.model.response.LogonResponse;
+import com.iknow.iflowtracksysproxy.integration.miles.model.response.StockVehicleContractResponse;
+import com.iknow.iflowtracksysproxy.util.ResourceReader;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
+
 
 @Slf4j
 @Service
-public class MilesApi  {
+public class MilesApi {
+
+    private static final String PRJ_SM_CustomerContractRequest = ResourceReader.asString("xml/PRJ_SM_CustomerContract.xml");
+    private static final String PRJ_SM_StockVehicleContractRequest = ResourceReader.asString("xml/PRJ_SM_StockVehicleContract.xml");
+
 
     private final RestTemplate xmlRestTemplate;
 
@@ -40,13 +54,51 @@ public class MilesApi  {
     }
 
     private LogonResponse logon() {
-       log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/Logon?identification={}&password={}", baseUrl, username, password);
+        log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/Logon?identification={}&password={}", baseUrl, username, password);
         return xmlRestTemplate.getForEntity(baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/Session/Logon?identification=" + username + "&password=" + password, BaseResponse.class)
                 .getBody()
                 .getData()
                 .getLoginResponse();
     }
 
+    public List<CustomerContractResponse> getCustomerContracts() {
+        log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch?sessionId={}", sessionId);
+        String body = PRJ_SM_CustomerContractRequest
+                .replace("{sessionId}", sessionId);
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_XML);
+            HttpEntity<String> request = new HttpEntity<>(body, headers);
+            List<CustomerContractResponse> baseResponseResponseEntity =  xmlRestTemplate.postForEntity(baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch", request, BaseResponse.class)
+                    .getBody()
+                    .getData()
+                    .getCustomerContracts();
+            return baseResponseResponseEntity;
+            //log.info("response: {}", baseResponseResponseEntity);
+        } catch (Exception e) {
+            log.error("MilesApi.getCustomerContracts", e.getStackTrace());
+            return null;
+        }
+    }
+
+    public List<StockVehicleContractResponse> getStockVehicleContracts() {
+        log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch?sessionId={}", sessionId);
+        String body = PRJ_SM_StockVehicleContractRequest
+                .replace("{sessionId}", sessionId);
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_XML);
+            HttpEntity<String> request = new HttpEntity<>(body, headers);
+            List<StockVehicleContractResponse> baseResponseResponseEntity =  xmlRestTemplate.postForEntity(baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch", request, BaseResponse.class)
+                    .getBody()
+                    .getData()
+                    .getStockVehicleContracts();
+            return baseResponseResponseEntity;
+         } catch (Exception e) {
+            log.error("MilesApi.getStockVehicleContracts", e.getStackTrace());
+            return null;
+        }
+    }
 
 
 }
