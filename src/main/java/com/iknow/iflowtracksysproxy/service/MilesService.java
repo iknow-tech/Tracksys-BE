@@ -1,9 +1,8 @@
 package com.iknow.iflowtracksysproxy.service;
 
 import com.iknow.iflowtracksysproxy.integration.miles.MilesApi;
-import com.iknow.iflowtracksysproxy.integration.miles.model.response.ContractsToBeRegisteredResponse;
-import com.iknow.iflowtracksysproxy.integration.miles.model.response.CustomerContractResponse;
-import com.iknow.iflowtracksysproxy.integration.miles.model.response.StockVehicleContractResponse;
+import com.iknow.iflowtracksysproxy.integration.miles.model.request.NetAmountUpdateRequest;
+import com.iknow.iflowtracksysproxy.integration.miles.model.response.*;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +20,7 @@ public class MilesService {
 
     /**
      * Get current session ID
+     * 
      * @return Current session ID
      */
     public String getSessionId() {
@@ -43,6 +43,10 @@ public class MilesService {
         return milesApi.getContractsRegistered();
     }
 
+    public NetAmountUpdateResponse updateNetAmount(NetAmountUpdateRequest request) {
+        return milesApi.updateNetAmount(request);
+    }
+
     /**
      * Get session info
      */
@@ -51,7 +55,6 @@ public class MilesService {
                 .sessionId(MilesApi.sessionId)
                 .build();
     }
-
 
     @Builder
     @Data

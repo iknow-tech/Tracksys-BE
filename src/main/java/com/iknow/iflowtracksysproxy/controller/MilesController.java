@@ -1,8 +1,7 @@
 package com.iknow.iflowtracksysproxy.controller;
 
-import com.iknow.iflowtracksysproxy.integration.miles.model.response.ContractsToBeRegisteredResponse;
-import com.iknow.iflowtracksysproxy.integration.miles.model.response.CustomerContractResponse;
-import com.iknow.iflowtracksysproxy.integration.miles.model.response.StockVehicleContractResponse;
+import com.iknow.iflowtracksysproxy.integration.miles.model.request.NetAmountUpdateRequest;
+import com.iknow.iflowtracksysproxy.integration.miles.model.response.*;
 import com.iknow.iflowtracksysproxy.service.MilesService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -78,6 +77,21 @@ public class MilesController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error getting contracts to be registered", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Update Net Amount (GenericAttributeUpdateService_NetAmountUpdate)
+     */
+    @GetMapping("/update-net-amount")
+    public ResponseEntity<NetAmountUpdateResponse> updateNetAmount(NetAmountUpdateRequest request) {
+        try {
+            log.info("Updating net amount for vehicleOrderItemId: {}", request.getVehicleOrderItemId());
+            NetAmountUpdateResponse response = milesService.updateNetAmount(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error updating net amount", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
