@@ -2,6 +2,7 @@ package com.iknow.iflowtracksysproxy.service;
 
 import com.iknow.iflowtracksysproxy.integration.miles.MilesApi;
 import com.iknow.iflowtracksysproxy.integration.miles.model.request.NetAmountUpdateRequest;
+import com.iknow.iflowtracksysproxy.integration.miles.model.request.TaxUpdateRequest;
 import com.iknow.iflowtracksysproxy.integration.miles.model.response.*;
 import lombok.Builder;
 import lombok.Data;
@@ -46,6 +47,8 @@ public class MilesService {
     public NetAmountUpdateResponse updateNetAmount(NetAmountUpdateRequest request) {
         return milesApi.updateNetAmount(request);
     }
+
+    public TaxUpdateResponse updateTax(TaxUpdateRequest request) { return  milesApi.updateTax(request);}
 
     /**
      * Get session info
