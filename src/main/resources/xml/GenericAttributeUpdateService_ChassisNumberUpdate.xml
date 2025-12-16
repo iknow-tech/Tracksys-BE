@@ -1,0 +1,21 @@
+<SofEnvelope>
+    <sessionID>{sessionId}</sessionID>
+    <action>execute</action>
+    <data>
+        <MWSBulkAttributeUpdate>
+            <MWSObject>
+                <id>{fleetVehicleId}</id> -- Fleetvehicle_id
+                <sroid>{orderId}</sroid>  ----- sabit  Order Objesi
+                <Field_Set>
+                    <Field>
+                        <id>{id}</id> ----- sabit Alan id
+                        <name></name>
+                        <MWSStringValue>
+                            <value>{value}</value>
+                        </MWSStringValue>
+                    </Field>
+                </Field_Set>
+            </MWSObject>
+        </MWSBulkAttributeUpdate>
+    </data>
+</SofEnvelope>

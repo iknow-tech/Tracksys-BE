@@ -1,6 +1,7 @@
 package com.iknow.iflowtracksysproxy.service;
 
 import com.iknow.iflowtracksysproxy.integration.miles.MilesApi;
+import com.iknow.iflowtracksysproxy.integration.miles.model.request.ChassisNumberUpdateRequest;
 import com.iknow.iflowtracksysproxy.integration.miles.model.request.DiscountUpdateRequest;
 import com.iknow.iflowtracksysproxy.integration.miles.model.request.NetAmountUpdateRequest;
 import com.iknow.iflowtracksysproxy.integration.miles.model.request.TaxUpdateRequest;
@@ -51,7 +52,13 @@ public class MilesService {
 
     public TaxUpdateResponse updateTax(TaxUpdateRequest request) { return milesApi.updateTax(request);}
 
-    public DiscountUpdateResponse updateDiscount(DiscountUpdateRequest request, String vehicleOrderItem) { return milesApi.updateDiscount(request, vehicleOrderItem);}
+    public DiscountUpdateResponse updateDiscount(DiscountUpdateRequest request, String vehicleOrderItem) {
+        return milesApi.updateDiscount(request, vehicleOrderItem);
+    }
+
+    public ChassisNumberUpdateResponse updateChassisNumber(ChassisNumberUpdateRequest request, String FleetvehicleId) {
+        return  milesApi.updateChassisNumber(request, FleetvehicleId);
+    }
 
     /**
      * Get session info

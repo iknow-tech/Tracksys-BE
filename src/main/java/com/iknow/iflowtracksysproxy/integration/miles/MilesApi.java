@@ -1,5 +1,6 @@
 package com.iknow.iflowtracksysproxy.integration.miles;
 
+import com.iknow.iflowtracksysproxy.integration.miles.model.request.ChassisNumberUpdateRequest;
 import com.iknow.iflowtracksysproxy.integration.miles.model.request.DiscountUpdateRequest;
 import com.iknow.iflowtracksysproxy.integration.miles.model.request.NetAmountUpdateRequest;
 import com.iknow.iflowtracksysproxy.integration.miles.model.request.TaxUpdateRequest;
@@ -34,6 +35,8 @@ public class MilesApi {
                         .asString("xml/GenericAttributeUpdateService_NetAmountUpdate.xml");
         private static final String GenericAttributeUpdateService_TaxUpdateRequest = ResourceReader
                     .asString("xml/GenericAttributeUpdateService_TaxUpdate.xml");
+    private static final String GenericAttributeUpdateService_ChassisNumberUpdateRequest = ResourceReader
+            .asString("xml/GenericAttributeUpdateService_ChassisNumberUpdate.xml");
 
         private final RestTemplate xmlRestTemplate;
 
@@ -219,6 +222,38 @@ public class MilesApi {
                     baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService",
                     httpEntity,
                     DiscountUpdateResponse.class
+            ).getBody();
+
+            return response;
+
+        } catch (Exception e) {
+            log.error("MilesApi.updateTax error: ", e);
+            return null;
+        }
+    }
+
+    public ChassisNumberUpdateResponse updateChassisNumber(ChassisNumberUpdateRequest request, String FleetvehicleId) {
+        log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService?sessionId={}",
+                baseUrl, sessionId);
+
+        // XML body template'ini request objesine göre oluştur
+        String body = GenericAttributeUpdateService_ChassisNumberUpdateRequest
+                .replace("{sessionId}", sessionId)
+                .replace("{fleetVehicleId}", FleetvehicleId)
+                .replace("{orderId}", request.getOrderId())
+                .replace("{id}", request.getFieldId())
+                .replace("{value}", request.getValue());
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_XML);
+
+            HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+            ChassisNumberUpdateResponse response = xmlRestTemplate.postForEntity(
+                    baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService",
+                    httpEntity,
+                    ChassisNumberUpdateResponse.class
             ).getBody();
 
             return response;
