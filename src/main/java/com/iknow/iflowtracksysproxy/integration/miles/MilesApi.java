@@ -1,5 +1,6 @@
 package com.iknow.iflowtracksysproxy.integration.miles;
 
+import com.iknow.iflowtracksysproxy.integration.miles.model.request.DiscountUpdateRequest;
 import com.iknow.iflowtracksysproxy.integration.miles.model.request.NetAmountUpdateRequest;
 import com.iknow.iflowtracksysproxy.integration.miles.model.request.TaxUpdateRequest;
 import com.iknow.iflowtracksysproxy.integration.miles.model.response.*;
@@ -184,6 +185,40 @@ public class MilesApi {
                     baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService",
                     httpEntity,
                     TaxUpdateResponse.class
+            ).getBody();
+
+            return response;
+
+        } catch (Exception e) {
+            log.error("MilesApi.updateTax error: ", e);
+            return null;
+        }
+    }
+
+    public DiscountUpdateResponse updateDiscount(DiscountUpdateRequest request, String vehicleOrderItem) {
+        log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService?sessionId={}",
+                baseUrl, sessionId);
+
+        // XML body template'ini request objesine göre oluştur
+        String body = GenericAttributeUpdateService_TaxUpdateRequest
+                .replace("{sessionId}", sessionId)
+                .replace("{vehicleOrderItemId}", vehicleOrderItem)
+                .replace("{orderId}", request.getOrderId())
+                .replace("{id}", request.getFieldId())
+                .replace("{refAmount}", request.getRefAmount())
+                .replace("{curAmount}", request.getCurAmount())
+                .replace("{currencyId}", request.getCurrencyId());
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_XML);
+
+            HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+            DiscountUpdateResponse response = xmlRestTemplate.postForEntity(
+                    baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService",
+                    httpEntity,
+                    DiscountUpdateResponse.class
             ).getBody();
 
             return response;

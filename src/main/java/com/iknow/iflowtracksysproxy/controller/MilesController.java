@@ -1,5 +1,6 @@
 package com.iknow.iflowtracksysproxy.controller;
 
+import com.iknow.iflowtracksysproxy.integration.miles.model.request.DiscountUpdateRequest;
 import com.iknow.iflowtracksysproxy.integration.miles.model.request.NetAmountUpdateRequest;
 import com.iknow.iflowtracksysproxy.integration.miles.model.request.TaxUpdateRequest;
 import com.iknow.iflowtracksysproxy.integration.miles.model.response.*;
@@ -103,6 +104,18 @@ public class MilesController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error updating tax", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PutMapping("/update-discount/{vehicleOrderItem}")
+    public ResponseEntity<DiscountUpdateResponse>  updateDiscount(@RequestBody DiscountUpdateRequest request, @PathVariable String vehicleOrderItem) {
+        try {
+            log.info("Updating Discount for vehicleOrderItemId: {}", vehicleOrderItem);
+            DiscountUpdateResponse response = milesService.updateDiscount(request, vehicleOrderItem);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error updating Discount", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

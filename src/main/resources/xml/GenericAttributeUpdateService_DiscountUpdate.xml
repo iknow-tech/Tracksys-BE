@@ -1,0 +1,23 @@
+<SofEnvelope>
+    <sessionID>{sessionId}</sessionID>
+    <action>execute</action>
+    <data>
+        <MWSBulkAttributeUpdate>
+            <MWSObject>
+                <id>{vehicleOrderItem}</id> -- VehicleOrderItem id
+                <sroid>{orderId}</sroid>  ----- Sabit  Order Objesi
+                <Field_Set>
+                    <Field>
+                        <id>{fieldId}</id> ----- Sabit Alan id
+                        <name></name>
+                        <MWSMCurrencyValue>
+                            <refAmount>{refAmount}</refAmount> --Sabit
+                            <curAmount>{curAmount}</curAmount> --Sabit
+                            <currencyId>{currencyId}</currencyId> --Sabit
+                        </MWSMCurrencyValue>
+                    </Field>
+                </Field_Set>
+            </MWSObject>
+        </MWSBulkAttributeUpdate>
+    </data>
+</SofEnvelope>
