@@ -138,8 +138,11 @@ public class MilesApi {
                 String body = GenericAttributeUpdateService_NetAmountUpdateRequest
                                 .replace("{sessionId}", sessionId)
                                 .replace("{vehicleOrderItemId}", request.getVehicleOrderItemId())
+                                .replace("{sroid}", request.getSroid())
+                                .replace("{fieldId}", request.getFieldId())
                                 .replace("{refAmount}", request.getRefAmount())
-                                .replace("{curAmount}", request.getCurAmount());
+                                .replace("{curAmount}", request.getCurAmount())
+                                .replace("{currencyId}", request.getCurrencyId());
                 try {
                         HttpHeaders headers = new HttpHeaders();
                         headers.setContentType(MediaType.APPLICATION_XML);

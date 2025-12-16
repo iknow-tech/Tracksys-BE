@@ -5,15 +5,15 @@
         <MWSBulkAttributeUpdate>
             <MWSObject>
                 <id>{vehicleOrderItemId}</id>
-                <sroid>210</sroid>
+                <sroid>{sroid}</sroid>
                 <Field_Set>
                     <Field>
-                        <id>1037</id>
+                        <id>{fieldId}</id>
                         <name></name>
                         <MWSMCurrencyValue>
                             <refAmount>{refAmount}</refAmount>
                             <curAmount>{curAmount}</curAmount>
-                            <currencyId>350001</currencyId>
+                            <currencyId>{currencyId}</currencyId>
                         </MWSMCurrencyValue>
                     </Field>
                 </Field_Set>
