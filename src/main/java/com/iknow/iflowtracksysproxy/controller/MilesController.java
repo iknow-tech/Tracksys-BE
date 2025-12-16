@@ -1,9 +1,6 @@
 package com.iknow.iflowtracksysproxy.controller;
 
-import com.iknow.iflowtracksysproxy.integration.miles.model.request.ChassisNumberUpdateRequest;
-import com.iknow.iflowtracksysproxy.integration.miles.model.request.DiscountUpdateRequest;
-import com.iknow.iflowtracksysproxy.integration.miles.model.request.NetAmountUpdateRequest;
-import com.iknow.iflowtracksysproxy.integration.miles.model.request.TaxUpdateRequest;
+import com.iknow.iflowtracksysproxy.integration.miles.model.request.*;
 import com.iknow.iflowtracksysproxy.integration.miles.model.response.*;
 import com.iknow.iflowtracksysproxy.service.MilesService;
 import lombok.RequiredArgsConstructor;
@@ -121,11 +118,23 @@ public class MilesController {
         }
     }
 
-    @PutMapping("/update-chassis-number/{FleetVehicleId}")
-    public ResponseEntity<ChassisNumberUpdateResponse> updateChassisNumber(@RequestBody ChassisNumberUpdateRequest request,  @PathVariable String FleetVehicleId) {
+    @PutMapping("/update-chassis-number/{fleetVehicleId}")
+    public ResponseEntity<ChassisNumberUpdateResponse> updateChassisNumber(@RequestBody ChassisNumberUpdateRequest request,  @PathVariable String fleetVehicleId) {
         try {
-            log.info("Updating chassisNumber for fleetvehicleId: {}", FleetVehicleId);
-            ChassisNumberUpdateResponse response = milesService.updateChassisNumber(request, FleetVehicleId);
+            log.info("Updating chassisNumber for fleetvehicleId: {}", fleetVehicleId);
+            ChassisNumberUpdateResponse response = milesService.updateChassisNumber(request, fleetVehicleId);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error updating chassisNumber", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PutMapping("/update-property-type/{fleetVehicleId}")
+    public ResponseEntity<PropertyTypeUpdateResponse> updateChassisNumber(@RequestBody PropertyTypeUpdateRequest request, @PathVariable String fleetVehicleId) {
+        try {
+            log.info("Updating propertyType for fleetvehicleId: {}", fleetVehicleId);
+            PropertyTypeUpdateResponse response = milesService.updatePropertyType(request, fleetVehicleId);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error updating chassisNumber", e);

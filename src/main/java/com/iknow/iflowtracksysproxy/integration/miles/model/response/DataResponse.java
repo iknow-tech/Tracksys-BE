@@ -27,4 +27,7 @@ public class DataResponse {
     @JacksonXmlProperty(localName = "PRJ_SM_ContractsToBeRegistered")
     private List<ContractsToBeRegisteredResponse> contractsToBeRegistered;
 
+    @JacksonXmlProperty(localName = "MWSBulkAttributeUpdate")
+    private PropertyTypeUpdateResponse propertyTypeUpdateResponse;
+
 }
