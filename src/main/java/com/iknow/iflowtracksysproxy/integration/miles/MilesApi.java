@@ -297,4 +297,38 @@ public class MilesApi {
         }
     }
 
+    public PropertyTypeUpdateResponse updateProperty(PropertyTypeUpdateRequest request, String fleetvehicleId) {
+        log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService?sessionId={}",
+                baseUrl, sessionId);
+
+        // XML body template'ini request objesine göre oluştur
+        String body = GenericAttributeUpdateService_PropertyTypeRequest
+                .replace("{sessionId}", sessionId)
+                .replace("{fleetVehicleId}", fleetvehicleId)
+                .replace("{orderId}", request.getOrderId())
+                .replace("{fieldId}", request.getFieldId())
+                .replace("{id}", request.getFieldId())
+                .replace("{value}", request.getValue());
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_XML);
+
+            HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+            PropertyTypeUpdateResponse response = xmlRestTemplate.postForEntity(
+                    baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService",
+                    httpEntity,
+                    PropertyTypeUpdateResponse.class
+            ).getBody();
+
+
+            return response;
+
+        } catch (Exception e) {
+            log.error("MilesApi.updateTax error: ", e);
+            return null;
+        }
+    }
+
 }
