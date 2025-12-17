@@ -91,6 +91,10 @@ public class MilesService {
         return milesApi.getDealerList();
     }
 
+    public List<ResponsibleDealerResponse> getResponsibleDealerList() {
+        return milesApi.getResponsibleDealerList();
+    }
+
 
 
     /**

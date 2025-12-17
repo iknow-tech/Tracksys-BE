@@ -48,6 +48,8 @@ public class MilesApi {
                 .asString("xml/GenericAttributeUpdateService_CreditApprovalDate.xml");
         private static final String PRJ_SM_DealerListRequest = ResourceReader
                 .asString("xml/PRJ_SM_DealerList.xml");
+        private static final String PRJ_SM_ResponsibleDealerRequest = ResourceReader
+                .asString("xml/PRJ_SM_ResponsibleDealerList.xml");
 
         private final RestTemplate xmlRestTemplate;
 
@@ -508,6 +510,28 @@ public class MilesApi {
                                 .getBody()
                                 .getData()
                                 .getDealerList();
+                        return dealerResponseList;
+                } catch (Exception e) {
+                        log.error("MilesApi.getStockVehicleContracts", e.getStackTrace());
+                        return null;
+                }
+        }
+
+        public List<ResponsibleDealerResponse> getResponsibleDealerList() {
+                log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch?sessionId={}",
+                        sessionId);
+                String body = PRJ_SM_ResponsibleDealerRequest
+                        .replace("{sessionId}", sessionId);
+                try {
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.setContentType(MediaType.APPLICATION_XML);
+                        HttpEntity<String> request = new HttpEntity<>(body, headers);
+                        List<ResponsibleDealerResponse> dealerResponseList = xmlRestTemplate.postForEntity(
+                                        baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch",
+                                        request, BaseResponse.class)
+                                .getBody()
+                                .getData()
+                                .getResponsibleDealerList();
                         return dealerResponseList;
                 } catch (Exception e) {
                         log.error("MilesApi.getStockVehicleContracts", e.getStackTrace());

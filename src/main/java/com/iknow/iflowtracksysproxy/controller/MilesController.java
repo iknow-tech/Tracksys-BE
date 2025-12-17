@@ -249,4 +249,19 @@ public class MilesController {
         }
     }
 
+    /**
+     * Get Responsible Dealer List (PRJ_SM_ResponsibleDealer)
+     */
+    @GetMapping("/responsible-dealer")
+    public ResponseEntity<List<ResponsibleDealerResponse>> getResponsibleDealers() {
+        try {
+            log.info("Getting responsible dealer list");
+            List<ResponsibleDealerResponse> response = milesService.getResponsibleDealerList();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error getting responsible dealer list", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 }

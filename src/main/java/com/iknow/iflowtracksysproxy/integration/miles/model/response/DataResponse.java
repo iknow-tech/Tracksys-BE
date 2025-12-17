@@ -34,6 +34,11 @@ public class DataResponse {
     @JacksonXmlProperty(localName = "PRJ_SM_DealerList")
     private List<GetDealerResponse> dealerList;
 
+    @JsonProperty
+    @JacksonXmlElementWrapper(localName = "PRJ_SM_ResponsibleDealer_Set")
+    @JacksonXmlProperty(localName = "PRJ_SM_ResponsibleDealer")
+    private List<ResponsibleDealerResponse> responsibleDealerList;
+
     @JsonProperty("MWSBulkAttributeUpdate")
     @JacksonXmlProperty(localName = "MWSBulkAttributeUpdate")
     private MWSBulkAttributeUpdate mwsBulkAttributeUpdate;
