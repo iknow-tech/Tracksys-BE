@@ -79,6 +79,10 @@ public class MilesService {
         return milesApi.updateRuhsatBelgeNo(request);
     }
 
+    public VehicleInspectionUpdateResponse getVehicleInspection(VehicleInspectionUpdateRequest request) {
+        return  milesApi.getVehicleInspection(request);
+    }
+
     /**
      * Get session info
      */
