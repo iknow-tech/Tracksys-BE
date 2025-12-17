@@ -75,6 +75,10 @@ public class MilesService {
         return milesApi.updateMulk(request);
     }
 
+    public BaseResponse updateRuhsatBelgeNo(RuhsatBelgeNoUpdateRequest request) {
+        return milesApi.updateRuhsatBelgeNo(request);
+    }
+
     public VehicleInspectionUpdateResponse getVehicleInspection(VehicleInspectionUpdateRequest request) {
         return  milesApi.getVehicleInspection(request);
     }
