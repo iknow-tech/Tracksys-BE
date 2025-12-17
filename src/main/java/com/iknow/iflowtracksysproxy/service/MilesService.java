@@ -71,6 +71,10 @@ public class MilesService {
         return  milesApi.updateProperty(request, fleetvehicleId);
     }
 
+    public VehicleInspectionUpdateResponse getVehicleInspection(VehicleInspectionUpdateRequest request) {
+        return  milesApi.getVehicleInspection(request);
+    }
+
     /**
      * Get session info
      */

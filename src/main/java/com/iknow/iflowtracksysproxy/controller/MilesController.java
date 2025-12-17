@@ -173,4 +173,16 @@ public class MilesController {
         }
     }
 
+    @GetMapping("/get-vehicle-inspection")
+    public ResponseEntity<VehicleInspectionUpdateResponse> getVehicleInspection(VehicleInspectionUpdateRequest request) {
+        try {
+            log.info("Updating vehicle inspection");
+            VehicleInspectionUpdateResponse response = milesService.getVehicleInspection(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error vehicle inspection", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 }
