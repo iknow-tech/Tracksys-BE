@@ -61,6 +61,10 @@ public class MilesService {
         return  milesApi.updatePropertyType(request, fleetvehicleId);
     }
 
+    public PropertyTypeUpdateResponse updateProperty(PropertyTypeUpdateRequest request, String fleetvehicleId) {
+        return  milesApi.updateProperty(request, fleetvehicleId);
+    }
+
     /**
      * Get session info
      */
