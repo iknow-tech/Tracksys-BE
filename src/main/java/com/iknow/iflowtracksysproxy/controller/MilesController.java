@@ -95,7 +95,7 @@ public class MilesController {
     }
 
     @PutMapping("/update-tax")
-    public ResponseEntity<TaxUpdateResponse>  updateTax(@RequestBody TaxUpdateRequest request) {
+    public ResponseEntity<TaxUpdateResponse> updateTax(@RequestBody TaxUpdateRequest request) {
         try {
             log.info("Updating tax");
             TaxUpdateResponse response = milesService.updateTax(request);
@@ -107,7 +107,8 @@ public class MilesController {
     }
 
     @PutMapping("/update-discount/{vehicleOrderItem}")
-    public ResponseEntity<DiscountUpdateResponse>  updateDiscount(@RequestBody DiscountUpdateRequest request, @PathVariable String vehicleOrderItem) {
+    public ResponseEntity<DiscountUpdateResponse> updateDiscount(@RequestBody DiscountUpdateRequest request,
+            @PathVariable String vehicleOrderItem) {
         try {
             log.info("Updating Discount for vehicleOrderItemId: {}", vehicleOrderItem);
             DiscountUpdateResponse response = milesService.updateDiscount(request, vehicleOrderItem);
@@ -119,7 +120,8 @@ public class MilesController {
     }
 
     @PutMapping("/update-chassis-number/{fleetVehicleId}")
-    public ResponseEntity<ChassisNumberUpdateResponse> updateChassisNumber(@RequestBody ChassisNumberUpdateRequest request,  @PathVariable String fleetVehicleId) {
+    public ResponseEntity<ChassisNumberUpdateResponse> updateChassisNumber(
+            @RequestBody ChassisNumberUpdateRequest request, @PathVariable String fleetVehicleId) {
         try {
             log.info("Updating chassisNumber for fleetvehicleId: {}", fleetVehicleId);
             ChassisNumberUpdateResponse response = milesService.updateChassisNumber(request, fleetVehicleId);
@@ -131,7 +133,8 @@ public class MilesController {
     }
 
     @PutMapping("/update-property-type/{fleetVehicleId}")
-    public ResponseEntity<PropertyTypeUpdateResponse> updatePropertyTpe(@RequestBody PropertyTypeUpdateRequest request, @PathVariable String fleetVehicleId) {
+    public ResponseEntity<PropertyTypeUpdateResponse> updatePropertyTpe(
+            @RequestBody PropertyTypeUpdateRequest request, @PathVariable String fleetVehicleId) {
         try {
             log.info("Updating propertyType for fleetvehicleId: {}", fleetVehicleId);
             PropertyTypeUpdateResponse response = milesService.updatePropertyType(request, fleetVehicleId);
@@ -150,6 +153,22 @@ public class MilesController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error updating chassisNumber", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Update Sasi No - 1.6.7 FleetVehicle Üzerinde Şasi Numarası Alanının
+     * Güncellenmesi
+     */
+    @PutMapping("/update-sasi-no")
+    public ResponseEntity<SasiNoUpdateResponse> updateSasiNo(@RequestBody SasiNoUpdateRequest request) {
+        try {
+            log.info("Updating sasi no for fleetVehicleId: {}", request.getFleetVehicleId());
+            SasiNoUpdateResponse response = milesService.updateSasiNo(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error updating sasi no", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

@@ -1,11 +1,13 @@
 package com.iknow.iflowtracksysproxy.integration.miles.model.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import lombok.Data;
 
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JacksonXmlRootElement(localName = "SofEnvelope")
 public class NetAmountUpdateResponse {
 
@@ -16,18 +18,21 @@ public class NetAmountUpdateResponse {
     private MetadataWrapper metadata;
 
     @Data
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class DataWrapper {
         @JsonProperty("MWSBulkAttributeUpdate")
         private MWSBulkAttributeUpdate mwsBulkAttributeUpdate;
     }
 
     @Data
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class MWSBulkAttributeUpdate {
         @JsonProperty("MWSObject")
         private MWSObject mwsObject;
     }
 
     @Data
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class MWSObject {
         @JsonProperty("id")
         private String id;
@@ -40,12 +45,14 @@ public class NetAmountUpdateResponse {
     }
 
     @Data
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class FieldSet {
         @JsonProperty("Field")
         private Field field;
     }
 
     @Data
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Field {
         @JsonProperty("id")
         private String id;
@@ -58,6 +65,7 @@ public class NetAmountUpdateResponse {
     }
 
     @Data
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class MWSMCurrencyValue {
         @JsonProperty("refAmount")
         private String refAmount;
@@ -70,12 +78,14 @@ public class NetAmountUpdateResponse {
     }
 
     @Data
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class MetadataWrapper {
         @JsonProperty("operationstatus")
         private OperationStatus operationstatus;
     }
 
     @Data
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class OperationStatus {
         @JacksonXmlProperty(isAttribute = true)
         private String businesserror;

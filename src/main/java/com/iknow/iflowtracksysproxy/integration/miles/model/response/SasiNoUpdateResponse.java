@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JacksonXmlRootElement(localName = "SofEnvelope")
-public class ChassisNumberUpdateResponse {
+public class SasiNoUpdateResponse {
 
     @JacksonXmlProperty(localName = "data")
     private ResponseData responseData;
@@ -81,7 +81,6 @@ public class ChassisNumberUpdateResponse {
     @Data
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class OperationStatus {
-
         @JacksonXmlProperty(isAttribute = true)
         @JsonAlias("businesserror")
         private String businessError;
