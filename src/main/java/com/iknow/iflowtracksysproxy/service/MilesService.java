@@ -87,6 +87,12 @@ public class MilesService {
         return milesApi.updateCreditApprovalDate(approvalDateUpdateRequest);
     }
 
+    public List<GetDealerResponse> getDealerResponseList() {
+        return milesApi.getDealerList();
+    }
+
+
+
     /**
      * Get session info
      */

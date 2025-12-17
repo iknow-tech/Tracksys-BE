@@ -46,6 +46,8 @@ public class MilesApi {
                         .asString("xml/GenericAttributeUpdateService_RuhsatBelgeNoUpdate.xml");
         private static final String GenericAttributeUpdateService_CreditApprovalDateRequest = ResourceReader
                 .asString("xml/GenericAttributeUpdateService_CreditApprovalDate.xml");
+        private static final String PRJ_SM_DealerListRequest = ResourceReader
+                .asString("xml/PRJ_SM_DealerList.xml");
 
         private final RestTemplate xmlRestTemplate;
 
@@ -490,5 +492,27 @@ public class MilesApi {
                         log.error("MilesApi.updateTax error: ", e);
                         return null;
                 }}
+
+        public List<GetDealerResponse> getDealerList() {
+                log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch?sessionId={}",
+                        sessionId);
+                String body = PRJ_SM_DealerListRequest
+                        .replace("{sessionId}", sessionId);
+                try {
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.setContentType(MediaType.APPLICATION_XML);
+                        HttpEntity<String> request = new HttpEntity<>(body, headers);
+                        List<GetDealerResponse> dealerResponseList = xmlRestTemplate.postForEntity(
+                                        baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch",
+                                        request, BaseResponse.class)
+                                .getBody()
+                                .getData()
+                                .getDealerList();
+                        return dealerResponseList;
+                } catch (Exception e) {
+                        log.error("MilesApi.getStockVehicleContracts", e.getStackTrace());
+                        return null;
+                }
+        }
 
 }

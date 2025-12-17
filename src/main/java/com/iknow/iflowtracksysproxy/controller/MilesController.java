@@ -234,4 +234,19 @@ public class MilesController {
         }
     }
 
+    /**
+     * Get Dealer List (PRJ_SM_DealerList)
+     */
+    @GetMapping("/dealer")
+    public ResponseEntity<List<GetDealerResponse>> getDealers() {
+        try {
+            log.info("Getting dealer list");
+            List<GetDealerResponse> response = milesService.getDealerResponseList();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error getting dealer list", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 }
