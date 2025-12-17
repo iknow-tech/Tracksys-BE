@@ -1,8 +1,7 @@
 package com.iknow.iflowtracksysproxy.service;
 
 import com.iknow.iflowtracksysproxy.integration.miles.MilesApi;
-import com.iknow.iflowtracksysproxy.integration.miles.model.request.NetAmountUpdateRequest;
-import com.iknow.iflowtracksysproxy.integration.miles.model.request.TaxUpdateRequest;
+import com.iknow.iflowtracksysproxy.integration.miles.model.request.*;
 import com.iknow.iflowtracksysproxy.integration.miles.model.response.*;
 import lombok.Builder;
 import lombok.Data;
@@ -48,7 +47,19 @@ public class MilesService {
         return milesApi.updateNetAmount(request);
     }
 
-    public TaxUpdateResponse updateTax(TaxUpdateRequest request) { return  milesApi.updateTax(request);}
+    public TaxUpdateResponse updateTax(TaxUpdateRequest request) { return milesApi.updateTax(request);}
+
+    public DiscountUpdateResponse updateDiscount(DiscountUpdateRequest request, String vehicleOrderItem) {
+        return milesApi.updateDiscount(request, vehicleOrderItem);
+    }
+
+    public ChassisNumberUpdateResponse updateChassisNumber(ChassisNumberUpdateRequest request, String fleetvehicleId) {
+        return  milesApi.updateChassisNumber(request, fleetvehicleId);
+    }
+
+    public PropertyTypeUpdateResponse updatePropertyType(PropertyTypeUpdateRequest request, String fleetvehicleId) {
+        return  milesApi.updatePropertyType(request, fleetvehicleId);
+    }
 
     /**
      * Get session info

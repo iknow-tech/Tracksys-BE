@@ -1,7 +1,6 @@
 package com.iknow.iflowtracksysproxy.integration.miles;
 
-import com.iknow.iflowtracksysproxy.integration.miles.model.request.NetAmountUpdateRequest;
-import com.iknow.iflowtracksysproxy.integration.miles.model.request.TaxUpdateRequest;
+import com.iknow.iflowtracksysproxy.integration.miles.model.request.*;
 import com.iknow.iflowtracksysproxy.integration.miles.model.response.*;
 import com.iknow.iflowtracksysproxy.util.ResourceReader;
 import jakarta.annotation.PostConstruct;
@@ -33,6 +32,10 @@ public class MilesApi {
                         .asString("xml/GenericAttributeUpdateService_NetAmountUpdate.xml");
         private static final String GenericAttributeUpdateService_TaxUpdateRequest = ResourceReader
                     .asString("xml/GenericAttributeUpdateService_TaxUpdate.xml");
+        private static final String GenericAttributeUpdateService_ChassisNumberUpdateRequest = ResourceReader
+                .asString("xml/GenericAttributeUpdateService_ChassisNumberUpdate.xml");
+        private static final String GenericAttributeUpdateService_PropertyTypeRequest = ResourceReader
+                .asString("xml/GenericAttributeUpdateService_PropertyType.xml");
 
         private final RestTemplate xmlRestTemplate;
 
@@ -188,6 +191,106 @@ public class MilesApi {
                     httpEntity,
                     TaxUpdateResponse.class
             ).getBody();
+
+            return response;
+
+        } catch (Exception e) {
+            log.error("MilesApi.updateTax error: ", e);
+            return null;
+        }
+    }
+
+    public DiscountUpdateResponse updateDiscount(DiscountUpdateRequest request, String vehicleOrderItem) {
+        log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService?sessionId={}",
+                baseUrl, sessionId);
+
+        // XML body template'ini request objesine göre oluştur
+        String body = GenericAttributeUpdateService_TaxUpdateRequest
+                .replace("{sessionId}", sessionId)
+                .replace("{vehicleOrderItemId}", vehicleOrderItem)
+                .replace("{orderId}", request.getOrderId())
+                .replace("{id}", request.getFieldId())
+                .replace("{refAmount}", request.getRefAmount())
+                .replace("{curAmount}", request.getCurAmount())
+                .replace("{currencyId}", request.getCurrencyId());
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_XML);
+
+            HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+            DiscountUpdateResponse response = xmlRestTemplate.postForEntity(
+                    baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService",
+                    httpEntity,
+                    DiscountUpdateResponse.class
+            ).getBody();
+
+            return response;
+
+        } catch (Exception e) {
+            log.error("MilesApi.updateTax error: ", e);
+            return null;
+        }
+    }
+
+    public ChassisNumberUpdateResponse updateChassisNumber(ChassisNumberUpdateRequest request, String fleetvehicleId) {
+        log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService?sessionId={}",
+                baseUrl, sessionId);
+
+        // XML body template'ini request objesine göre oluştur
+        String body = GenericAttributeUpdateService_ChassisNumberUpdateRequest
+                .replace("{sessionId}", sessionId)
+                .replace("{fleetVehicleId}", fleetvehicleId)
+                .replace("{orderId}", request.getOrderId())
+                .replace("{id}", request.getFieldId())
+                .replace("{value}", request.getValue());
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_XML);
+
+            HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+            ChassisNumberUpdateResponse response = xmlRestTemplate.postForEntity(
+                    baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService",
+                    httpEntity,
+                    ChassisNumberUpdateResponse.class
+            ).getBody();
+
+            return response;
+
+        } catch (Exception e) {
+            log.error("MilesApi.updateTax error: ", e);
+            return null;
+        }
+    }
+
+    public PropertyTypeUpdateResponse updatePropertyType(PropertyTypeUpdateRequest request, String fleetvehicleId) {
+        log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService?sessionId={}",
+                baseUrl, sessionId);
+
+        // XML body template'ini request objesine göre oluştur
+        String body = GenericAttributeUpdateService_PropertyTypeRequest
+                .replace("{sessionId}", sessionId)
+                .replace("{fleetVehicleId}", fleetvehicleId)
+                .replace("{orderId}", request.getOrderId())
+                .replace("{fieldId}", request.getFieldId())
+                .replace("{id}", request.getFieldId())
+                .replace("{value}", request.getValue());
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_XML);
+
+            HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+            PropertyTypeUpdateResponse response = xmlRestTemplate.postForEntity(
+                    baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService",
+                    httpEntity,
+                    PropertyTypeUpdateResponse.class
+            ).getBody();
+
 
             return response;
 

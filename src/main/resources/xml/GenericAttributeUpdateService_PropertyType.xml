@@ -1,0 +1,21 @@
+<SofEnvelope>
+    <sessionID>{sessionId}</sessionID>
+    <action>execute</action>
+    <data>
+        <MWSBulkAttributeUpdate>
+            <MWSObject>
+                <id>{fleetVehicleId}</id> -- Fleetvehicle id
+                <sroid>{orderId}</sroid>  ----- sabit  Order Objesi
+                <Field_Set>
+                    <Field>
+                        <id>{fieldId}</id> ----- sabit Alan id
+                        <name></name>
+                        <MWSEnumerationValue>
+                            <value>{value}</value> --Leasing ise Lookuptan Enum Id değeri alınacak
+                        </MWSEnumerationValue>
+                    </Field>
+                </Field_Set>
+            </MWSObject>
+        </MWSBulkAttributeUpdate>
+    </data>
+</SofEnvelope>
