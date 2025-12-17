@@ -216,4 +216,22 @@ public class MilesController {
         }
     }
 
+    @PostMapping("/vehicle-order/credit-approval-date")
+    public ResponseEntity<ApprovalDateUpdateBaseResponse> updateCreditApprovalDate(@RequestBody ApprovalDateUpdateRequest request) {
+        try {
+            log.info("Updating Credit Approval Date for vehicleOrderId: {}, date: {}", request.getOrderId(), request.getApprovalDate());
+
+            if (request.getVehicleOrderItemId() == null || request.getApprovalDate() == null ) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            ApprovalDateUpdateBaseResponse response = milesService.updateCreditApprovalDate(request);
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("Error updating credit approval date", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 }

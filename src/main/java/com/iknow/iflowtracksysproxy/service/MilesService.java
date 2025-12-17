@@ -83,6 +83,10 @@ public class MilesService {
         return  milesApi.getVehicleInspection(request);
     }
 
+    public  ApprovalDateUpdateBaseResponse updateCreditApprovalDate(ApprovalDateUpdateRequest approvalDateUpdateRequest){
+        return milesApi.updateCreditApprovalDate(approvalDateUpdateRequest);
+    }
+
     /**
      * Get session info
      */

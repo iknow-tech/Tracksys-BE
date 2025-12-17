@@ -44,6 +44,8 @@ public class MilesApi {
                 .asString("xml/PRJ_SM_VehicleDocuments.xml");
         private static final String GenericAttributeUpdateService_RuhsatBelgeNoUpdateRequest = ResourceReader
                         .asString("xml/GenericAttributeUpdateService_RuhsatBelgeNoUpdate.xml");
+        private static final String GenericAttributeUpdateService_CreditApprovalDateRequest = ResourceReader
+                .asString("xml/GenericAttributeUpdateService_CreditApprovalDate.xml");
 
         private final RestTemplate xmlRestTemplate;
 
@@ -457,5 +459,36 @@ public class MilesApi {
                         return null;
                 }
         }
+
+        public ApprovalDateUpdateBaseResponse updateCreditApprovalDate(ApprovalDateUpdateRequest request) {
+                log.info("Updating Credit Approval Date for vehicleOrderId: {}, date: {}", request.getOrderId(), request.getApprovalDate());
+
+                // XML body template'ini request objesine göre oluştur
+                String body = GenericAttributeUpdateService_CreditApprovalDateRequest
+                        .replace("{sessionId}", sessionId)
+                        .replace("{vehicleOrderItemId}", request.getVehicleOrderItemId())
+                        .replace("{orderId}", request.getOrderId() != null ? request.getOrderId() : "205")
+                        .replace("{id}", request.getFieldId() != null ? request.getFieldId() : "1000062")
+                        .replace("{approvalDate}", request.getApprovalDate().toString());
+
+                try {
+
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.setContentType(MediaType.APPLICATION_XML);
+
+                        HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+                        return xmlRestTemplate.postForEntity(
+                                baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService",
+                                httpEntity,
+                                ApprovalDateUpdateBaseResponse.class
+                        ).getBody();
+
+
+
+                } catch (Exception e) {
+                        log.error("MilesApi.updateTax error: ", e);
+                        return null;
+                }}
 
 }
