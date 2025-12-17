@@ -1,32 +1,40 @@
 package com.iknow.iflowtracksysproxy.integration.miles.model.response;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-
 
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class BaseResponse {
     @JsonProperty("data")
     private DataResponse data;
+
     @JsonProperty("metadata")
-    private String metadata;
+    private MetadataResponse metadata;
 
-
-    public String getMetadata() {
-        return metadata;
+    @Data
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class MetadataResponse {
+        @JacksonXmlProperty(localName = "operationstatus")
+        private OperationStatus operationstatus;
     }
 
-    public void setMetadata(String metadata) {
-        this.metadata = metadata;
-    }
+    @Data
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class OperationStatus {
+        @JacksonXmlProperty(isAttribute = true)
+        @JsonAlias("businesserror")
+        private String businesserror;
 
-    public DataResponse getData() {
-        return data;
-    }
+        @JacksonXmlProperty(isAttribute = true)
+        @JsonAlias("technicalerror")
+        private String technicalerror;
 
-    public void setData(DataResponse data) {
-        this.data = data;
+        @JacksonXmlProperty(isAttribute = true)
+        @JsonAlias("calculationerror")
+        private String calculationerror;
     }
 }

@@ -189,4 +189,19 @@ public class MilesController {
         }
     }
 
+    /**
+     * Update Ruhsat Belge No - 1.6.11.2 Ruhsat Belge No Alanının Güncellenmesi
+     */
+    @PutMapping("/update-ruhsat-belge-no")
+    public ResponseEntity<BaseResponse> updateRuhsatBelgeNo(@RequestBody RuhsatBelgeNoUpdateRequest request) {
+        try {
+            log.info("Updating ruhsat belge no for vehiclePropertyId: {}", request.getVehiclePropertyId());
+            BaseResponse response = milesService.updateRuhsatBelgeNo(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error updating ruhsat belge no", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 }

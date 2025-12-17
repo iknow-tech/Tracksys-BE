@@ -75,6 +75,10 @@ public class MilesService {
         return milesApi.updateMulk(request);
     }
 
+    public BaseResponse updateRuhsatBelgeNo(RuhsatBelgeNoUpdateRequest request) {
+        return milesApi.updateRuhsatBelgeNo(request);
+    }
+
     /**
      * Get session info
      */

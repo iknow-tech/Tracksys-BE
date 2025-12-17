@@ -40,6 +40,8 @@ public class MilesApi {
                         .asString("xml/GenericAttributeUpdateService_SasiNoUpdate.xml");
         private static final String GenericAttributeUpdateService_MulkUpdateRequest = ResourceReader
                         .asString("xml/GenericAttributeUpdateService_MulkUpdate.xml");
+        private static final String GenericAttributeUpdateService_RuhsatBelgeNoUpdateRequest = ResourceReader
+                        .asString("xml/GenericAttributeUpdateService_RuhsatBelgeNoUpdate.xml");
 
         private final RestTemplate xmlRestTemplate;
 
@@ -388,6 +390,36 @@ public class MilesApi {
 
                 } catch (Exception e) {
                         log.error("MilesApi.updateMulk error: ", e);
+                        return null;
+                }
+        }
+
+        public BaseResponse updateRuhsatBelgeNo(RuhsatBelgeNoUpdateRequest request) {
+                log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService?sessionId={}",
+                                baseUrl, sessionId);
+
+                String body = GenericAttributeUpdateService_RuhsatBelgeNoUpdateRequest
+                                .replace("{sessionId}", sessionId)
+                                .replace("{vehiclePropertyId}", request.getVehiclePropertyId())
+                                .replace("{sroid}", request.getSroid())
+                                .replace("{fieldId}", request.getFieldId())
+                                .replace("{ruhsatBelgeNo}", request.getRuhsatBelgeNo());
+
+                try {
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.setContentType(MediaType.APPLICATION_XML);
+
+                        HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+                        BaseResponse response = xmlRestTemplate.postForEntity(
+                                        baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService",
+                                        httpEntity,
+                                        BaseResponse.class).getBody();
+
+                        return response;
+
+                } catch (Exception e) {
+                        log.error("MilesApi.updateRuhsatBelgeNo error: ", e);
                         return null;
                 }
         }
