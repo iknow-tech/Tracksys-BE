@@ -1,11 +1,13 @@
 package com.iknow.iflowtracksysproxy.integration.miles.model.response;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import lombok.Data;
 
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JacksonXmlRootElement(localName = "SofEnvelope")
 public class ChassisNumberUpdateResponse {
 
@@ -16,19 +18,22 @@ public class ChassisNumberUpdateResponse {
     private ResponseMetadata responsemetadata;
 
     @Data
-    public static class ResponseData{
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class ResponseData {
         @JacksonXmlProperty(localName = "MWSBulkAttributeUpdate")
         private MWSBulkAttributeUpdate mwsBulkAttributeUpdate;
     }
 
     @Data
-    public static class MWSBulkAttributeUpdate{
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class MWSBulkAttributeUpdate {
         @JacksonXmlProperty(localName = "MWSObject")
         private MWSObject mwsObject;
     }
 
     @Data
-    public static class MWSObject{
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class MWSObject {
         @JacksonXmlProperty(localName = "id")
         private String id;
 
@@ -40,13 +45,15 @@ public class ChassisNumberUpdateResponse {
     }
 
     @Data
-    public static class FieldSet{
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class FieldSet {
         @JacksonXmlProperty(localName = "Field")
         private Field field;
     }
 
     @Data
-    public static class Field{
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class Field {
         @JacksonXmlProperty(localName = "id")
         private String id;
 
@@ -58,18 +65,21 @@ public class ChassisNumberUpdateResponse {
     }
 
     @Data
-    public static class MWSStringValue{
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class MWSStringValue {
         @JacksonXmlProperty(localName = "value")
         private String value;
     }
 
     @Data
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class ResponseMetadata {
         @JacksonXmlProperty(localName = "operationstatus")
         private OperationStatus operationStatus;
     }
 
     @Data
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class OperationStatus {
 
         @JacksonXmlProperty(isAttribute = true)
