@@ -68,7 +68,11 @@ public class MilesService {
     }
 
     public PropertyTypeUpdateResponse updateProperty(PropertyTypeUpdateRequest request, String fleetvehicleId) {
-        return  milesApi.updateProperty(request, fleetvehicleId);
+        return milesApi.updateProperty(request, fleetvehicleId);
+    }
+
+    public MulkUpdateResponse updateMulk(MulkUpdateRequest request) {
+        return milesApi.updateMulk(request);
     }
 
     /**

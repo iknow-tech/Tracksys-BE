@@ -146,7 +146,8 @@ public class MilesController {
     }
 
     @PutMapping("/update-property/{fleetVehicleId}")
-    public ResponseEntity<PropertyTypeUpdateResponse> updateProperty(@RequestBody PropertyTypeUpdateRequest request, @PathVariable String fleetVehicleId) {
+    public ResponseEntity<PropertyTypeUpdateResponse> updateProperty(@RequestBody PropertyTypeUpdateRequest request,
+            @PathVariable String fleetVehicleId) {
         try {
             log.info("Updating propertyType for fleetvehicleId: {}", fleetVehicleId);
             PropertyTypeUpdateResponse response = milesService.updateProperty(request, fleetVehicleId);
@@ -169,6 +170,21 @@ public class MilesController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error updating sasi no", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Update Mulk - 1.6.10 FleetVehicle Üzerinde Mülk Alanının Güncellenmesi
+     */
+    @PutMapping("/update-mulk")
+    public ResponseEntity<MulkUpdateResponse> updateMulk(@RequestBody MulkUpdateRequest request) {
+        try {
+            log.info("Updating mulk for fleetVehicleId: {}", request.getFleetVehicleId());
+            MulkUpdateResponse response = milesService.updateMulk(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error updating mulk", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
