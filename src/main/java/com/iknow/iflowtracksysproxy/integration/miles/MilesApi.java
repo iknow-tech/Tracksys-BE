@@ -38,6 +38,8 @@ public class MilesApi {
                         .asString("xml/GenericAttributeUpdateService_PropertyType.xml");
         private static final String GenericAttributeUpdateService_SasiNoUpdateRequest = ResourceReader
                         .asString("xml/GenericAttributeUpdateService_SasiNoUpdate.xml");
+        private static final String GenericAttributeUpdateService_MulkUpdateRequest = ResourceReader
+                        .asString("xml/GenericAttributeUpdateService_MulkUpdate.xml");
         private static final String PRJ_SM_VehicleDocumentsRequest = ResourceReader
                 .asString("xml/PRJ_SM_VehicleDocuments.xml");
 
@@ -330,30 +332,30 @@ public class MilesApi {
                 }
         }
 
-    public PropertyTypeUpdateResponse updateProperty(PropertyTypeUpdateRequest request, String fleetvehicleId) {
-        log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService?sessionId={}",
-                baseUrl, sessionId);
+        public PropertyTypeUpdateResponse updateProperty(PropertyTypeUpdateRequest request, String fleetvehicleId) {
+                log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService?sessionId={}",
+                                baseUrl, sessionId);
 
-        // XML body template'ini request objesine göre oluştur
-        String body = GenericAttributeUpdateService_PropertyTypeRequest
-                .replace("{sessionId}", sessionId)
-                .replace("{fleetVehicleId}", fleetvehicleId)
-                .replace("{orderId}", request.getOrderId())
-                .replace("{fieldId}", request.getFieldId())
-                .replace("{id}", request.getFieldId())
-                .replace("{value}", request.getValue());
+                // XML body template'ini request objesine göre oluştur
+                String body = GenericAttributeUpdateService_PropertyTypeRequest
+                                .replace("{sessionId}", sessionId)
+                                .replace("{fleetVehicleId}", fleetvehicleId)
+                                .replace("{orderId}", request.getOrderId())
+                                .replace("{fieldId}", request.getFieldId())
+                                .replace("{id}", request.getFieldId())
+                                .replace("{value}", request.getValue());
 
-        try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_XML);
+                try {
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.setContentType(MediaType.APPLICATION_XML);
 
-            HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+                        HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
 
-            PropertyTypeUpdateResponse response = xmlRestTemplate.postForEntity(
-                    baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService",
-                    httpEntity,
-                    PropertyTypeUpdateResponse.class
-            ).getBody();
+                        PropertyTypeUpdateResponse response = xmlRestTemplate.postForEntity(
+                                        baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService",
+                                        httpEntity,
+                                        PropertyTypeUpdateResponse.class).getBody();
+
 
 
             return response;
@@ -386,12 +388,42 @@ public class MilesApi {
             ).getBody();
 
 
-            return response;
+                        return response;
 
-        } catch (Exception e) {
-            log.error("MilesApi.updateTax error: ", e);
-            return null;
+                } catch (Exception e) {
+                        log.error("MilesApi.updateTax error: ", e);
+                        return null;
+                }
         }
-    }
+
+        public MulkUpdateResponse updateMulk(MulkUpdateRequest request) {
+                log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService?sessionId={}",
+                                baseUrl, sessionId);
+
+                String body = GenericAttributeUpdateService_MulkUpdateRequest
+                                .replace("{sessionId}", sessionId)
+                                .replace("{fleetVehicleId}", request.getFleetVehicleId())
+                                .replace("{sroid}", request.getSroid())
+                                .replace("{fieldId}", request.getFieldId())
+                                .replace("{value}", request.getValue());
+
+                try {
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.setContentType(MediaType.APPLICATION_XML);
+
+                        HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+                        MulkUpdateResponse response = xmlRestTemplate.postForEntity(
+                                        baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService",
+                                        httpEntity,
+                                        MulkUpdateResponse.class).getBody();
+
+                        return response;
+
+                } catch (Exception e) {
+                        log.error("MilesApi.updateMulk error: ", e);
+                        return null;
+                }
+        }
 
 }
