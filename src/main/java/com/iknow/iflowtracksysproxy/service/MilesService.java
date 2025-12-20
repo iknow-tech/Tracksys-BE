@@ -97,6 +97,20 @@ public class MilesService {
     public BaseResponse updateHgsTalepTarihi(HgsTalepTarihiUpdateRequest request) {
         return milesApi.updateHgsTalepTarihi(request);
     }
+    public  ApprovalDateUpdateBaseResponse updateCreditApprovalDate(ApprovalDateUpdateRequest approvalDateUpdateRequest){
+        return milesApi.updateCreditApprovalDate(approvalDateUpdateRequest);
+    }
+
+    public List<GetDealerResponse> getDealerResponseList() {
+        return milesApi.getDealerList();
+    }
+
+    public List<ResponsibleDealerResponse> getResponsibleDealerList() {
+        return milesApi.getResponsibleDealerList();
+    }
+
+
+
     /**
      * Get session info
      */
