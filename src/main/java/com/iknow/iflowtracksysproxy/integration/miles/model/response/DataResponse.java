@@ -30,6 +30,9 @@ public class DataResponse {
     private List<ContractsToBeRegisteredResponse> contractsToBeRegistered;
 
     @JsonProperty
+    @JacksonXmlElementWrapper(localName = "PRJ_SM_VehicleDocuments_Set")
+    @JacksonXmlProperty(localName = "PRJ_SM_VehicleDocuments")
+    private List<VehicleDocumentsResponse> vehicleDocuments;
     @JacksonXmlElementWrapper(localName = "PRJ_SM_DealerList_Set")
     @JacksonXmlProperty(localName = "PRJ_SM_DealerList")
     private List<GetDealerResponse> dealerList;
@@ -93,6 +96,10 @@ public class DataResponse {
         @JsonProperty("MWSMCurrencyValue")
         @JacksonXmlProperty(localName = "MWSMCurrencyValue")
         private MWSMCurrencyValue mwsmCurrencyValue;
+
+        @JsonProperty("MWSDateTimeValue")
+        @JacksonXmlProperty(localName = "MWSDateTimeValue")
+        private MWSDateTimeValue mwsDateTimeValue;
     }
 
     @Data
@@ -120,5 +127,12 @@ public class DataResponse {
 
         @JsonProperty("currencyId")
         private String currencyId;
+    }
+
+    @Data
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class MWSDateTimeValue {
+        @JsonProperty("value")
+        private String value;
     }
 }

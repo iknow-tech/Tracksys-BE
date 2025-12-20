@@ -205,7 +205,8 @@ public class MilesController {
     }
 
     @GetMapping("/get-vehicle-inspection")
-    public ResponseEntity<VehicleInspectionUpdateResponse> getVehicleInspection(VehicleInspectionUpdateRequest request) {
+    public ResponseEntity<VehicleInspectionUpdateResponse> getVehicleInspection(
+            VehicleInspectionUpdateRequest request) {
         try {
             log.info("Updating vehicle inspection");
             VehicleInspectionUpdateResponse response = milesService.getVehicleInspection(request);
@@ -216,6 +217,17 @@ public class MilesController {
         }
     }
 
+    /**
+     * Get Vehicle Documents - 1.6.12.1 PRJ_SM_VehicleDocuments Servisi
+     */
+    @GetMapping("/get-vehicle-documents")
+    public ResponseEntity<BaseResponse> getVehicleDocuments(VehicleDocumentsRequest request) {
+        try {
+            log.info("Getting vehicle documents for fleetvehicleId: {}", request.getFleetvehicleId());
+            BaseResponse response = milesService.getVehicleDocuments(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error getting vehicle documents", e);
     @PostMapping("/vehicle-order/credit-approval-date")
     public ResponseEntity<ApprovalDateUpdateBaseResponse> updateCreditApprovalDate(@RequestBody ApprovalDateUpdateRequest request) {
         try {
@@ -250,6 +262,18 @@ public class MilesController {
     }
 
     /**
+     * Update Vehicle Inspection Date - 1.6.12.2 Araç Muayene Geçerlilik Sonu
+     * Alanının Güncellenmesi
+     */
+    @PutMapping("/update-vehicle-inspection-date")
+    public ResponseEntity<BaseResponse> updateVehicleInspectionDate(
+            @RequestBody VehicleInspectionDateUpdateRequest request) {
+        try {
+            log.info("Updating vehicle inspection date for vehiclePropertyId: {}", request.getVehiclePropertyId());
+            BaseResponse response = milesService.updateVehicleInspectionDate(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error updating vehicle inspection date", e);
      * Get Responsible Dealer List (PRJ_SM_ResponsibleDealer)
      */
     @GetMapping("/responsible-dealer")
