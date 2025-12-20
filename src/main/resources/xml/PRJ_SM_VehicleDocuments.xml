@@ -1,5 +1,5 @@
 <SofEnvelope>
     <sessionID>{sessionId}</sessionID>
     <selection>PRJ_SM_VehicleDocuments</selection>
-    <arg0>{ordersId}</arg0> --Orders id
+    <arg0>{fleetvehicleId}</arg0>
 </SofEnvelope>
