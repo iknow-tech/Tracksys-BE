@@ -1,0 +1,21 @@
+<SofEnvelope>
+    <sessionID>{sessionId}</sessionID>
+    <action>execute</action>
+    <data>
+        <MWSBulkAttributeUpdate>
+            <MWSObject>
+                <id>{vehicleOrderItemId}</id> -- VehicleOrderItem id
+                <sroid>{orderId}</sroid>  -- Sabit  Order Objesi
+                <Field_Set>
+                    <Field>
+                        <id>{id}</id> -- Sabit Alan id
+                        <name></name>
+                        <MWSDateValue>>
+                            <value>{approvalDate}</value> --Proforma Onay tarihi ile aynı olmalı
+                        </MWSDateValue>>
+                    </Field>
+                </Field_Set>
+            </MWSObject>
+        </MWSBulkAttributeUpdate>
+    </data>
+</SofEnvelope>

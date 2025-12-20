@@ -46,6 +46,12 @@ public class MilesApi {
                         .asString("xml/GenericAttributeUpdateService_RuhsatBelgeNoUpdate.xml");
         private static final String GenericAttributeUpdateService_VehicleInspectionUpdateRequest = ResourceReader
                         .asString("xml/GenericAttributeUpdateService_VehicleInspectionUpdate.xml");
+        private static final String GenericAttributeUpdateService_CreditApprovalDateRequest = ResourceReader
+                .asString("xml/GenericAttributeUpdateService_CreditApprovalDate.xml");
+        private static final String PRJ_SM_DealerListRequest = ResourceReader
+                .asString("xml/PRJ_SM_DealerList.xml");
+        private static final String PRJ_SM_ResponsibleDealerRequest = ResourceReader
+                .asString("xml/PRJ_SM_ResponsibleDealerList.xml");
 
         private final RestTemplate xmlRestTemplate;
 
@@ -465,6 +471,19 @@ public class MilesApi {
                                 .replace("{fleetvehicleId}", request.getFleetvehicleId());
 
                 try {
+        public ApprovalDateUpdateBaseResponse updateCreditApprovalDate(ApprovalDateUpdateRequest request) {
+                log.info("Updating Credit Approval Date for vehicleOrderId: {}, date: {}", request.getOrderId(), request.getApprovalDate());
+
+                // XML body template'ini request objesine göre oluştur
+                String body = GenericAttributeUpdateService_CreditApprovalDateRequest
+                        .replace("{sessionId}", sessionId)
+                        .replace("{vehicleOrderItemId}", request.getVehicleOrderItemId())
+                        .replace("{orderId}", request.getOrderId() != null ? request.getOrderId() : "205")
+                        .replace("{id}", request.getFieldId() != null ? request.getFieldId() : "1000062")
+                        .replace("{approvalDate}", request.getApprovalDate().toString());
+
+                try {
+
                         HttpHeaders headers = new HttpHeaders();
                         headers.setContentType(MediaType.APPLICATION_XML);
 
@@ -479,6 +498,37 @@ public class MilesApi {
 
                 } catch (Exception e) {
                         log.error("MilesApi.getVehicleDocuments error: ", e);
+                        return xmlRestTemplate.postForEntity(
+                                baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService",
+                                httpEntity,
+                                ApprovalDateUpdateBaseResponse.class
+                        ).getBody();
+
+
+
+                } catch (Exception e) {
+                        log.error("MilesApi.updateTax error: ", e);
+                        return null;
+                }}
+
+        public List<GetDealerResponse> getDealerList() {
+                log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch?sessionId={}",
+                        sessionId);
+                String body = PRJ_SM_DealerListRequest
+                        .replace("{sessionId}", sessionId);
+                try {
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.setContentType(MediaType.APPLICATION_XML);
+                        HttpEntity<String> request = new HttpEntity<>(body, headers);
+                        List<GetDealerResponse> dealerResponseList = xmlRestTemplate.postForEntity(
+                                        baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch",
+                                        request, BaseResponse.class)
+                                .getBody()
+                                .getData()
+                                .getDealerList();
+                        return dealerResponseList;
+                } catch (Exception e) {
+                        log.error("MilesApi.getStockVehicleContracts", e.getStackTrace());
                         return null;
                 }
         }
@@ -509,6 +559,24 @@ public class MilesApi {
 
                 } catch (Exception e) {
                         log.error("MilesApi.updateVehicleInspectionDate error: ", e);
+        public List<ResponsibleDealerResponse> getResponsibleDealerList() {
+                log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch?sessionId={}",
+                        sessionId);
+                String body = PRJ_SM_ResponsibleDealerRequest
+                        .replace("{sessionId}", sessionId);
+                try {
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.setContentType(MediaType.APPLICATION_XML);
+                        HttpEntity<String> request = new HttpEntity<>(body, headers);
+                        List<ResponsibleDealerResponse> dealerResponseList = xmlRestTemplate.postForEntity(
+                                        baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch",
+                                        request, BaseResponse.class)
+                                .getBody()
+                                .getData()
+                                .getResponsibleDealerList();
+                        return dealerResponseList;
+                } catch (Exception e) {
+                        log.error("MilesApi.getStockVehicleContracts", e.getStackTrace());
                         return null;
                 }
         }

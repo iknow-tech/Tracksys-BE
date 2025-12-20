@@ -91,6 +91,20 @@ public class MilesService {
         return milesApi.getVehicleInspection(request);
     }
 
+    public  ApprovalDateUpdateBaseResponse updateCreditApprovalDate(ApprovalDateUpdateRequest approvalDateUpdateRequest){
+        return milesApi.updateCreditApprovalDate(approvalDateUpdateRequest);
+    }
+
+    public List<GetDealerResponse> getDealerResponseList() {
+        return milesApi.getDealerList();
+    }
+
+    public List<ResponsibleDealerResponse> getResponsibleDealerList() {
+        return milesApi.getResponsibleDealerList();
+    }
+
+
+
     /**
      * Get session info
      */
