@@ -22,4 +22,10 @@ public class VehicleDocumentsResponse {
 
     @JacksonXmlProperty(localName = "trafficinsurance")
     private String trafficinsurance;
+
+    @JacksonXmlProperty(localName = "hgstagno")
+    private String hgstagno;
+
+    @JacksonXmlProperty(localName = "licenseplateandequipmentrequestdate")
+    private String licenseplateandequipmentrequestdate;
 }
