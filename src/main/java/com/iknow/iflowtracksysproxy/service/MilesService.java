@@ -95,6 +95,14 @@ public class MilesService {
         return milesApi.updateHgsTalepTarihi(request);
     }
 
+    public BaseResponse updatePlakaAvadanlikTalepTarihi(PlakaAvadanlikTalepTarihiUpdateRequest request) {
+        return milesApi.updatePlakaAvadanlikTalepTarihi(request);
+    }
+
+    public BaseResponse updatePlakaAvadanlikAlindiTarihi(PlakaAvadanlikAlindiTarihiUpdateRequest request) {
+        return milesApi.updatePlakaAvadanlikAlindiTarihi(request);
+    }
+
     public VehicleInspectionUpdateResponse getVehicleInspection(VehicleInspectionUpdateRequest request) {
         return milesApi.getVehicleInspection(request);
     }

@@ -50,6 +50,10 @@ public class MilesApi {
                         .asString("xml/GenericAttributeUpdateService_HgsEtiketNoUpdate.xml");
         private static final String GenericAttributeUpdateService_HgsTalepTarihiUpdateRequest = ResourceReader
                         .asString("xml/GenericAttributeUpdateService_HgsTalepTarihiUpdate.xml");
+        private static final String GenericAttributeUpdateService_PlakaAvadanlikTalepTarihiUpdateRequest = ResourceReader
+                        .asString("xml/GenericAttributeUpdateService_PlakaAvadanlikTalepTarihiUpdate.xml");
+        private static final String GenericAttributeUpdateService_PlakaAvadanlikAlindiTarihiUpdateRequest = ResourceReader
+                        .asString("xml/GenericAttributeUpdateService_PlakaAvadanlikAlindiTarihiUpdate.xml");
 
         private final RestTemplate xmlRestTemplate;
 
@@ -573,6 +577,66 @@ public class MilesApi {
 
                 } catch (Exception e) {
                         log.error("MilesApi.updateHgsTalepTarihi error: ", e);
+                        return null;
+                }
+        }
+
+        public BaseResponse updatePlakaAvadanlikTalepTarihi(PlakaAvadanlikTalepTarihiUpdateRequest request) {
+                log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService?sessionId={}",
+                                baseUrl, sessionId);
+
+                String body = GenericAttributeUpdateService_PlakaAvadanlikTalepTarihiUpdateRequest
+                                .replace("{sessionId}", sessionId)
+                                .replace("{vehiclePropertyId}", request.getVehiclePropertyId())
+                                .replace("{sroid}", request.getSroid())
+                                .replace("{fieldId}", request.getFieldId())
+                                .replace("{dateTimeValue}", request.getDateTimeValue());
+
+                try {
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.setContentType(MediaType.APPLICATION_XML);
+
+                        HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+                        BaseResponse response = xmlRestTemplate.postForEntity(
+                                        baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService",
+                                        httpEntity,
+                                        BaseResponse.class).getBody();
+
+                        return response;
+
+                } catch (Exception e) {
+                        log.error("MilesApi.updatePlakaAvadanlikTalepTarihi error: ", e);
+                        return null;
+                }
+        }
+
+        public BaseResponse updatePlakaAvadanlikAlindiTarihi(PlakaAvadanlikAlindiTarihiUpdateRequest request) {
+                log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService?sessionId={}",
+                                baseUrl, sessionId);
+
+                String body = GenericAttributeUpdateService_PlakaAvadanlikAlindiTarihiUpdateRequest
+                                .replace("{sessionId}", sessionId)
+                                .replace("{vehiclePropertyId}", request.getVehiclePropertyId())
+                                .replace("{sroid}", request.getSroid())
+                                .replace("{fieldId}", request.getFieldId())
+                                .replace("{dateTimeValue}", request.getDateTimeValue());
+
+                try {
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.setContentType(MediaType.APPLICATION_XML);
+
+                        HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+                        BaseResponse response = xmlRestTemplate.postForEntity(
+                                        baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService",
+                                        httpEntity,
+                                        BaseResponse.class).getBody();
+
+                        return response;
+
+                } catch (Exception e) {
+                        log.error("MilesApi.updatePlakaAvadanlikAlindiTarihi error: ", e);
                         return null;
                 }
         }
