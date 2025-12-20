@@ -90,7 +90,13 @@ public class MilesService {
     public VehicleInspectionUpdateResponse getVehicleInspection(VehicleInspectionUpdateRequest request) {
         return milesApi.getVehicleInspection(request);
     }
+    public BaseResponse updateHgsEtiketNo(HgsEtiketNoUpdateRequest request) {
+        return milesApi.updateHgsEtiketNo(request);
+    }
 
+    public BaseResponse updateHgsTalepTarihi(HgsTalepTarihiUpdateRequest request) {
+        return milesApi.updateHgsTalepTarihi(request);
+    }
     /**
      * Get session info
      */

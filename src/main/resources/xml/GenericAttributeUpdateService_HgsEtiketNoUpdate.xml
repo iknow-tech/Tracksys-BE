@@ -1,0 +1,21 @@
+<SofEnvelope>
+    <sessionID>{sessionId}</sessionID>
+    <action>execute</action>
+    <data>
+        <MWSBulkAttributeUpdate>
+            <MWSObject>
+                <id>{vehiclePropertyId}</id>
+                <sroid>{sroid}</sroid>
+                <Field_Set>
+                    <Field>
+                        <id>{fieldId}</id>
+                        <name></name>
+                        <MWSStringValue>
+                            <value>{hgsEtiketNo}</value>
+                        </MWSStringValue>
+                    </Field>
+                </Field_Set>
+            </MWSObject>
+        </MWSBulkAttributeUpdate>
+    </data>
+</SofEnvelope>

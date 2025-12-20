@@ -46,7 +46,10 @@ public class MilesApi {
                         .asString("xml/GenericAttributeUpdateService_RuhsatBelgeNoUpdate.xml");
         private static final String GenericAttributeUpdateService_VehicleInspectionUpdateRequest = ResourceReader
                         .asString("xml/GenericAttributeUpdateService_VehicleInspectionUpdate.xml");
-
+    private static final String GenericAttributeUpdateService_HgsEtiketNoUpdateRequest = ResourceReader
+            .asString("xml/GenericAttributeUpdateService_HgsEtiketNoUpdate.xml");
+    private static final String GenericAttributeUpdateService_HgsTalepTarihiUpdateRequest = ResourceReader
+            .asString("xml/GenericAttributeUpdateService_HgsTalepTarihiUpdate.xml");
         private final RestTemplate xmlRestTemplate;
 
         @Value("${miles.baseUrl}")
@@ -512,5 +515,64 @@ public class MilesApi {
                         return null;
                 }
         }
+    public BaseResponse updateHgsEtiketNo(HgsEtiketNoUpdateRequest request) {
+        log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService?sessionId={}",
+                baseUrl, sessionId);
+
+        String body = GenericAttributeUpdateService_HgsEtiketNoUpdateRequest
+                .replace("{sessionId}", sessionId)
+                .replace("{vehiclePropertyId}", request.getVehiclePropertyId())
+                .replace("{sroid}", request.getSroid())
+                .replace("{fieldId}", request.getFieldId())
+                .replace("{hgsEtiketNo}", request.getHgsEtiketNo());
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_XML);
+
+            HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+            BaseResponse response = xmlRestTemplate.postForEntity(
+                    baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService",
+                    httpEntity,
+                    BaseResponse.class).getBody();
+
+            return response;
+
+        } catch (Exception e) {
+            log.error("MilesApi.updateHgsEtiketNo error: ", e);
+            return null;
+        }
+    }
+
+    public BaseResponse updateHgsTalepTarihi(HgsTalepTarihiUpdateRequest request) {
+        log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService?sessionId={}",
+                baseUrl, sessionId);
+
+        String body = GenericAttributeUpdateService_HgsTalepTarihiUpdateRequest
+                .replace("{sessionId}", sessionId)
+                .replace("{vehiclePropertyId}", request.getVehiclePropertyId())
+                .replace("{sroid}", request.getSroid())
+                .replace("{fieldId}", request.getFieldId())
+                .replace("{dateTimeValue}", request.getDateTimeValue());
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_XML);
+
+            HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+            BaseResponse response = xmlRestTemplate.postForEntity(
+                    baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService",
+                    httpEntity,
+                    BaseResponse.class).getBody();
+
+            return response;
+
+        } catch (Exception e) {
+            log.error("MilesApi.updateHgsTalepTarihi error: ", e);
+            return null;
+        }
+    }
 
 }

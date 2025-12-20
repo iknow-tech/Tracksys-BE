@@ -248,5 +248,33 @@ public class MilesController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+    /**
+     * Update HGS Etiket No - 1.6.13.2 HGS Etiket No Alanının Güncellenmesi
+     */
+    @PutMapping("/update-hgs-etiket-no")
+    public ResponseEntity<BaseResponse> updateHgsEtiketNo(@RequestBody HgsEtiketNoUpdateRequest request) {
+        try {
+            log.info("Updating HGS etiket no for vehiclePropertyId: {}", request.getVehiclePropertyId());
+            BaseResponse response = milesService.updateHgsEtiketNo(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error updating HGS etiket no", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 
+    /**
+     * Update HGS Talep Tarihi - 1.6.13.3 HGS Etiket No Talep Tarihi Alanının Güncellenmesi
+     */
+    @PutMapping("/update-hgs-talep-tarihi")
+    public ResponseEntity<BaseResponse> updateHgsTalepTarihi(@RequestBody HgsTalepTarihiUpdateRequest request) {
+        try {
+            log.info("Updating HGS talep tarihi for vehiclePropertyId: {}", request.getVehiclePropertyId());
+            BaseResponse response = milesService.updateHgsTalepTarihi(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error updating HGS talep tarihi", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 }
