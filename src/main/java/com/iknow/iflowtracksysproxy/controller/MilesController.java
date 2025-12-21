@@ -280,4 +280,39 @@ public class MilesController {
         }
     }
 
+    /**
+     * Update Plaka Avadanlık Talep Tarihi - 1.6.14.2 Plaka ve Avadanlık Sevki Talep
+     * Edildi Tarihi Alanının Güncellenmesi
+     */
+    @PutMapping("/update-plaka-avadanlik-talep-tarihi")
+    public ResponseEntity<BaseResponse> updatePlakaAvadanlikTalepTarihi(
+            @RequestBody PlakaAvadanlikTalepTarihiUpdateRequest request) {
+        try {
+            log.info("Updating Plaka Avadanlik talep tarihi for vehiclePropertyId: {}", request.getVehiclePropertyId());
+            BaseResponse response = milesService.updatePlakaAvadanlikTalepTarihi(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error updating Plaka Avadanlik talep tarihi", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Update Plaka Avadanlık Alındı Tarihi - 1.6.14.3 Plaka ve Avadanlık Sevki
+     * Alındı Tarihi Alanının Güncellenmesi
+     */
+    @PutMapping("/update-plaka-avadanlik-alindi-tarihi")
+    public ResponseEntity<BaseResponse> updatePlakaAvadanlikAlindiTarihi(
+            @RequestBody PlakaAvadanlikAlindiTarihiUpdateRequest request) {
+        try {
+            log.info("Updating Plaka Avadanlik alindi tarihi for vehiclePropertyId: {}",
+                    request.getVehiclePropertyId());
+            BaseResponse response = milesService.updatePlakaAvadanlikAlindiTarihi(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error updating Plaka Avadanlik alindi tarihi", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 }
