@@ -329,4 +329,18 @@ public class MilesController {
         }
     }
 
+    @PutMapping("/traffic-registration-number")
+    public ResponseEntity<TrafficRegistrationNumberUpdateResponse> updatePlakaAvadanlikAlindiTarihi(
+            @RequestBody TrafficRegistrationNumberUpdaterequest request) {
+        try {
+            log.info("Updating trafficRegistrationNumber vehiclePropertyId: {}",
+                    request.getVehiclePropertyId());
+            TrafficRegistrationNumberUpdateResponse response = milesService.updateTrafficRegistrationNumber(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error updating trafficRegistrationNumber", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 }

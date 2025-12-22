@@ -16,6 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -54,8 +57,10 @@ public class MilesApi {
                         .asString("xml/GenericAttributeUpdateService_PlakaAvadanlikTalepTarihiUpdate.xml");
         private static final String GenericAttributeUpdateService_PlakaAvadanlikAlindiTarihiUpdateRequest = ResourceReader
                         .asString("xml/GenericAttributeUpdateService_PlakaAvadanlikAlindiTarihiUpdate.xml");
-    private static final String PRJ_SM_VehicleDocuments_GetTrafficInsuranceRequest = ResourceReader
-            .asString("xml/PRJ_SM_VehicleDocuments_GetTrafficInsurance.xml");
+        private static final String PRJ_SM_VehicleDocuments_GetTrafficInsuranceRequest = ResourceReader
+                .asString("xml/PRJ_SM_VehicleDocuments_GetTrafficInsurance.xml");
+        private static final String GenericAttributeUpdateService_TrafficRegistrationNumberUpdateRequest = ResourceReader
+                .asString("xml/GenericAttributeUpdateService_TrafficRegistrationNumberUpdate.xml");
 
         private final RestTemplate xmlRestTemplate;
 
@@ -644,7 +649,7 @@ public class MilesApi {
         }
 
         public TrafficInsuranceGetResponse getTrafficInsurance(TrafficInsuranceGetRequest request) {
-            log.info("/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch",
+            log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch{}",
                     baseUrl, sessionId);
 
             String body = PRJ_SM_VehicleDocuments_GetTrafficInsuranceRequest
@@ -669,5 +674,35 @@ public class MilesApi {
                 return null;
             }
         }
+
+    public TrafficRegistrationNumberUpdateResponse updateTrafficRegistrationNumber(TrafficRegistrationNumberUpdaterequest request) {
+        log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService/{}",
+                baseUrl, sessionId);
+
+        String body = GenericAttributeUpdateService_TrafficRegistrationNumberUpdateRequest
+                .replace("{sessionId}", sessionId)
+                .replace("{vehiclePropertyId}", request.getVehiclePropertyId())
+                .replace("{fieldId}", request.getFieldId())
+                .replace("{dateTime}", request.getDateTime())
+                .replace("{orderId}", request.getOrderId());
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_XML);
+
+            HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+            TrafficRegistrationNumberUpdateResponse response = xmlRestTemplate.postForEntity(
+                    baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService",
+                    httpEntity,
+                    TrafficRegistrationNumberUpdateResponse.class).getBody();
+
+            return response;
+
+        } catch (Exception e) {
+            log.error("MilesApi.updateTrafficRegistrationNumber error: ", e);
+            return null;
+        }
+    }
 
 }

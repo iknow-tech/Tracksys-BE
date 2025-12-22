@@ -111,6 +111,10 @@ public class MilesService {
         return milesApi.getTrafficInsurance(request);
     }
 
+    public TrafficRegistrationNumberUpdateResponse updateTrafficRegistrationNumber(TrafficRegistrationNumberUpdaterequest request) {
+        return milesApi.updateTrafficRegistrationNumber(request);
+    }
+
     /**
      * Get session info
      */
