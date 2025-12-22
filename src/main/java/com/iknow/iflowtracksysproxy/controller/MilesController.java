@@ -329,6 +329,10 @@ public class MilesController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error updating Trafik Sigortasi talep tarihi", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+
+        }}
+
     @GetMapping("/traffic-insurance/{fleetVehicleId}")
     public ResponseEntity<TrafficInsuranceGetResponse> getTrafficInsurance(
             @ModelAttribute TrafficInsuranceGetRequest request) {
@@ -369,6 +373,10 @@ public class MilesController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error updating Sevk Bitis tarihi", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+
+        }}
+
     @PutMapping("/delivery-dealer-area")
     public ResponseEntity<DeliveryDealerAreaUpdateResponse> updatePlakaAvadanlikAlindiTarihi(
             @RequestBody DeliveryDealerAreaUpdateRequest request) {
