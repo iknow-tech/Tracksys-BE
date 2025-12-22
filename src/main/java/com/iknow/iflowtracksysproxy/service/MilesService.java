@@ -103,6 +103,14 @@ public class MilesService {
         return milesApi.updatePlakaAvadanlikAlindiTarihi(request);
     }
 
+    public BaseResponse updateTrafikSigortasiTalepTarihi(TrafikSigortasiTalepTarihiUpdateRequest request) {
+        return milesApi.updateTrafikSigortasiTalepTarihi(request);
+    }
+
+    public BaseResponse updateSevkBitisTarihi(SevkBitisTarihiUpdateRequest request) {
+        return milesApi.updateSevkBitisTarihi(request);
+    }
+
     public VehicleInspectionUpdateResponse getVehicleInspection(VehicleInspectionUpdateRequest request) {
         return milesApi.getVehicleInspection(request);
     }

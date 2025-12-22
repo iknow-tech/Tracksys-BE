@@ -315,4 +315,38 @@ public class MilesController {
         }
     }
 
+    /**
+     * Update Trafik Sigortası Talep Tarihi - 1.6.15.2 Trafik Sigortası Talep Tarihi
+     * Alanının Güncellenmesi
+     */
+    @PutMapping("/update-trafik-sigortasi-talep-tarihi")
+    public ResponseEntity<BaseResponse> updateTrafikSigortasiTalepTarihi(
+            @RequestBody TrafikSigortasiTalepTarihiUpdateRequest request) {
+        try {
+            log.info("Updating Trafik Sigortasi talep tarihi for vehiclePropertyId: {}",
+                    request.getVehiclePropertyId());
+            BaseResponse response = milesService.updateTrafikSigortasiTalepTarihi(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error updating Trafik Sigortasi talep tarihi", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Update Sevk Bitiş Tarihi - 1.6.18.1 Vehicle Order Üzerinde Sevk Bitiş
+     * Tarihinin Güncellenmesi
+     */
+    @PutMapping("/update-sevk-bitis-tarihi")
+    public ResponseEntity<BaseResponse> updateSevkBitisTarihi(@RequestBody SevkBitisTarihiUpdateRequest request) {
+        try {
+            log.info("Updating Sevk Bitis tarihi for deliveryConditionId: {}", request.getDeliveryConditionId());
+            BaseResponse response = milesService.updateSevkBitisTarihi(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error updating Sevk Bitis tarihi", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 }
