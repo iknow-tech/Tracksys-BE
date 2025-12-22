@@ -79,8 +79,44 @@ public class MilesService {
         return milesApi.updateRuhsatBelgeNo(request);
     }
 
+    public BaseResponse getVehicleDocuments(VehicleDocumentsRequest request) {
+        return milesApi.getVehicleDocuments(request);
+    }
+
+    public BaseResponse updateVehicleInspectionDate(VehicleInspectionDateUpdateRequest request) {
+        return milesApi.updateVehicleInspectionDate(request);
+    }
+
+    public BaseResponse updateHgsEtiketNo(HgsEtiketNoUpdateRequest request) {
+        return milesApi.updateHgsEtiketNo(request);
+    }
+
+    public BaseResponse updateHgsTalepTarihi(HgsTalepTarihiUpdateRequest request) {
+        return milesApi.updateHgsTalepTarihi(request);
+    }
+
+    public BaseResponse updatePlakaAvadanlikTalepTarihi(PlakaAvadanlikTalepTarihiUpdateRequest request) {
+        return milesApi.updatePlakaAvadanlikTalepTarihi(request);
+    }
+
+    public BaseResponse updatePlakaAvadanlikAlindiTarihi(PlakaAvadanlikAlindiTarihiUpdateRequest request) {
+        return milesApi.updatePlakaAvadanlikAlindiTarihi(request);
+    }
+
     public VehicleInspectionUpdateResponse getVehicleInspection(VehicleInspectionUpdateRequest request) {
-        return  milesApi.getVehicleInspection(request);
+        return milesApi.getVehicleInspection(request);
+    }
+
+    public TrafficInsuranceGetResponse getTrafficInsurance(TrafficInsuranceGetRequest request) {
+        return milesApi.getTrafficInsurance(request);
+    }
+
+    public TrafficRegistrationNumberUpdateResponse updateTrafficRegistrationNumber(TrafficRegistrationNumberUpdaterequest request) {
+        return milesApi.updateTrafficRegistrationNumber(request);
+    }
+
+    public DeliveryDealerAreaUpdateResponse updateDeliveryDealerArea(DeliveryDealerAreaUpdateRequest request) {
+        return milesApi.updateDeliveryDealerArea(request);
     }
 
     public  ApprovalDateUpdateBaseResponse updateCreditApprovalDate(ApprovalDateUpdateRequest approvalDateUpdateRequest){

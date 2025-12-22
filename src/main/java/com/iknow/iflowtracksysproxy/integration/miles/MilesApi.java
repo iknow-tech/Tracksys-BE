@@ -5,15 +5,12 @@ import com.iknow.iflowtracksysproxy.integration.miles.model.response.*;
 import com.iknow.iflowtracksysproxy.util.ResourceReader;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -41,7 +38,7 @@ public class MilesApi {
         private static final String GenericAttributeUpdateService_MulkUpdateRequest = ResourceReader
                         .asString("xml/GenericAttributeUpdateService_MulkUpdate.xml");
         private static final String PRJ_SM_VehicleDocumentsRequest = ResourceReader
-                .asString("xml/PRJ_SM_VehicleDocuments.xml");
+                        .asString("xml/PRJ_SM_VehicleDocuments.xml");
         private static final String GenericAttributeUpdateService_RuhsatBelgeNoUpdateRequest = ResourceReader
                         .asString("xml/GenericAttributeUpdateService_RuhsatBelgeNoUpdate.xml");
         private static final String GenericAttributeUpdateService_CreditApprovalDateRequest = ResourceReader
@@ -50,6 +47,22 @@ public class MilesApi {
                 .asString("xml/PRJ_SM_DealerList.xml");
         private static final String PRJ_SM_ResponsibleDealerRequest = ResourceReader
                 .asString("xml/PRJ_SM_ResponsibleDealerList.xml");
+        private static final String GenericAttributeUpdateService_VehicleInspectionUpdateRequest = ResourceReader
+                        .asString("xml/GenericAttributeUpdateService_VehicleInspectionUpdate.xml");
+        private static final String GenericAttributeUpdateService_HgsEtiketNoUpdateRequest = ResourceReader
+                        .asString("xml/GenericAttributeUpdateService_HgsEtiketNoUpdate.xml");
+        private static final String GenericAttributeUpdateService_HgsTalepTarihiUpdateRequest = ResourceReader
+                        .asString("xml/GenericAttributeUpdateService_HgsTalepTarihiUpdate.xml");
+        private static final String GenericAttributeUpdateService_PlakaAvadanlikTalepTarihiUpdateRequest = ResourceReader
+                        .asString("xml/GenericAttributeUpdateService_PlakaAvadanlikTalepTarihiUpdate.xml");
+        private static final String GenericAttributeUpdateService_PlakaAvadanlikAlindiTarihiUpdateRequest = ResourceReader
+                        .asString("xml/GenericAttributeUpdateService_PlakaAvadanlikAlindiTarihiUpdate.xml");
+        private static final String PRJ_SM_VehicleDocuments_GetTrafficInsuranceRequest = ResourceReader
+                .asString("xml/PRJ_SM_VehicleDocuments_GetTrafficInsurance.xml");
+        private static final String GenericAttributeUpdateService_TrafficRegistrationNumberUpdateRequest = ResourceReader
+                .asString("xml/GenericAttributeUpdateService_TrafficRegistrationNumberUpdate.xml");
+    private static final String GenericAttributeUpdateService_DeliveryDealerAreaUpdateRequest = ResourceReader
+            .asString("xml/GenericAttributeUpdateService_DeliveryDealerAreaUpdate.xml");
 
         private final RestTemplate xmlRestTemplate;
 
@@ -364,37 +377,33 @@ public class MilesApi {
                                         httpEntity,
                                         PropertyTypeUpdateResponse.class).getBody();
 
+                        return response;
 
-
-            return response;
-
-        } catch (Exception e) {
-            log.error("MilesApi.updateTax error: ", e);
-            return null;
+                } catch (Exception e) {
+                        log.error("MilesApi.updateTax error: ", e);
+                        return null;
+                }
         }
-    }
 
-    public VehicleInspectionUpdateResponse getVehicleInspection(VehicleInspectionUpdateRequest request) {
-        log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService?sessionId={}",
-                baseUrl, sessionId);
+        public VehicleInspectionUpdateResponse getVehicleInspection(VehicleInspectionUpdateRequest request) {
+                log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService?sessionId={}",
+                                baseUrl, sessionId);
 
-        // XML body template'ini request objesine göre oluştur
-        String body = PRJ_SM_VehicleDocumentsRequest
-                .replace("{sessionId}", sessionId)
-                .replace("{ordersId}",  request.getOrdersId());
+                // XML body template'ini request objesine göre oluştur
+                String body = PRJ_SM_VehicleDocumentsRequest
+                                .replace("{sessionId}", sessionId)
+                                .replace("{ordersId}", request.getOrdersId());
 
-        try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_XML);
+                try {
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.setContentType(MediaType.APPLICATION_XML);
 
-            HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+                        HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
 
-            VehicleInspectionUpdateResponse response = xmlRestTemplate.postForEntity(
-                    baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch",
-                    httpEntity,
-                    VehicleInspectionUpdateResponse.class
-            ).getBody();
-
+                        VehicleInspectionUpdateResponse response = xmlRestTemplate.postForEntity(
+                                        baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch",
+                                        httpEntity,
+                                        VehicleInspectionUpdateResponse.class).getBody();
 
                         return response;
 
@@ -463,6 +472,270 @@ public class MilesApi {
                         return null;
                 }
         }
+
+        public BaseResponse getVehicleDocuments(VehicleDocumentsRequest request) {
+                log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch?sessionId={}",
+                                baseUrl, sessionId);
+
+                String body = PRJ_SM_VehicleDocumentsRequest
+                                .replace("{sessionId}", sessionId)
+                                .replace("{fleetvehicleId}", request.getFleetvehicleId());
+
+                try {
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.setContentType(MediaType.APPLICATION_XML);
+
+                        HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+                        BaseResponse response = xmlRestTemplate.postForEntity(
+                                        baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch",
+                                        httpEntity,
+                                        BaseResponse.class).getBody();
+
+                        return response;
+
+                } catch (Exception e) {
+                        log.error("MilesApi.getVehicleDocuments error: ", e);
+                        return null;
+                }
+        }
+
+        public BaseResponse updateVehicleInspectionDate(VehicleInspectionDateUpdateRequest request) {
+                log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService?sessionId={}",
+                                baseUrl, sessionId);
+
+                String body = GenericAttributeUpdateService_VehicleInspectionUpdateRequest
+                                .replace("{sessionId}", sessionId)
+                                .replace("{vehiclePropertyId}", request.getVehiclePropertyId())
+                                .replace("{sroid}", request.getSroid())
+                                .replace("{fieldId}", request.getFieldId())
+                                .replace("{dateTimeValue}", request.getDateTimeValue());
+
+                try {
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.setContentType(MediaType.APPLICATION_XML);
+
+                        HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+                        BaseResponse response = xmlRestTemplate.postForEntity(
+                                        baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService",
+                                        httpEntity,
+                                        BaseResponse.class).getBody();
+
+                        return response;
+
+                } catch (Exception e) {
+                        log.error("MilesApi.updateVehicleInspectionDate error: ", e);
+                        return null;
+                }
+        }
+
+        public BaseResponse updateHgsEtiketNo(HgsEtiketNoUpdateRequest request) {
+                log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService?sessionId={}",
+                                baseUrl, sessionId);
+
+                String body = GenericAttributeUpdateService_HgsEtiketNoUpdateRequest
+                                .replace("{sessionId}", sessionId)
+                                .replace("{vehiclePropertyId}", request.getVehiclePropertyId())
+                                .replace("{sroid}", request.getSroid())
+                                .replace("{fieldId}", request.getFieldId())
+                                .replace("{hgsEtiketNo}", request.getHgsEtiketNo());
+
+                try {
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.setContentType(MediaType.APPLICATION_XML);
+
+                        HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+                        BaseResponse response = xmlRestTemplate.postForEntity(
+                                        baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService",
+                                        httpEntity,
+                                        BaseResponse.class).getBody();
+
+                        return response;
+
+                } catch (Exception e) {
+                        log.error("MilesApi.updateHgsEtiketNo error: ", e);
+                        return null;
+                }
+        }
+
+        public BaseResponse updateHgsTalepTarihi(HgsTalepTarihiUpdateRequest request) {
+                log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService?sessionId={}",
+                                baseUrl, sessionId);
+
+                String body = GenericAttributeUpdateService_HgsTalepTarihiUpdateRequest
+                                .replace("{sessionId}", sessionId)
+                                .replace("{vehiclePropertyId}", request.getVehiclePropertyId())
+                                .replace("{sroid}", request.getSroid())
+                                .replace("{fieldId}", request.getFieldId())
+                                .replace("{dateTimeValue}", request.getDateTimeValue());
+
+                try {
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.setContentType(MediaType.APPLICATION_XML);
+
+                        HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+                        BaseResponse response = xmlRestTemplate.postForEntity(
+                                        baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService",
+                                        httpEntity,
+                                        BaseResponse.class).getBody();
+
+                        return response;
+
+                } catch (Exception e) {
+                        log.error("MilesApi.updateHgsTalepTarihi error: ", e);
+                        return null;
+                }
+        }
+
+        public BaseResponse updatePlakaAvadanlikTalepTarihi(PlakaAvadanlikTalepTarihiUpdateRequest request) {
+                log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService?sessionId={}",
+                                baseUrl, sessionId);
+
+                String body = GenericAttributeUpdateService_PlakaAvadanlikTalepTarihiUpdateRequest
+                                .replace("{sessionId}", sessionId)
+                                .replace("{vehiclePropertyId}", request.getVehiclePropertyId())
+                                .replace("{sroid}", request.getSroid())
+                                .replace("{fieldId}", request.getFieldId())
+                                .replace("{dateTimeValue}", request.getDateTimeValue());
+
+                try {
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.setContentType(MediaType.APPLICATION_XML);
+
+                        HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+                        BaseResponse response = xmlRestTemplate.postForEntity(
+                                        baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService",
+                                        httpEntity,
+                                        BaseResponse.class).getBody();
+
+                        return response;
+
+                } catch (Exception e) {
+                        log.error("MilesApi.updatePlakaAvadanlikTalepTarihi error: ", e);
+                        return null;
+                }
+        }
+
+        public BaseResponse updatePlakaAvadanlikAlindiTarihi(PlakaAvadanlikAlindiTarihiUpdateRequest request) {
+                log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService?sessionId={}",
+                                baseUrl, sessionId);
+
+                String body = GenericAttributeUpdateService_PlakaAvadanlikAlindiTarihiUpdateRequest
+                                .replace("{sessionId}", sessionId)
+                                .replace("{vehiclePropertyId}", request.getVehiclePropertyId())
+                                .replace("{sroid}", request.getSroid())
+                                .replace("{fieldId}", request.getFieldId())
+                                .replace("{dateTimeValue}", request.getDateTimeValue());
+
+                try {
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.setContentType(MediaType.APPLICATION_XML);
+
+                        HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+                        BaseResponse response = xmlRestTemplate.postForEntity(
+                                        baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService",
+                                        httpEntity,
+                                        BaseResponse.class).getBody();
+
+                        return response;
+
+                } catch (Exception e) {
+                        log.error("MilesApi.updatePlakaAvadanlikAlindiTarihi error: ", e);
+                        return null;
+                }
+        }
+
+        public TrafficInsuranceGetResponse getTrafficInsurance(TrafficInsuranceGetRequest request) {
+            log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch{}",
+                    baseUrl, sessionId);
+
+            String body = PRJ_SM_VehicleDocuments_GetTrafficInsuranceRequest
+                    .replace("{sessionId}", sessionId)
+                    .replace("{fleetVehicleId}", request.getFleetVehicleId());
+
+            try {
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_XML);
+
+                HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+                TrafficInsuranceGetResponse response = xmlRestTemplate.postForEntity(
+                        baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch",
+                        httpEntity,
+                        TrafficInsuranceGetResponse.class).getBody();
+
+                return response;
+
+            } catch (Exception e) {
+                log.error("MilesApi.updatePlakaAvadanlikAlindiTarihi error: ", e);
+                return null;
+            }
+        }
+
+    public TrafficRegistrationNumberUpdateResponse updateTrafficRegistrationNumber(TrafficRegistrationNumberUpdaterequest request) {
+        log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService/{}",
+                baseUrl, sessionId);
+
+        String body = GenericAttributeUpdateService_TrafficRegistrationNumberUpdateRequest
+                .replace("{sessionId}", sessionId)
+                .replace("{vehiclePropertyId}", request.getVehiclePropertyId())
+                .replace("{fieldId}", request.getFieldId())
+                .replace("{dateTime}", request.getDateTime())
+                .replace("{orderId}", request.getOrderId());
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_XML);
+
+            HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+            TrafficRegistrationNumberUpdateResponse response = xmlRestTemplate.postForEntity(
+                    baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService",
+                    httpEntity,
+                    TrafficRegistrationNumberUpdateResponse.class).getBody();
+
+            return response;
+
+        } catch (Exception e) {
+            log.error("MilesApi.updateTrafficRegistrationNumber error: ", e);
+            return null;
+        }
+    }
+
+    public DeliveryDealerAreaUpdateResponse  updateDeliveryDealerArea(DeliveryDealerAreaUpdateRequest request) {
+        log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService/{}",
+                baseUrl, sessionId);
+
+        String body = GenericAttributeUpdateService_DeliveryDealerAreaUpdateRequest
+                .replace("{sessionId}", sessionId)
+                .replace("{contractId}", request.getContractId())
+                .replace("{fieldId}", request.getFieldId())
+                .replace("{value}", request.getValue())
+                .replace("{orderId}", request.getOrderId());
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_XML);
+
+            HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+            DeliveryDealerAreaUpdateResponse response = xmlRestTemplate.postForEntity(
+                    baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService",
+                    httpEntity,
+                    DeliveryDealerAreaUpdateResponse.class).getBody();
+
+            return response;
+
+        } catch (Exception e) {
+            log.error("MilesApi.updateTrafficRegistrationNumber error: ", e);
+            return null;
+        }
+    }
 
         public ApprovalDateUpdateBaseResponse updateCreditApprovalDate(ApprovalDateUpdateRequest request) {
                 log.info("Updating Credit Approval Date for vehicleOrderId: {}, date: {}", request.getOrderId(), request.getApprovalDate());

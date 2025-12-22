@@ -205,13 +205,154 @@ public class MilesController {
     }
 
     @GetMapping("/get-vehicle-inspection")
-    public ResponseEntity<VehicleInspectionUpdateResponse> getVehicleInspection(VehicleInspectionUpdateRequest request) {
+    public ResponseEntity<VehicleInspectionUpdateResponse> getVehicleInspection(
+            VehicleInspectionUpdateRequest request) {
         try {
             log.info("Updating vehicle inspection");
             VehicleInspectionUpdateResponse response = milesService.getVehicleInspection(request);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error vehicle inspection", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Get Vehicle Documents - 1.6.12.1 PRJ_SM_VehicleDocuments Servisi
+     */
+    @GetMapping("/get-vehicle-documents")
+    public ResponseEntity<BaseResponse> getVehicleDocuments(VehicleDocumentsRequest request) {
+        try {
+            log.info("Getting vehicle documents for fleetvehicleId: {}", request.getFleetvehicleId());
+            BaseResponse response = milesService.getVehicleDocuments(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error getting vehicle documents", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Update Vehicle Inspection Date - 1.6.12.2 Araç Muayene Geçerlilik Sonu
+     * Alanının Güncellenmesi
+     */
+    @PutMapping("/update-vehicle-inspection-date")
+    public ResponseEntity<BaseResponse> updateVehicleInspectionDate(
+            @RequestBody VehicleInspectionDateUpdateRequest request) {
+        try {
+            log.info("Updating vehicle inspection date for vehiclePropertyId: {}", request.getVehiclePropertyId());
+            BaseResponse response = milesService.updateVehicleInspectionDate(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error updating vehicle inspection date", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Update HGS Etiket No - 1.6.13.2 HGS Etiket No Alanının Güncellenmesi
+     */
+    @PutMapping("/update-hgs-etiket-no")
+    public ResponseEntity<BaseResponse> updateHgsEtiketNo(@RequestBody HgsEtiketNoUpdateRequest request) {
+        try {
+            log.info("Updating HGS etiket no for vehiclePropertyId: {}", request.getVehiclePropertyId());
+            BaseResponse response = milesService.updateHgsEtiketNo(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error updating HGS etiket no", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Update HGS Talep Tarihi - 1.6.13.3 HGS Etiket No Talep Tarihi Alanının
+     * Güncellenmesi
+     */
+    @PutMapping("/update-hgs-talep-tarihi")
+    public ResponseEntity<BaseResponse> updateHgsTalepTarihi(@RequestBody HgsTalepTarihiUpdateRequest request) {
+        try {
+            log.info("Updating HGS talep tarihi for vehiclePropertyId: {}", request.getVehiclePropertyId());
+            BaseResponse response = milesService.updateHgsTalepTarihi(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error updating HGS talep tarihi", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Update Plaka Avadanlık Talep Tarihi - 1.6.14.2 Plaka ve Avadanlık Sevki Talep
+     * Edildi Tarihi Alanının Güncellenmesi
+     */
+    @PutMapping("/update-plaka-avadanlik-talep-tarihi")
+    public ResponseEntity<BaseResponse> updatePlakaAvadanlikTalepTarihi(
+            @RequestBody PlakaAvadanlikTalepTarihiUpdateRequest request) {
+        try {
+            log.info("Updating Plaka Avadanlik talep tarihi for vehiclePropertyId: {}", request.getVehiclePropertyId());
+            BaseResponse response = milesService.updatePlakaAvadanlikTalepTarihi(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error updating Plaka Avadanlik talep tarihi", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Update Plaka Avadanlık Alındı Tarihi - 1.6.14.3 Plaka ve Avadanlık Sevki
+     * Alındı Tarihi Alanının Güncellenmesi
+     */
+    @PutMapping("/update-plaka-avadanlik-alindi-tarihi")
+    public ResponseEntity<BaseResponse> updatePlakaAvadanlikAlindiTarihi(
+            @RequestBody PlakaAvadanlikAlindiTarihiUpdateRequest request) {
+        try {
+            log.info("Updating Plaka Avadanlik alindi tarihi for vehiclePropertyId: {}",
+                    request.getVehiclePropertyId());
+            BaseResponse response = milesService.updatePlakaAvadanlikAlindiTarihi(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error updating Plaka Avadanlik alindi tarihi", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/traffic-insurance/{fleetVehicleId}")
+    public ResponseEntity<TrafficInsuranceGetResponse> getTrafficInsurance(
+            @ModelAttribute TrafficInsuranceGetRequest request) {
+        try {
+            log.info("Getting trafficInsurance for fleetVehicleId: {}",
+                    request.getFleetVehicleId());
+            TrafficInsuranceGetResponse response = milesService.getTrafficInsurance(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error Getting trafficInsurance", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PutMapping("/traffic-registration-number")
+    public ResponseEntity<TrafficRegistrationNumberUpdateResponse> updatePlakaAvadanlikAlindiTarihi(
+            @RequestBody TrafficRegistrationNumberUpdaterequest request) {
+        try {
+            log.info("Updating trafficRegistrationNumber vehiclePropertyId: {}",
+                    request.getVehiclePropertyId());
+            TrafficRegistrationNumberUpdateResponse response = milesService.updateTrafficRegistrationNumber(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error updating trafficRegistrationNumber", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PutMapping("/delivery-dealer-area")
+    public ResponseEntity<DeliveryDealerAreaUpdateResponse> updatePlakaAvadanlikAlindiTarihi(
+            @RequestBody DeliveryDealerAreaUpdateRequest request) {
+        try {
+            log.info("Updating deliveryDealerArea contractId: {}",
+                    request.getContractId());
+            DeliveryDealerAreaUpdateResponse response = milesService.updateDeliveryDealerArea(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error updating DeliveryDealerArea", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
