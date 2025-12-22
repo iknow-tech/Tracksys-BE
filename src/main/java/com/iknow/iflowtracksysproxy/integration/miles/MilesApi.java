@@ -57,6 +57,10 @@ public class MilesApi {
                         .asString("xml/GenericAttributeUpdateService_PlakaAvadanlikTalepTarihiUpdate.xml");
         private static final String GenericAttributeUpdateService_PlakaAvadanlikAlindiTarihiUpdateRequest = ResourceReader
                         .asString("xml/GenericAttributeUpdateService_PlakaAvadanlikAlindiTarihiUpdate.xml");
+        private static final String GenericAttributeUpdateService_TrafikSigortasiTalepTarihiUpdateRequest = ResourceReader
+                        .asString("xml/GenericAttributeUpdateService_TrafikSigortasiTalepTarihiUpdate.xml");
+        private static final String GenericAttributeUpdateService_SevkBitisTarihiUpdateRequest = ResourceReader
+                        .asString("xml/GenericAttributeUpdateService_SevkBitisTarihiUpdate.xml");
         private static final String PRJ_SM_VehicleDocuments_GetTrafficInsuranceRequest = ResourceReader
                 .asString("xml/PRJ_SM_VehicleDocuments_GetTrafficInsurance.xml");
         private static final String GenericAttributeUpdateService_TrafficRegistrationNumberUpdateRequest = ResourceReader
@@ -650,6 +654,65 @@ public class MilesApi {
                 }
         }
 
+        public BaseResponse updateTrafikSigortasiTalepTarihi(TrafikSigortasiTalepTarihiUpdateRequest request) {
+                log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService?sessionId={}",
+                                baseUrl, sessionId);
+
+                String body = GenericAttributeUpdateService_TrafikSigortasiTalepTarihiUpdateRequest
+                                .replace("{sessionId}", sessionId)
+                                .replace("{vehiclePropertyId}", request.getVehiclePropertyId())
+                                .replace("{sroid}", request.getSroid())
+                                .replace("{fieldId}", request.getFieldId())
+                                .replace("{dateTimeValue}", request.getDateTimeValue());
+
+                try {
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.setContentType(MediaType.APPLICATION_XML);
+
+                        HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+                        BaseResponse response = xmlRestTemplate.postForEntity(
+                                        baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService",
+                                        httpEntity,
+                                        BaseResponse.class).getBody();
+
+                        return response;
+
+                } catch (Exception e) {
+                        log.error("MilesApi.updateTrafikSigortasiTalepTarihi error: ", e);
+                        return null;
+                }
+        }
+
+        public BaseResponse updateSevkBitisTarihi(SevkBitisTarihiUpdateRequest request) {
+                log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService?sessionId={}",
+                                baseUrl, sessionId);
+
+                String body = GenericAttributeUpdateService_SevkBitisTarihiUpdateRequest
+                                .replace("{sessionId}", sessionId)
+                                .replace("{deliveryConditionId}", request.getDeliveryConditionId())
+                                .replace("{sroid}", request.getSroid())
+                                .replace("{fieldId}", request.getFieldId())
+                                .replace("{dateTimeValue}", request.getDateTimeValue());
+
+                try {
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.setContentType(MediaType.APPLICATION_XML);
+
+                        HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+                        BaseResponse response = xmlRestTemplate.postForEntity(
+                                        baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService",
+                                        httpEntity,
+                                        BaseResponse.class).getBody();
+
+                        return response;
+
+                } catch (Exception e) {
+                        log.error("MilesApi.updateSevkBitisTarihi error: ", e);
+                        return null;
+                }
+        }
         public TrafficInsuranceGetResponse getTrafficInsurance(TrafficInsuranceGetRequest request) {
             log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch{}",
                     baseUrl, sessionId);
