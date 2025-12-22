@@ -115,6 +115,10 @@ public class MilesService {
         return milesApi.updateTrafficRegistrationNumber(request);
     }
 
+    public DeliveryDealerAreaUpdateResponse updateDeliveryDealerArea(DeliveryDealerAreaUpdateRequest request) {
+        return milesApi.updateDeliveryDealerArea(request);
+    }
+
     /**
      * Get session info
      */

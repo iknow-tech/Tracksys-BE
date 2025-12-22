@@ -343,4 +343,18 @@ public class MilesController {
         }
     }
 
+    @PutMapping("/delivery-dealer-area")
+    public ResponseEntity<DeliveryDealerAreaUpdateResponse> updatePlakaAvadanlikAlindiTarihi(
+            @RequestBody DeliveryDealerAreaUpdateRequest request) {
+        try {
+            log.info("Updating deliveryDealerArea contractId: {}",
+                    request.getContractId());
+            DeliveryDealerAreaUpdateResponse response = milesService.updateDeliveryDealerArea(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error updating DeliveryDealerArea", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 }
