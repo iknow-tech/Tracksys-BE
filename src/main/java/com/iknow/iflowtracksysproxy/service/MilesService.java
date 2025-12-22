@@ -115,6 +115,18 @@ public class MilesService {
         return milesApi.getVehicleInspection(request);
     }
 
+    public TrafficInsuranceGetResponse getTrafficInsurance(TrafficInsuranceGetRequest request) {
+        return milesApi.getTrafficInsurance(request);
+    }
+
+    public TrafficRegistrationNumberUpdateResponse updateTrafficRegistrationNumber(TrafficRegistrationNumberUpdaterequest request) {
+        return milesApi.updateTrafficRegistrationNumber(request);
+    }
+
+    public DeliveryDealerAreaUpdateResponse updateDeliveryDealerArea(DeliveryDealerAreaUpdateRequest request) {
+        return milesApi.updateDeliveryDealerArea(request);
+    }
+
     /**
      * Get session info
      */

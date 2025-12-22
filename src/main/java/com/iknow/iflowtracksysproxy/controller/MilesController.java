@@ -329,6 +329,30 @@ public class MilesController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error updating Trafik Sigortasi talep tarihi", e);
+    @GetMapping("/traffic-insurance/{fleetVehicleId}")
+    public ResponseEntity<TrafficInsuranceGetResponse> getTrafficInsurance(
+            @ModelAttribute TrafficInsuranceGetRequest request) {
+        try {
+            log.info("Getting trafficInsurance for fleetVehicleId: {}",
+                    request.getFleetVehicleId());
+            TrafficInsuranceGetResponse response = milesService.getTrafficInsurance(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error Getting trafficInsurance", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PutMapping("/traffic-registration-number")
+    public ResponseEntity<TrafficRegistrationNumberUpdateResponse> updatePlakaAvadanlikAlindiTarihi(
+            @RequestBody TrafficRegistrationNumberUpdaterequest request) {
+        try {
+            log.info("Updating trafficRegistrationNumber vehiclePropertyId: {}",
+                    request.getVehiclePropertyId());
+            TrafficRegistrationNumberUpdateResponse response = milesService.updateTrafficRegistrationNumber(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error updating trafficRegistrationNumber", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -345,6 +369,16 @@ public class MilesController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error updating Sevk Bitis tarihi", e);
+    @PutMapping("/delivery-dealer-area")
+    public ResponseEntity<DeliveryDealerAreaUpdateResponse> updatePlakaAvadanlikAlindiTarihi(
+            @RequestBody DeliveryDealerAreaUpdateRequest request) {
+        try {
+            log.info("Updating deliveryDealerArea contractId: {}",
+                    request.getContractId());
+            DeliveryDealerAreaUpdateResponse response = milesService.updateDeliveryDealerArea(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error updating DeliveryDealerArea", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
