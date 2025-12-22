@@ -107,6 +107,10 @@ public class MilesService {
         return milesApi.getVehicleInspection(request);
     }
 
+    public TrafficInsuranceGetResponse getTrafficInsurance(TrafficInsuranceGetRequest request) {
+        return milesApi.getTrafficInsurance(request);
+    }
+
     /**
      * Get session info
      */

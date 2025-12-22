@@ -54,6 +54,8 @@ public class MilesApi {
                         .asString("xml/GenericAttributeUpdateService_PlakaAvadanlikTalepTarihiUpdate.xml");
         private static final String GenericAttributeUpdateService_PlakaAvadanlikAlindiTarihiUpdateRequest = ResourceReader
                         .asString("xml/GenericAttributeUpdateService_PlakaAvadanlikAlindiTarihiUpdate.xml");
+    private static final String PRJ_SM_VehicleDocuments_GetTrafficInsuranceRequest = ResourceReader
+            .asString("xml/PRJ_SM_VehicleDocuments_GetTrafficInsurance.xml");
 
         private final RestTemplate xmlRestTemplate;
 
@@ -639,6 +641,33 @@ public class MilesApi {
                         log.error("MilesApi.updatePlakaAvadanlikAlindiTarihi error: ", e);
                         return null;
                 }
+        }
+
+        public TrafficInsuranceGetResponse getTrafficInsurance(TrafficInsuranceGetRequest request) {
+            log.info("/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch",
+                    baseUrl, sessionId);
+
+            String body = PRJ_SM_VehicleDocuments_GetTrafficInsuranceRequest
+                    .replace("{sessionId}", sessionId)
+                    .replace("{fleetVehicleId}", request.getFleetVehicleId());
+
+            try {
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_XML);
+
+                HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+                TrafficInsuranceGetResponse response = xmlRestTemplate.postForEntity(
+                        baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch",
+                        httpEntity,
+                        TrafficInsuranceGetResponse.class).getBody();
+
+                return response;
+
+            } catch (Exception e) {
+                log.error("MilesApi.updatePlakaAvadanlikAlindiTarihi error: ", e);
+                return null;
+            }
         }
 
 }

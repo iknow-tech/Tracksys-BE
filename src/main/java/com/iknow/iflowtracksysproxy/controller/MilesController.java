@@ -315,4 +315,18 @@ public class MilesController {
         }
     }
 
+    @GetMapping("/traffic-insurance/{fleetVehicleId}")
+    public ResponseEntity<TrafficInsuranceGetResponse> getTrafficInsurance(
+            @ModelAttribute TrafficInsuranceGetRequest request) {
+        try {
+            log.info("Getting trafficInsurance for fleetVehicleId: {}",
+                    request.getFleetVehicleId());
+            TrafficInsuranceGetResponse response = milesService.getTrafficInsurance(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error Getting trafficInsurance", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 }
