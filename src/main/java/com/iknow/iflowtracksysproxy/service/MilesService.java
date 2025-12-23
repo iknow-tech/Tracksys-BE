@@ -2,7 +2,6 @@ package com.iknow.iflowtracksysproxy.service;
 
 import com.iknow.iflowtracksysproxy.integration.miles.MilesApi;
 import com.iknow.iflowtracksysproxy.integration.miles.model.request.*;
-
 import com.iknow.iflowtracksysproxy.integration.miles.model.response.*;
 import lombok.Builder;
 import lombok.Data;
@@ -104,6 +103,14 @@ public class MilesService {
         return milesApi.updatePlakaAvadanlikAlindiTarihi(request);
     }
 
+    public BaseResponse updateTrafikSigortasiTalepTarihi(TrafikSigortasiTalepTarihiUpdateRequest request) {
+        return milesApi.updateTrafikSigortasiTalepTarihi(request);
+    }
+
+    public BaseResponse updateSevkBitisTarihi(SevkBitisTarihiUpdateRequest request) {
+        return milesApi.updateSevkBitisTarihi(request);
+    }
+
     public VehicleInspectionUpdateResponse getVehicleInspection(VehicleInspectionUpdateRequest request) {
         return milesApi.getVehicleInspection(request);
     }
@@ -121,9 +128,23 @@ public class MilesService {
         return milesApi.updateDeliveryDealerArea(request);
     }
 
+    public  ApprovalDateUpdateBaseResponse updateCreditApprovalDate(ApprovalDateUpdateRequest approvalDateUpdateRequest){
+        return milesApi.updateCreditApprovalDate(approvalDateUpdateRequest);
+    }
+
+    public List<GetDealerResponse> getDealerResponseList() {
+        return milesApi.getDealerList();
+    }
+
+    public List<ResponsibleDealerResponse> getResponsibleDealerList() {
+        return milesApi.getResponsibleDealerList();
+    }
+
     public TriggerMWSBulkProcessorResponse triggerMWSBulkProcessor(TriggerMWSBulkProcessorRequest request) {
         return milesApi.triggerMWSBulkProcessor(request);
     }
+
+
 
     /**
      * Get session info

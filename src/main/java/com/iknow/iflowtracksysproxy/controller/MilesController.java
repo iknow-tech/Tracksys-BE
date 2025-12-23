@@ -315,6 +315,24 @@ public class MilesController {
         }
     }
 
+    /**
+     * Update Trafik Sigortası Talep Tarihi - 1.6.15.2 Trafik Sigortası Talep Tarihi
+     * Alanının Güncellenmesi
+     */
+    @PutMapping("/update-trafik-sigortasi-talep-tarihi")
+    public ResponseEntity<BaseResponse> updateTrafikSigortasiTalepTarihi(
+            @RequestBody TrafikSigortasiTalepTarihiUpdateRequest request) {
+        try {
+            log.info("Updating Trafik Sigortasi talep tarihi for vehiclePropertyId: {}",
+                    request.getVehiclePropertyId());
+            BaseResponse response = milesService.updateTrafikSigortasiTalepTarihi(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error updating Trafik Sigortasi talep tarihi", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+
+        }}
+
     @GetMapping("/traffic-insurance/{fleetVehicleId}")
     public ResponseEntity<TrafficInsuranceGetResponse> getTrafficInsurance(
             @ModelAttribute TrafficInsuranceGetRequest request) {
@@ -343,6 +361,22 @@ public class MilesController {
         }
     }
 
+    /**
+     * Update Sevk Bitiş Tarihi - 1.6.18.1 Vehicle Order Üzerinde Sevk Bitiş
+     * Tarihinin Güncellenmesi
+     */
+    @PutMapping("/update-sevk-bitis-tarihi")
+    public ResponseEntity<BaseResponse> updateSevkBitisTarihi(@RequestBody SevkBitisTarihiUpdateRequest request) {
+        try {
+            log.info("Updating Sevk Bitis tarihi for deliveryConditionId: {}", request.getDeliveryConditionId());
+            BaseResponse response = milesService.updateSevkBitisTarihi(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error updating Sevk Bitis tarihi", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+
+        }}
+
     @PutMapping("/delivery-dealer-area")
     public ResponseEntity<DeliveryDealerAreaUpdateResponse> updateDeliveryDealerArea(
             @RequestBody DeliveryDealerAreaUpdateRequest request) {
@@ -353,6 +387,54 @@ public class MilesController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error updating DeliveryDealerArea", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/vehicle-order/credit-approval-date")
+    public ResponseEntity<ApprovalDateUpdateBaseResponse> updateCreditApprovalDate(@RequestBody ApprovalDateUpdateRequest request) {
+        try {
+            log.info("Updating Credit Approval Date for vehicleOrderId: {}, date: {}", request.getOrderId(), request.getApprovalDate());
+
+            if (request.getVehicleOrderItemId() == null || request.getApprovalDate() == null ) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            ApprovalDateUpdateBaseResponse response = milesService.updateCreditApprovalDate(request);
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("Error updating credit approval date", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Get Dealer List (PRJ_SM_DealerList)
+     */
+    @GetMapping("/dealer")
+    public ResponseEntity<List<GetDealerResponse>> getDealers() {
+        try {
+            log.info("Getting dealer list");
+            List<GetDealerResponse> response = milesService.getDealerResponseList();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error getting dealer list", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Get Responsible Dealer List (PRJ_SM_ResponsibleDealer)
+     */
+    @GetMapping("/responsible-dealer")
+    public ResponseEntity<List<ResponsibleDealerResponse>> getResponsibleDealers() {
+        try {
+            log.info("Getting responsible dealer list");
+            List<ResponsibleDealerResponse> response = milesService.getResponsibleDealerList();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error getting responsible dealer list", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
