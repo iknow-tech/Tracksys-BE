@@ -1,0 +1,30 @@
+<SofEnvelope>
+  <sessionID>{sessionId}</sessionID>
+  <bulkprocessorid>1004375</bulkprocessorid>
+  <action>execute</action>
+  <data>
+    <MWSBulkProcessorArgument_Set>
+      <id>1005246</id>
+      <MWSBulkProcessorArgument>
+        <name>connectorName</name>
+        <value>3|HDF_NetInvoice_IncomingInvoice_Import</value>
+      </MWSBulkProcessorArgument>
+      <MWSBulkProcessorArgument>
+        <name>xmlfile</name>
+        <value>3|</value>
+      </MWSBulkProcessorArgument>
+      <MWSBulkProcessorArgument>
+        <name>processmode</name>
+        <value>9|1</value>
+      </MWSBulkProcessorArgument>
+      <MWSBulkProcessorArgument>
+        <name>testMode</name>
+        <value>12|0</value>
+      </MWSBulkProcessorArgument>
+      <MWSBulkProcessorArgument>
+        <name>guids</name>
+        <value>3|{guid}</value>
+      </MWSBulkProcessorArgument>
+    </MWSBulkProcessorArgument_Set>
+  </data>
+</SofEnvelope>

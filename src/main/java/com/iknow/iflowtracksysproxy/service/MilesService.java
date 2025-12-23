@@ -2,6 +2,7 @@ package com.iknow.iflowtracksysproxy.service;
 
 import com.iknow.iflowtracksysproxy.integration.miles.MilesApi;
 import com.iknow.iflowtracksysproxy.integration.miles.model.request.*;
+
 import com.iknow.iflowtracksysproxy.integration.miles.model.response.*;
 import lombok.Builder;
 import lombok.Data;
@@ -111,12 +112,17 @@ public class MilesService {
         return milesApi.getTrafficInsurance(request);
     }
 
-    public TrafficRegistrationNumberUpdateResponse updateTrafficRegistrationNumber(TrafficRegistrationNumberUpdaterequest request) {
+    public TrafficRegistrationNumberUpdateResponse updateTrafficRegistrationNumber(
+            TrafficRegistrationNumberUpdaterequest request) {
         return milesApi.updateTrafficRegistrationNumber(request);
     }
 
     public DeliveryDealerAreaUpdateResponse updateDeliveryDealerArea(DeliveryDealerAreaUpdateRequest request) {
         return milesApi.updateDeliveryDealerArea(request);
+    }
+
+    public TriggerMWSBulkProcessorResponse triggerMWSBulkProcessor(TriggerMWSBulkProcessorRequest request) {
+        return milesApi.triggerMWSBulkProcessor(request);
     }
 
     /**
