@@ -1,0 +1,12 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tem="http://tempuri.org/">
+    <soapenv:Header/>
+    <soapenv:Body>
+        <tem:SaveRuhsatBelgesi>
+            <tem:plakaNo>{plakaNo}</tem:plakaNo>
+            <tem:sasiNo>{sasiNo}</tem:sasiNo>
+            <tem:gecerlilikTarihi>{validityDate}</tem:gecerlilikTarihi>
+            <tem:dokumanBinary>{fileBinary}</tem:dokumanBinary>
+            <tem:dokumanExtension>{fileExtension}</tem:dokumanExtension>
+        </tem:SaveRuhsatBelgesi>
+    </soapenv:Body>
+</soapenv:Envelope>

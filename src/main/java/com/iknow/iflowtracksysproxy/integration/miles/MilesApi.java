@@ -12,7 +12,9 @@ import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Base64;
 import java.util.List;
 
 @Slf4j
@@ -73,6 +75,8 @@ public class MilesApi {
                 .asString("xml/TriggerMWSBulkProcessor_ApproveContract.xml");
         private static final String PRJ_SM_OwnerShiptRequest = ResourceReader
                 .asString("xml/PRJ_SM_OwnerShip.xml");
+        private static final String SaveLicenseCertificateRequest = ResourceReader
+                .asString("xml/SaveLicenseCertificate.xml");
 
 
         private final RestTemplate xmlRestTemplate;
@@ -967,5 +971,57 @@ public class MilesApi {
                 return null;
             }
         }
+
+        public SaveLicenseCertificateResponse saveLicenseCertificate(
+                SaveLicenseCertificateRequest request) {
+
+            log.info("triggering SaveRuhsatBelgesi");
+
+            try {
+                MultipartFile file = request.getFile();
+
+                // 1️⃣ Dosyayı Base64'e çevir
+                String fileBinary = Base64.getEncoder()
+                        .encodeToString(file.getBytes());
+
+                // 2️⃣ Dosya uzantısını al (pdf, jpg vs.)
+                String originalFilename = file.getOriginalFilename();
+                String fileExtension = "";
+
+                if (originalFilename != null && originalFilename.contains(".")) {
+                    fileExtension = originalFilename.substring(
+                            originalFilename.lastIndexOf('.') + 1
+                    );
+                }
+
+                // 3️⃣ SOAP XML body oluştur
+                String body = SaveLicenseCertificateRequest
+                        .replace("{sessionId}", sessionId)
+                        .replace("{plakaNo}", request.getPlakaNo())
+                        .replace("{sasiNo}", request.getSasiNo())
+                        .replace("{validityDate}", request.getValidityDate())
+                        .replace("{fileBinary}", fileBinary)
+                        .replace("{fileExtension}", fileExtension);
+
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.TEXT_XML);
+                headers.add("SOAPAction", "http://tempuri.org/SaveRuhsatBelgesi");
+
+                HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+                SaveLicenseCertificateResponse response = xmlRestTemplate.postForEntity(
+                        "https://pws.hedeffilotest.com/SaveRuhsatBelgesiDGA.asmx",
+                        httpEntity,
+                        SaveLicenseCertificateResponse.class
+                ).getBody();
+
+                return response;
+
+            } catch (Exception e) {
+                log.error("MilesApi.saveLicenseCertificate error", e);
+                throw new RuntimeException("SaveLicenseCertificate failed", e);
+            }
+        }
+
 
 }

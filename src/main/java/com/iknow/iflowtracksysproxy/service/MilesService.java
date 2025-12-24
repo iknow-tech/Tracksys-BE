@@ -152,6 +152,10 @@ public class MilesService {
         return milesApi.getOwnerShip();
     }
 
+    public SaveLicenseCertificateResponse saveLicenseCertificate(SaveLicenseCertificateRequest request) {
+        return milesApi.saveLicenseCertificate(request);
+    }
+
 
 
     /**

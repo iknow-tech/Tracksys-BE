@@ -6,6 +6,7 @@ import com.iknow.iflowtracksysproxy.service.MilesService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -473,6 +474,18 @@ public class MilesController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error triggering approveContract", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping(value="/save-license-certificate", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<SaveLicenseCertificateResponse> saveLicenseCertificate(@ModelAttribute SaveLicenseCertificateRequest request) {
+        try {
+            log.info("Triggering saveLicenseCertificate");
+            SaveLicenseCertificateResponse response = milesService.saveLicenseCertificate(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error triggering saveLicenseCertificate", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
