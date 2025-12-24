@@ -144,6 +144,10 @@ public class MilesService {
         return milesApi.triggerMWSBulkProcessor(request);
     }
 
+    public TriggerMWSBulkProcessor_ApproveContractResponse triggerMWSBulkProcessor(TriggerMWSBulkProcessor_ApproveContractRequest request) {
+        return milesApi.approveContract(request);
+    }
+
 
 
     /**

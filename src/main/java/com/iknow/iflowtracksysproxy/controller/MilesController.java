@@ -452,4 +452,18 @@ public class MilesController {
         }
     }
 
+    @PostMapping("/approve-contract")
+    public ResponseEntity<TriggerMWSBulkProcessor_ApproveContractResponse> approveContract(
+            @RequestBody TriggerMWSBulkProcessor_ApproveContractRequest request) {
+        try {
+            log.info("Triggering approveContract for contractId: {}", request.getContractId());
+            TriggerMWSBulkProcessor_ApproveContractResponse response = milesService.triggerMWSBulkProcessor(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error triggering approveContract", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+
 }
