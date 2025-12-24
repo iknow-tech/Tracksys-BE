@@ -465,5 +465,17 @@ public class MilesController {
         }
     }
 
+    @GetMapping("/ownership")
+    public ResponseEntity<PRJ_SM_OwnerShipResponse> getOwnerShip() {
+        try {
+            log.info("Triggering getownership");
+            PRJ_SM_OwnerShipResponse response = milesService.getOwnerShip();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error triggering approveContract", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 
 }

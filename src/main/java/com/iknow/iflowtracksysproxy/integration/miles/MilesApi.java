@@ -71,6 +71,8 @@ public class MilesApi {
                         .asString("xml/MWS_TriggerMWSBulkProcessor.xml");
         private static final String MWS_TriggerMWSBulkProcessor_ApproveContractRequest = ResourceReader
                 .asString("xml/TriggerMWSBulkProcessor_ApproveContract.xml");
+        private static final String PRJ_SM_OwnerShiptRequest = ResourceReader
+                .asString("xml/PRJ_SM_OwnerShip.xml");
 
 
         private final RestTemplate xmlRestTemplate;
@@ -938,6 +940,32 @@ public class MilesApi {
                         log.error("MilesApi.triggerMWSBulkProcessor_ApproveContract error: ", e);
                         return null;
                 }
+        }
+
+        public PRJ_SM_OwnerShipResponse getOwnerShip() {
+            log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch/{}",
+                    baseUrl, sessionId);
+
+            String body = PRJ_SM_OwnerShiptRequest
+                    .replace("{sessionId}", sessionId);
+
+            try {
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_XML);
+
+                HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+                PRJ_SM_OwnerShipResponse response = xmlRestTemplate.postForEntity(
+                        baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch",
+                        httpEntity,
+                        PRJ_SM_OwnerShipResponse.class).getBody();
+
+                return response;
+
+            } catch (Exception e) {
+                log.error("MilesApi.getOwnerShip error: ", e);
+                return null;
+            }
         }
 
 }

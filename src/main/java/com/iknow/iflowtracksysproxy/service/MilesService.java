@@ -148,6 +148,10 @@ public class MilesService {
         return milesApi.approveContract(request);
     }
 
+    public PRJ_SM_OwnerShipResponse getOwnerShip() {
+        return milesApi.getOwnerShip();
+    }
+
 
 
     /**
