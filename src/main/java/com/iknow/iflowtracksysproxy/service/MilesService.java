@@ -119,7 +119,8 @@ public class MilesService {
         return milesApi.getTrafficInsurance(request);
     }
 
-    public TrafficRegistrationNumberUpdateResponse updateTrafficRegistrationNumber(TrafficRegistrationNumberUpdaterequest request) {
+    public TrafficRegistrationNumberUpdateResponse updateTrafficRegistrationNumber(
+            TrafficRegistrationNumberUpdaterequest request) {
         return milesApi.updateTrafficRegistrationNumber(request);
     }
 
@@ -137,6 +138,10 @@ public class MilesService {
 
     public List<ResponsibleDealerResponse> getResponsibleDealerList() {
         return milesApi.getResponsibleDealerList();
+    }
+
+    public TriggerMWSBulkProcessorResponse triggerMWSBulkProcessor(TriggerMWSBulkProcessorRequest request) {
+        return milesApi.triggerMWSBulkProcessor(request);
     }
 
 

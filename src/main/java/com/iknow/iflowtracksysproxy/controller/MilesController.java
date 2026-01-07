@@ -378,7 +378,7 @@ public class MilesController {
         }}
 
     @PutMapping("/delivery-dealer-area")
-    public ResponseEntity<DeliveryDealerAreaUpdateResponse> updatePlakaAvadanlikAlindiTarihi(
+    public ResponseEntity<DeliveryDealerAreaUpdateResponse> updateDeliveryDealerArea(
             @RequestBody DeliveryDealerAreaUpdateRequest request) {
         try {
             log.info("Updating deliveryDealerArea contractId: {}",
@@ -435,6 +435,19 @@ public class MilesController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error getting responsible dealer list", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/trigger-mws-bulk-processor")
+    public ResponseEntity<TriggerMWSBulkProcessorResponse> triggerMWSBulkProcessor(
+            @RequestBody TriggerMWSBulkProcessorRequest request) {
+        try {
+            log.info("Triggering MWS Bulk Processor for guid: {}", request.getGuid());
+            TriggerMWSBulkProcessorResponse response = milesService.triggerMWSBulkProcessor(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error triggering MWS Bulk Processor", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
