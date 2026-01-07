@@ -25,11 +25,11 @@ public class MilesController {
     @GetMapping("/session")
     public ResponseEntity<MilesService.SessionInfo> getSessionInfo() {
         try {
-            log.info("Getting Miles session information");
+            System.out.print("Getting Miles session information");
             MilesService.SessionInfo sessionInfo = milesService.getSessionInfo();
             return ResponseEntity.ok(sessionInfo);
         } catch (Exception e) {
-            log.error("Error getting session info", e);
+            System.out.print("Error getting session info");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

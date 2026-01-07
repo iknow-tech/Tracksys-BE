@@ -1,0 +1,37 @@
+package com.iknow.iflowtracksysproxy.respository;
+
+import com.iknow.iflowtracksysproxy.entity.ContractDealerAssignment;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface ContractDealerAssignmentRepository extends JpaRepository<ContractDealerAssignment, Long> {
+
+    /**
+     * Kontratın aktif atamasını bul
+     */
+    Optional<ContractDealerAssignment> findByContractIdAndStatus(String contractId, String status);
+
+
+    /**
+     * Bayinin aktif kontratlarını bul (TÜM OBJE)
+     */
+    @Query("""
+    SELECT DISTINCT a
+    FROM ContractDealerAssignment a
+    WHERE a.dealerBusinessPartnerId = :dealerId
+      AND a.status = :status
+    ORDER BY a.assignedDate DESC
+""")
+    List<ContractDealerAssignment> findLatestAssignmentsPerContract(
+            @Param("dealerId") String dealerId,
+            @Param("status") String status
+    );
+
+
+}

@@ -21,10 +21,18 @@ public class StockVehicleContractResponse {
     private String py;
     @JsonAlias("fleetvehicle_id")
     private String fleetVehicleId;
+    @JsonAlias("fleetvehiclestatus")
+    private String fleetVehicleStatus;
     @JsonAlias("licenseplate")
     private String licensePlate;
+    @JsonAlias("ownership")
+    private String ownership;
+    @JsonAlias(" property")
+    private String  property;
     @JsonAlias("chassisnumber")
     private String chassisNumber;
+    @JsonAlias("comments")
+    private String comments;
     @JsonAlias("make")
     private String make;
     @JsonAlias("model")
@@ -43,4 +51,8 @@ public class StockVehicleContractResponse {
     private String vehicleOrderId;
     @JsonAlias("netprice")
     private String netPrice;
+    @JsonAlias("motornumber")
+    private String motornumber;
+    @JsonAlias("deliveryperson")
+    private String deliveryPerson;
 }
