@@ -55,4 +55,7 @@ public class ContractDealerAssignment {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    private String cancelledBy;
+    private LocalDateTime cancelledDate;
+
 }

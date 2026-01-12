@@ -1,8 +1,10 @@
 package com.iknow.iflowtracksysproxy.service;
 
+import com.iknow.iflowtracksysproxy.entity.ContractDealerAssignment;
 import com.iknow.iflowtracksysproxy.integration.miles.MilesApi;
 import com.iknow.iflowtracksysproxy.integration.miles.model.request.*;
 import com.iknow.iflowtracksysproxy.integration.miles.model.response.*;
+import com.iknow.iflowtracksysproxy.respository.ContractDealerAssignmentRepository;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -17,6 +21,8 @@ import java.util.List;
 public class MilesService {
 
     private final MilesApi milesApi;
+
+    private final ContractDealerAssignmentRepository contractDealerAssignmentRepository;
 
     /**
      * Get current session ID
@@ -28,12 +34,37 @@ public class MilesService {
             log.warn("Session ID is null, attempting to refresh");
             milesApi.refreshSessionId();
         }
+        log.info("Session ID: {}", MilesApi.sessionId);
         return MilesApi.sessionId;
     }
 
+
     public List<CustomerContractResponse> getCustomerContracts() {
-        return milesApi.getCustomerContracts();
+
+        List<CustomerContractResponse> contracts = milesApi.getCustomerContracts();
+
+        if (contracts == null || contracts.isEmpty()) return contracts;
+
+        List<ContractDealerAssignment> assignments =
+                contractDealerAssignmentRepository.findByStatus("ACTIVE");
+
+        Map<String, ContractDealerAssignment> map =
+                assignments.stream()
+                        .collect(Collectors.toMap(
+                                ContractDealerAssignment::getContractId,
+                                a -> a
+                        ));
+
+        for (CustomerContractResponse c : contracts) {
+            ContractDealerAssignment a = map.get(c.getId());
+            if (a != null) {
+                c.setAssignedDealer(a.getDealerName());
+            }
+        }
+
+        return contracts;
     }
+
 
     public List<StockVehicleContractResponse> getStockVehicleContracts() {
         return milesApi.getStockVehicleContracts();

@@ -33,5 +33,14 @@ public interface ContractDealerAssignmentRepository extends JpaRepository<Contra
             @Param("status") String status
     );
 
+    List<ContractDealerAssignment> findByStatus(String status);
+
+    Optional<ContractDealerAssignment> findFirstByContractIdAndStatus(
+            String contractId, String status);
+
+    List<ContractDealerAssignment> findByDealerBusinessPartnerIdAndStatus(
+            String dealerId, String status);
+
+
 
 }

@@ -2,6 +2,7 @@ package com.iknow.iflowtracksysproxy.controller;
 
 import com.iknow.iflowtracksysproxy.dto.DealerContractInfo;
 import com.iknow.iflowtracksysproxy.dto.request.AssignDealerRequest;
+import com.iknow.iflowtracksysproxy.dto.request.UnassignDealerRequest;
 import com.iknow.iflowtracksysproxy.dto.response.AssignDealerResponse;
 import com.iknow.iflowtracksysproxy.service.ContractDealerAssignmentService;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+
+import static com.fasterxml.jackson.databind.type.LogicalType.Map;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -61,4 +65,16 @@ public class ContractDealerController {
             return ResponseEntity.status(500).build();
         }
     }
+
+    @PostMapping("/unassign-dealer")
+    public ResponseEntity<?> unassignDealer(@RequestBody UnassignDealerRequest request) {
+
+        assignmentService.unassignDealer(request);
+
+        return ResponseEntity.ok(java.util.Map.of(
+                "success", true,
+                "message", "Bayi ataması iptal edildi"
+        ));
+    }
+
 }

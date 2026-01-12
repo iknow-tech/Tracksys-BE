@@ -2,6 +2,7 @@ package com.iknow.iflowtracksysproxy.service;
 
 import com.iknow.iflowtracksysproxy.dto.DealerContractInfo;
 import com.iknow.iflowtracksysproxy.dto.request.AssignDealerRequest;
+import com.iknow.iflowtracksysproxy.dto.request.UnassignDealerRequest;
 import com.iknow.iflowtracksysproxy.dto.response.AssignDealerResponse;
 import com.iknow.iflowtracksysproxy.entity.ContractDealerAssignment;
 import com.iknow.iflowtracksysproxy.integration.miles.MilesApi;
@@ -53,6 +54,7 @@ public class ContractDealerAssignmentService {
                         .notes("Web UI  üzerinden atama.")
                         .build();
 
+                contract.setAssignedDealer(request.getDealerName());
                 assignmentRepository.save(newAssignment);
                 assignedCount++;
 
@@ -153,6 +155,25 @@ public class ContractDealerAssignmentService {
 
         return detailedContracts;
     }
+
+    @Transactional
+    public void unassignDealer(UnassignDealerRequest request) {
+        ContractDealerAssignment assignment =
+                assignmentRepository
+                        .findFirstByContractIdAndStatus(
+                                request.getContractId(), "ACTIVE")
+                        .orElseThrow(() ->
+                                new RuntimeException("Aktif bayi ataması bulunamadı"));
+
+        assignment.setStatus("CANCELLED");
+        assignment.setCancelledBy(request.getCancelledBy());
+        assignment.setCancelledDate(LocalDateTime.now());
+
+        assignmentRepository.save(assignment);
+
+        log.info("Contract {} dealer assignment cancelled", request.getContractId());
+    }
+
 
 
 }

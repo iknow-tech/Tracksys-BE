@@ -58,4 +58,6 @@ public class CustomerContractResponse {
     @JsonAlias("id ")
     private String id ;
 
+    private String assignedDealer;
+
 }
