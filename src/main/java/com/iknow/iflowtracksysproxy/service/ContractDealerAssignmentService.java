@@ -1,13 +1,17 @@
 package com.iknow.iflowtracksysproxy.service;
 
+import com.iknow.iflowtracksysproxy.cache.CustomerContractCache;
 import com.iknow.iflowtracksysproxy.dto.DealerContractInfo;
 import com.iknow.iflowtracksysproxy.dto.request.AssignDealerRequest;
 import com.iknow.iflowtracksysproxy.dto.request.UnassignDealerRequest;
 import com.iknow.iflowtracksysproxy.dto.response.AssignDealerResponse;
 import com.iknow.iflowtracksysproxy.entity.ContractDealerAssignment;
+import com.iknow.iflowtracksysproxy.entity.ContractLeasingAssignment;
 import com.iknow.iflowtracksysproxy.integration.miles.MilesApi;
 import com.iknow.iflowtracksysproxy.integration.miles.model.response.CustomerContractResponse;
 import com.iknow.iflowtracksysproxy.respository.ContractDealerAssignmentRepository;
+import com.iknow.iflowtracksysproxy.respository.ContractLeasingAssignmentRepository;
+import com.iknow.iflowtracksysproxy.respository.ContractProformaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,8 +30,10 @@ import java.util.stream.Collectors;
 public class ContractDealerAssignmentService {
 
     private final ContractDealerAssignmentRepository assignmentRepository;
-
-    private final MilesApi milesApi;
+    private final CustomerContractCache customerContractCache;
+    private final MilesContractSyncService milesContractSyncService;
+    private final ContractProformaRepository contractProformaRepository;
+    private final ContractLeasingAssignmentRepository contractLeasingAssignmentRepository;
 
     @Transactional
     public AssignDealerResponse assignDealerToContracts(AssignDealerRequest request) {
@@ -92,7 +98,16 @@ public class ContractDealerAssignmentService {
             return new ArrayList<>();
         }
 
-        List<CustomerContractResponse> allContracts = milesApi.getCustomerContracts();
+       List<CustomerContractResponse> allContracts = customerContractCache.get();
+
+        if (allContracts == null || allContracts.isEmpty()) {
+            milesContractSyncService.syncFromMiles("DEALER_ON_DEMAND");
+            allContracts = customerContractCache.get();
+        }
+
+        if (allContracts == null || allContracts.isEmpty()) {
+            return new ArrayList<>();
+        }
 
         Map<String, CustomerContractResponse> contractMap = allContracts.stream()
                 .collect(Collectors.toMap(
@@ -104,12 +119,12 @@ public class ContractDealerAssignmentService {
 
         List<DealerContractInfo> detailedContracts = new ArrayList<>();
 
+
         for (ContractDealerAssignment assignment : assignments) {
+            ContractLeasingAssignment leasingAssignment =new ContractLeasingAssignment();
             try {
                 String contractId = assignment.getContractId();
-
                 log.debug("📄 Processing contract: {}", contractId);
-
                 CustomerContractResponse contract = contractMap.get(contractId);
 
                 if (contract == null) {
@@ -117,13 +132,23 @@ public class ContractDealerAssignmentService {
                     continue;
                 }
 
+                boolean hasProforma = contractProformaRepository.existsByContractId(contractId);
+
+                Optional<ContractLeasingAssignment> leasingAssignmentOptional= contractLeasingAssignmentRepository.findByContractIdAndStatus(contractId,"ACTIVE");
+                if(leasingAssignmentOptional.isPresent()){
+                    leasingAssignment = leasingAssignmentOptional.get();
+                }
+
                 DealerContractInfo contractInfo = DealerContractInfo.builder()
+                        .id(contract.getId())
                         .contractId(contract.getId())
                         .contractApprovedDate(contract.getContractapproveddate())
                         .customer(contract.getCustomer())
                         .make(contract.getMake())
                         .model(contract.getModel())
                         .modelYear(contract.getModelYear())
+                        .leasingName(leasingAssignment.getLeasingName())
+                        .sysEnumerationId(leasingAssignment.getLeasingEnumId())
                         .version(contract.getVersion())
                         .color(contract.getColor())
                         .deliveryPerson(contract.getDeliveryPerson())
@@ -137,6 +162,7 @@ public class ContractDealerAssignmentService {
                         .assignedDate(assignment.getAssignedDate())
                         .assignedBy(assignment.getAssignedBy())
                         .status(assignment.getStatus())
+                        .hasProforma(hasProforma)
 
                         .build();
 

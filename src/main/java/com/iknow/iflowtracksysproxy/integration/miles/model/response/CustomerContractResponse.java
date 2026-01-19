@@ -58,6 +58,15 @@ public class CustomerContractResponse {
     @JsonAlias("id ")
     private String id ;
 
+    // assigned dealer
     private String assignedDealer;
+
+    // assigned leasing
+    private String assignedLeasing;
+    private String sysEnumerationId;
+
+
+    //proforma
+    private boolean hasProforma;
 
 }

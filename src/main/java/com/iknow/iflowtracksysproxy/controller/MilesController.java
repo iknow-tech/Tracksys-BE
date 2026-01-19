@@ -1,7 +1,9 @@
 package com.iknow.iflowtracksysproxy.controller;
 
+import com.iknow.iflowtracksysproxy.cache.CustomerContractCache;
 import com.iknow.iflowtracksysproxy.integration.miles.model.request.*;
 import com.iknow.iflowtracksysproxy.integration.miles.model.response.*;
+import com.iknow.iflowtracksysproxy.service.MilesContractSyncService;
 import com.iknow.iflowtracksysproxy.service.MilesService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +20,8 @@ import java.util.List;
 public class MilesController {
 
     private final MilesService milesService;
+    private final CustomerContractCache customerContractCache;
+    private final MilesContractSyncService milesContractSyncService;
 
     /**
      * Get current session information
@@ -40,9 +44,8 @@ public class MilesController {
     @GetMapping("/customer-contracts")
     public ResponseEntity<List<CustomerContractResponse>> getCustomerContracts() {
         try {
-            log.info("Getting customer contracts");
-            List<CustomerContractResponse> response = milesService.getCustomerContracts();
-            return ResponseEntity.ok(response);
+            log.info("Getting customer contracts (merged)");
+            return ResponseEntity.ok(milesService.getCustomerContracts());
         } catch (Exception e) {
             log.error("Error getting customer contracts", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -448,6 +451,21 @@ public class MilesController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error triggering MWS Bulk Processor", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Get Leasing Company List (PRJ_SM_OwnerShip)
+     */
+    @GetMapping("/leasing")
+    public ResponseEntity<List<GetLeasingResponse>> getLeasings() {
+        try {
+            log.info("Getting leasing company list");
+            List<GetLeasingResponse> response = milesService.getLeasingResponseList();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error getting leasing company list", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
