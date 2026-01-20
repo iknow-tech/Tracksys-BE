@@ -90,6 +90,9 @@ public class MilesService {
             if (leasing != null) {
                 c.setAssignedLeasing(leasing.getLeasingName());
                 c.setSysEnumerationId(leasing.getLeasingEnumId());
+            } else {
+                c.setAssignedLeasing(null);
+                c.setSysEnumerationId(null);
             }
 
             boolean hasProforma = contractProformaRepository.existsByContractId(c.getId());

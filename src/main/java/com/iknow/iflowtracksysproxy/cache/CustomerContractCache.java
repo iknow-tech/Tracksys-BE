@@ -5,6 +5,7 @@ import lombok.Getter;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -29,5 +30,10 @@ public class CustomerContractCache {
 
     public boolean isEmpty() {
         return cache.get().isEmpty();
+    }
+
+    public List<CustomerContractResponse> snapshot() {
+        List<CustomerContractResponse> data=  cache.get();
+        return data == null ? new ArrayList<>() : new ArrayList<>(data);
     }
 }

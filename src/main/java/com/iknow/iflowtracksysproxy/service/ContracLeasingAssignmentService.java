@@ -68,7 +68,7 @@ public class ContracLeasingAssignmentService {
                     assignment.setLeasingName(request.getDescription());
                     assignment.setAssignedDate(LocalDateTime.now());
                     assignment.setAssignedBy(request.getAssignedBy());
-                    assignment.setStatus("PASSIVE");
+                    assignment.setStatus("CANCELED");
                     assignmentRepository.save(assignment);
 
                 }

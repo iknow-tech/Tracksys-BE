@@ -148,7 +148,7 @@ public class ContractDealerAssignmentService {
                         .model(contract.getModel())
                         .modelYear(contract.getModelYear())
                         .leasingName(leasingAssignment.getLeasingName())
-                        .sysEnumerationId(leasingAssignment.getLeasingEnumId())
+                         .sysEnumerationId(leasingAssignment.getLeasingEnumId())
                         .version(contract.getVersion())
                         .color(contract.getColor())
                         .deliveryPerson(contract.getDeliveryPerson())

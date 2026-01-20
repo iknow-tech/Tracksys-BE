@@ -24,7 +24,7 @@ public class ContractLeasingAssignment {
     @Column(name = "contract_id", nullable = false, length = 50)
     private String contractId;
 
-    @Column(name = "leasing_enum_id", length = 50, nullable = true)
+    @Column(name = "leasing_enum_id", length = 50)
     private String leasingEnumId;
 
     @Column(name = "leasing_name", nullable = true, length = 50)
