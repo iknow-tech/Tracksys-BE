@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DealerContractInfo {
+    private String id;
     private String contractId;
     private String contractApprovedDate;
     private String customer;
@@ -33,6 +34,9 @@ public class DealerContractInfo {
     private String deliveryDate;
     private String dealerName;
     private LocalDateTime assignedDate;
+    private String leasingName;
+    private String sysEnumerationId;
     private String assignedBy;
     private String status;
+    private boolean hasProforma;
 }

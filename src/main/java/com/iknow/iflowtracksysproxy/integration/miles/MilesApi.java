@@ -2,6 +2,7 @@ package com.iknow.iflowtracksysproxy.integration.miles;
 
 import com.iknow.iflowtracksysproxy.integration.miles.model.request.*;
 import com.iknow.iflowtracksysproxy.integration.miles.model.response.*;
+import com.iknow.iflowtracksysproxy.service.MilesContractSyncService;
 import com.iknow.iflowtracksysproxy.util.ResourceReader;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,8 @@ import java.util.List;
 @Slf4j
 @Service
 public class MilesApi {
+
+
 
         private static final String PRJ_SM_CustomerContractRequest = ResourceReader
                         .asString("xml/PRJ_SM_CustomerContract.xml");
@@ -78,6 +81,8 @@ public class MilesApi {
         private static final String SaveLicenseCertificateRequest = ResourceReader
                 .asString("xml/SaveLicenseCertificate.xml");
 
+        private static final String PRJ_SM_LeasingListRequest = ResourceReader
+                .asString("xml/PRJ_SM_OwnerShip.xml");
 
         private final RestTemplate xmlRestTemplate;
 
@@ -971,6 +976,28 @@ public class MilesApi {
                 return null;
             }
         }
+
+    public List<GetLeasingResponse> getLeasingsList() {
+        log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch?sessionId={}",
+                sessionId);
+        String body = PRJ_SM_LeasingListRequest
+                .replace("{sessionId}", sessionId);
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_XML);
+            HttpEntity<String> request = new HttpEntity<>(body, headers);
+            List<GetLeasingResponse> leasingResponseList = xmlRestTemplate.postForEntity(
+                            baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch",
+                            request, BaseResponse.class)
+                    .getBody()
+                    .getData()
+                    .getLeasings();
+            return leasingResponseList;
+        } catch (Exception e) {
+            log.error("MilesApi.getLeasingsList", e.getStackTrace());
+            return null;
+        }
+    }
 
         public SaveLicenseCertificateResponse saveLicenseCertificate(
                 SaveLicenseCertificateRequest request) {

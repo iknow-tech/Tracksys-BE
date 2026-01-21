@@ -1,10 +1,14 @@
 package com.iknow.iflowtracksysproxy.service;
 
+import com.iknow.iflowtracksysproxy.cache.CustomerContractCache;
 import com.iknow.iflowtracksysproxy.entity.ContractDealerAssignment;
+import com.iknow.iflowtracksysproxy.entity.ContractLeasingAssignment;
 import com.iknow.iflowtracksysproxy.integration.miles.MilesApi;
 import com.iknow.iflowtracksysproxy.integration.miles.model.request.*;
 import com.iknow.iflowtracksysproxy.integration.miles.model.response.*;
 import com.iknow.iflowtracksysproxy.respository.ContractDealerAssignmentRepository;
+import com.iknow.iflowtracksysproxy.respository.ContractLeasingAssignmentRepository;
+import com.iknow.iflowtracksysproxy.respository.ContractProformaRepository;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +25,11 @@ import java.util.stream.Collectors;
 public class MilesService {
 
     private final MilesApi milesApi;
-
     private final ContractDealerAssignmentRepository contractDealerAssignmentRepository;
+    private final ContractLeasingAssignmentRepository contractLeasingAssignmentRepository;
+    private final CustomerContractCache customerContractCache;
+    private final MilesContractSyncService milesContractSyncService;
+    private final ContractProformaRepository contractProformaRepository;
 
     /**
      * Get current session ID
@@ -41,25 +48,56 @@ public class MilesService {
 
     public List<CustomerContractResponse> getCustomerContracts() {
 
-        List<CustomerContractResponse> contracts = milesApi.getCustomerContracts();
+        if (customerContractCache.isEmpty()) {
+            log.info("Cache boş, Miles'tan senkron ediliyor");
+            milesContractSyncService.syncFromMiles("API_CALL");
+        }
 
-        if (contracts == null || contracts.isEmpty()) return contracts;
+        List<CustomerContractResponse> contracts = customerContractCache.get();
 
-        List<ContractDealerAssignment> assignments =
+        if (contracts == null || contracts.isEmpty()) {
+            return contracts;
+        }
+
+        List<ContractDealerAssignment> dealerAssignments =
                 contractDealerAssignmentRepository.findByStatus("ACTIVE");
 
-        Map<String, ContractDealerAssignment> map =
-                assignments.stream()
+        List<ContractLeasingAssignment> leasingAssigments =
+                contractLeasingAssignmentRepository.findByStatus("ACTIVE");
+
+        Map<String, ContractDealerAssignment> dealerMap =
+                dealerAssignments.stream()
                         .collect(Collectors.toMap(
                                 ContractDealerAssignment::getContractId,
                                 a -> a
                         ));
 
+        Map<String, ContractLeasingAssignment> leasingMap =
+                leasingAssigments.stream()
+                        .collect(Collectors.toMap(
+                                ContractLeasingAssignment::getContractId,
+                                a -> a
+                        ));
+
         for (CustomerContractResponse c : contracts) {
-            ContractDealerAssignment a = map.get(c.getId());
-            if (a != null) {
-                c.setAssignedDealer(a.getDealerName());
+
+            ContractDealerAssignment dealer = dealerMap.get(c.getId());
+            if (dealer != null) {
+                c.setAssignedDealer(dealer.getDealerName());
             }
+
+            ContractLeasingAssignment leasing = leasingMap.get(c.getId());
+            if (leasing != null) {
+                c.setAssignedLeasing(leasing.getLeasingName());
+                c.setSysEnumerationId(leasing.getLeasingEnumId());
+            } else {
+                c.setAssignedLeasing(null);
+                c.setSysEnumerationId(null);
+            }
+
+            boolean hasProforma = contractProformaRepository.existsByContractId(c.getId());
+            c.setHasProforma(hasProforma);
+
         }
 
         return contracts;
@@ -173,6 +211,10 @@ public class MilesService {
 
     public TriggerMWSBulkProcessorResponse triggerMWSBulkProcessor(TriggerMWSBulkProcessorRequest request) {
         return milesApi.triggerMWSBulkProcessor(request);
+    }
+
+    public List<GetLeasingResponse> getLeasingResponseList() {
+        return milesApi.getLeasingsList();
     }
 
     public TriggerMWSBulkProcessor_ApproveContractResponse triggerMWSBulkProcessor(TriggerMWSBulkProcessor_ApproveContractRequest request) {

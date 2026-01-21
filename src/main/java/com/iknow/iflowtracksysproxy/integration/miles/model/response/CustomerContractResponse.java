@@ -3,6 +3,8 @@ package com.iknow.iflowtracksysproxy.integration.miles.model.response;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class CustomerContractResponse {
     @JsonAlias("contract_id")
@@ -58,6 +60,16 @@ public class CustomerContractResponse {
     @JsonAlias("id ")
     private String id ;
 
+    // assigned dealer
     private String assignedDealer;
+
+    // assigned leasing
+    private String assignedLeasing;
+    private String sysEnumerationId;
+
+    //proforma
+    private boolean hasProforma;
+
+    private ContractMilesUpdateResponse contractMilesUpdate;
 
 }
