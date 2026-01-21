@@ -4,6 +4,7 @@ import com.iknow.iflowtracksysproxy.dto.auth.AuthResponse;
 import com.iknow.iflowtracksysproxy.dto.auth.LoginRequest;
 import com.iknow.iflowtracksysproxy.dto.auth.RegisterRequest;
 import com.iknow.iflowtracksysproxy.entity.User;
+import com.iknow.iflowtracksysproxy.integration.miles.model.response.TracksysUsersResponse;
 import com.iknow.iflowtracksysproxy.repository.UserRepository;
 import com.iknow.iflowtracksysproxy.util.JwtUtil;
 import jakarta.annotation.PostConstruct;
@@ -23,6 +24,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final MilesService milesService;
 
 
     @PostConstruct
@@ -60,7 +62,29 @@ public class AuthService {
             throw new RuntimeException("Email already registered");
         }
 
+        TracksysUsersResponse tracksysUsers = milesService.getTracksysUsers();
+        var users = tracksysUsers.getData().getTracksysUsersSet().getTracksysUsers();
+
+
+        var isTracksysUser = false;
+        Long foundedTracksysUsersId = null;
+        for (var user : users) {
+            if (
+                    user.getTracksysEmail().equals(request.getEmail())
+                    && user.getDescription().equals("Tracksys")
+            ){
+                isTracksysUser = true;
+                foundedTracksysUsersId = user.getUserAccountId();
+                break;
+            }
+        }
+
+        if (!isTracksysUser || foundedTracksysUsersId == null) {
+            throw new RuntimeException("User is not tracksys user");
+        }
+
         User user = User.builder()
+                .id(foundedTracksysUsersId)
                 .name(request.getName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))

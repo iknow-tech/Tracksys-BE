@@ -80,9 +80,11 @@ public class MilesApi {
                 .asString("xml/PRJ_SM_OwnerShip.xml");
         private static final String SaveLicenseCertificateRequest = ResourceReader
                 .asString("xml/SaveLicenseCertificate.xml");
-
         private static final String PRJ_SM_LeasingListRequest = ResourceReader
                 .asString("xml/PRJ_SM_OwnerShip.xml");
+        private static final String PRJ_SM_TracksysUsersRequest = ResourceReader
+                .asString("xml/PRJ_SM_TracksysUsers.xml");
+
 
         private final RestTemplate xmlRestTemplate;
 
@@ -1050,5 +1052,23 @@ public class MilesApi {
             }
         }
 
+        public TracksysUsersResponse getTracksysUsers(){
+            log.info("triggering GetTracksysUsers");
+            String body = PRJ_SM_TracksysUsersRequest
+                    .replace("{sessionId}", sessionId);
+            try {
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_XML);
+                HttpEntity<String> request = new HttpEntity<>(body, headers);
+                TracksysUsersResponse users = xmlRestTemplate.postForEntity(
+                                baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch",
+                                request, TracksysUsersResponse.class)
+                        .getBody();
+                return users;
+            } catch (Exception e) {
+                log.error("MilesApi.getLeasingsList", e.getStackTrace());
+                return null;
+            }
+        }
 
 }
