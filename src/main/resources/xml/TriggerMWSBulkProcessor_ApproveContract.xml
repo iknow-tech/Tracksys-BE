@@ -1,0 +1,38 @@
+<SofEnvelope>
+    <bulkprocessorid>1005840</bulkprocessorid>
+    <sessionID>{sessionId}</sessionID>
+    <action>action</action>
+    <data>
+        <MWSBulkProcessorArgument_Set>
+            <id>1005840</id>
+            <MWSBulkProcessorArgument>
+                <name>contract_id</name>
+                <value>1|{contractId}</value>
+            </MWSBulkProcessorArgument>
+            <MWSBulkProcessorArgument>
+                <name>deliverydate</name>
+                <value>5|{deliveryDate}</value>
+            </MWSBulkProcessorArgument>
+            <MWSBulkProcessorArgument>
+                <name>deliverymileage</name>
+                <value>1|{deliveryMileage}</value>
+            </MWSBulkProcessorArgument>
+            <MWSBulkProcessorArgument>
+                <name>receiptbycontact</name>
+                <value>1|{receiptByContact}</value>
+            </MWSBulkProcessorArgument>
+            <MWSBulkProcessorArgument>
+                <name>isdriver</name>
+                <value>12|{isDriver}</value>
+            </MWSBulkProcessorArgument>
+            <MWSBulkProcessorArgument>
+                <name>deliveryLocation</name>
+                <value>3|{deliveryLocation}</value>
+            </MWSBulkProcessorArgument>
+        </MWSBulkProcessorArgument_Set>
+    </data>
+    <metadata>
+        <operationstatus businesserror="false" technicalerror="false"
+                         calculationerror="false"/>
+    </metadata>
+</SofEnvelope>

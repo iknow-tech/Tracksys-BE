@@ -13,7 +13,9 @@ import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Base64;
 import java.util.List;
 
 @Slf4j
@@ -45,11 +47,11 @@ public class MilesApi {
         private static final String GenericAttributeUpdateService_RuhsatBelgeNoUpdateRequest = ResourceReader
                         .asString("xml/GenericAttributeUpdateService_RuhsatBelgeNoUpdate.xml");
         private static final String GenericAttributeUpdateService_CreditApprovalDateRequest = ResourceReader
-                .asString("xml/GenericAttributeUpdateService_CreditApprovalDate.xml");
+                        .asString("xml/GenericAttributeUpdateService_CreditApprovalDate.xml");
         private static final String PRJ_SM_DealerListRequest = ResourceReader
-                .asString("xml/PRJ_SM_DealerList.xml");
+                        .asString("xml/PRJ_SM_DealerList.xml");
         private static final String PRJ_SM_ResponsibleDealerRequest = ResourceReader
-                .asString("xml/PRJ_SM_ResponsibleDealerList.xml");
+                        .asString("xml/PRJ_SM_ResponsibleDealerList.xml");
         private static final String GenericAttributeUpdateService_VehicleInspectionUpdateRequest = ResourceReader
                         .asString("xml/GenericAttributeUpdateService_VehicleInspectionUpdate.xml");
         private static final String GenericAttributeUpdateService_HgsEtiketNoUpdateRequest = ResourceReader
@@ -72,8 +74,17 @@ public class MilesApi {
                         .asString("xml/GenericAttributeUpdateService_DeliveryDealerAreaUpdate.xml");
         private static final String MWS_TriggerMWSBulkProcessorRequest = ResourceReader
                         .asString("xml/MWS_TriggerMWSBulkProcessor.xml");
+        private static final String MWS_TriggerMWSBulkProcessor_ApproveContractRequest = ResourceReader
+                .asString("xml/TriggerMWSBulkProcessor_ApproveContract.xml");
+        private static final String PRJ_SM_OwnerShiptRequest = ResourceReader
+                .asString("xml/PRJ_SM_OwnerShip.xml");
+        private static final String SaveLicenseCertificateRequest = ResourceReader
+                .asString("xml/SaveLicenseCertificate.xml");
         private static final String PRJ_SM_LeasingListRequest = ResourceReader
                 .asString("xml/PRJ_SM_OwnerShip.xml");
+        private static final String PRJ_SM_TracksysUsersRequest = ResourceReader
+                .asString("xml/PRJ_SM_TracksysUsers.xml");
+
 
         private final RestTemplate xmlRestTemplate;
 
@@ -720,6 +731,7 @@ public class MilesApi {
                         return null;
                 }
         }
+
         public TrafficInsuranceGetResponse getTrafficInsurance(TrafficInsuranceGetRequest request) {
                 log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch{}",
                                 baseUrl, sessionId);
@@ -802,22 +814,23 @@ public class MilesApi {
 
                         return response;
 
-        } catch (Exception e) {
-            log.error("MilesApi.updateTrafficRegistrationNumber error: ", e);
-            return null;
+                } catch (Exception e) {
+                        log.error("MilesApi.updateTrafficRegistrationNumber error: ", e);
+                        return null;
+                }
         }
-    }
 
         public ApprovalDateUpdateBaseResponse updateCreditApprovalDate(ApprovalDateUpdateRequest request) {
-                log.info("Updating Credit Approval Date for vehicleOrderId: {}, date: {}", request.getOrderId(), request.getApprovalDate());
+                log.info("Updating Credit Approval Date for vehicleOrderId: {}, date: {}", request.getOrderId(),
+                                request.getApprovalDate());
 
                 // XML body template'ini request objesine göre oluştur
                 String body = GenericAttributeUpdateService_CreditApprovalDateRequest
-                        .replace("{sessionId}", sessionId)
-                        .replace("{vehicleOrderItemId}", request.getVehicleOrderItemId())
-                        .replace("{orderId}", request.getOrderId() != null ? request.getOrderId() : "205")
-                        .replace("{id}", request.getFieldId() != null ? request.getFieldId() : "1000062")
-                        .replace("{approvalDate}", request.getApprovalDate().toString());
+                                .replace("{sessionId}", sessionId)
+                                .replace("{vehicleOrderItemId}", request.getVehicleOrderItemId())
+                                .replace("{orderId}", request.getOrderId() != null ? request.getOrderId() : "205")
+                                .replace("{id}", request.getFieldId() != null ? request.getFieldId() : "1000062")
+                                .replace("{approvalDate}", request.getApprovalDate().toString());
 
                 try {
 
@@ -827,23 +840,21 @@ public class MilesApi {
                         HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
 
                         return xmlRestTemplate.postForEntity(
-                                baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService",
-                                httpEntity,
-                                ApprovalDateUpdateBaseResponse.class
-                        ).getBody();
-
-
+                                        baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService",
+                                        httpEntity,
+                                        ApprovalDateUpdateBaseResponse.class).getBody();
 
                 } catch (Exception e) {
                         log.error("MilesApi.updateTax error: ", e);
                         return null;
-                }}
+                }
+        }
 
         public List<GetDealerResponse> getDealerList() {
                 log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch?sessionId={}",
-                        sessionId);
+                                sessionId);
                 String body = PRJ_SM_DealerListRequest
-                        .replace("{sessionId}", sessionId);
+                                .replace("{sessionId}", sessionId);
                 try {
                         HttpHeaders headers = new HttpHeaders();
                         headers.setContentType(MediaType.APPLICATION_XML);
@@ -851,9 +862,9 @@ public class MilesApi {
                         List<GetDealerResponse> dealerResponseList = xmlRestTemplate.postForEntity(
                                         baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch",
                                         request, BaseResponse.class)
-                                .getBody()
-                                .getData()
-                                .getDealerList();
+                                        .getBody()
+                                        .getData()
+                                        .getDealerList();
                         return dealerResponseList;
                 } catch (Exception e) {
                         log.error("MilesApi.getStockVehicleContracts", e.getStackTrace());
@@ -863,9 +874,9 @@ public class MilesApi {
 
         public List<ResponsibleDealerResponse> getResponsibleDealerList() {
                 log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch?sessionId={}",
-                        sessionId);
+                                sessionId);
                 String body = PRJ_SM_ResponsibleDealerRequest
-                        .replace("{sessionId}", sessionId);
+                                .replace("{sessionId}", sessionId);
                 try {
                         HttpHeaders headers = new HttpHeaders();
                         headers.setContentType(MediaType.APPLICATION_XML);
@@ -873,9 +884,9 @@ public class MilesApi {
                         List<ResponsibleDealerResponse> dealerResponseList = xmlRestTemplate.postForEntity(
                                         baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch",
                                         request, BaseResponse.class)
-                                .getBody()
-                                .getData()
-                                .getResponsibleDealerList();
+                                        .getBody()
+                                        .getData()
+                                        .getResponsibleDealerList();
                         return dealerResponseList;
                 } catch (Exception e) {
                         log.error("MilesApi.getStockVehicleContracts", e.getStackTrace());
@@ -883,54 +894,181 @@ public class MilesApi {
                 }
         }
 
-    public TriggerMWSBulkProcessorResponse triggerMWSBulkProcessor(TriggerMWSBulkProcessorRequest request) {
-        log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService/{}",
-                baseUrl, sessionId);
+        public TriggerMWSBulkProcessorResponse triggerMWSBulkProcessor(TriggerMWSBulkProcessorRequest request) {
+                log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService/{}",
+                                baseUrl, sessionId);
 
-        String body = MWS_TriggerMWSBulkProcessorRequest
-                .replace("{sessionId}", sessionId)
-                .replace("{guid}", request.getGuid());
+                String body = MWS_TriggerMWSBulkProcessorRequest
+                                .replace("{sessionId}", sessionId)
+                                .replace("{guid}", request.getGuid());
 
-        try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_XML);
-
-            HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
-
-            TriggerMWSBulkProcessorResponse response = xmlRestTemplate.postForEntity(
-                    baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/TriggerMWSBulkProcessor",
-                    httpEntity,
-                    TriggerMWSBulkProcessorResponse.class).getBody();
-
-            return response;
-
-        } catch (Exception e) {
-            log.error("MilesApi.triggerMWSBulkProcessor error: ", e);
-            return null;
-        }
-    }
-
-        public List<GetLeasingResponse> getLeasingsList() {
-                log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch?sessionId={}",
-                        sessionId);
-                String body = PRJ_SM_LeasingListRequest
-                        .replace("{sessionId}", sessionId);
                 try {
                         HttpHeaders headers = new HttpHeaders();
                         headers.setContentType(MediaType.APPLICATION_XML);
-                        HttpEntity<String> request = new HttpEntity<>(body, headers);
-                        List<GetLeasingResponse> leasingResponseList = xmlRestTemplate.postForEntity(
-                                        baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch",
-                                        request, BaseResponse.class)
-                                .getBody()
-                                .getData()
-                                .getLeasings();
-                        return leasingResponseList;
+
+                        HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+                        TriggerMWSBulkProcessorResponse response = xmlRestTemplate.postForEntity(
+                                        baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/TriggerMWSBulkProcessor",
+                                        httpEntity,
+                                        TriggerMWSBulkProcessorResponse.class).getBody();
+
+                        return response;
+
                 } catch (Exception e) {
-                        log.error("MilesApi.getLeasingsList", e.getStackTrace());
+                        log.error("MilesApi.triggerMWSBulkProcessor error: ", e);
                         return null;
                 }
         }
 
+        public TriggerMWSBulkProcessor_ApproveContractResponse approveContract(TriggerMWSBulkProcessor_ApproveContractRequest request) {
+                log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/TriggerMWSBulkProcessor/{}",
+                                baseUrl, sessionId);
+
+                String body = MWS_TriggerMWSBulkProcessor_ApproveContractRequest
+                                .replace("{sessionId}", sessionId)
+                                .replace("{contractId}", request.getContractId())
+                                .replace("{deliveryDate}", request.getDeliveryDate())
+                                .replace("{deliveryMileage}", request.getDeliveryMileage())
+                                .replace("{receiptByContact}", request.getReceiptByContact())
+                                .replace("{isDriver}", request.getIsDriver())
+                                .replace("{deliveryLocation}", request.getDeliveryLocation());
+
+                try {
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.setContentType(MediaType.APPLICATION_XML);
+
+                        HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+                        TriggerMWSBulkProcessor_ApproveContractResponse response = xmlRestTemplate.postForEntity(
+                                        baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/TriggerMWSBulkProcessor",
+                                        httpEntity,
+                                TriggerMWSBulkProcessor_ApproveContractResponse.class).getBody();
+
+                        return response;
+
+                } catch (Exception e) {
+                        log.error("MilesApi.triggerMWSBulkProcessor_ApproveContract error: ", e);
+                        return null;
+                }
+        }
+
+        public PRJ_SM_OwnerShipResponse getOwnerShip() {
+            log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch/{}",
+                    baseUrl, sessionId);
+
+            String body = PRJ_SM_OwnerShiptRequest
+                    .replace("{sessionId}", sessionId);
+
+            try {
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_XML);
+
+                HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+                PRJ_SM_OwnerShipResponse response = xmlRestTemplate.postForEntity(
+                        baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch",
+                        httpEntity,
+                        PRJ_SM_OwnerShipResponse.class).getBody();
+
+                return response;
+
+            } catch (Exception e) {
+                log.error("MilesApi.getOwnerShip error: ", e);
+                return null;
+            }
+        }
+
+    public List<GetLeasingResponse> getLeasingsList() {
+        log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch?sessionId={}",
+                sessionId);
+        String body = PRJ_SM_LeasingListRequest
+                .replace("{sessionId}", sessionId);
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_XML);
+            HttpEntity<String> request = new HttpEntity<>(body, headers);
+            List<GetLeasingResponse> leasingResponseList = xmlRestTemplate.postForEntity(
+                            baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch",
+                            request, BaseResponse.class)
+                    .getBody()
+                    .getData()
+                    .getLeasings();
+            return leasingResponseList;
+        } catch (Exception e) {
+            log.error("MilesApi.getLeasingsList", e.getStackTrace());
+            return null;
+        }
+    }
+
+        public SaveLicenseCertificateResponse saveLicenseCertificate(
+                SaveLicenseCertificateRequest request) {
+
+            log.info("triggering SaveRuhsatBelgesi");
+
+            try {
+                MultipartFile file = request.getFile();
+
+                // 1️⃣ Dosyayı Base64'e çevir
+                String fileBinary = Base64.getEncoder()
+                        .encodeToString(file.getBytes());
+
+                // 2️⃣ Dosya uzantısını al (pdf, jpg vs.)
+                String originalFilename = file.getOriginalFilename();
+                String fileExtension = "";
+
+                if (originalFilename != null && originalFilename.contains(".")) {
+                    fileExtension = originalFilename.substring(
+                            originalFilename.lastIndexOf('.') + 1
+                    );
+                }
+
+                // 3️⃣ SOAP XML body oluştur
+                String body = SaveLicenseCertificateRequest
+                        .replace("{sessionId}", sessionId)
+                        .replace("{plakaNo}", request.getPlakaNo())
+                        .replace("{sasiNo}", request.getSasiNo())
+                        .replace("{validityDate}", request.getValidityDate())
+                        .replace("{fileBinary}", fileBinary)
+                        .replace("{fileExtension}", fileExtension);
+
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.TEXT_XML);
+                headers.add("SOAPAction", "http://tempuri.org/SaveRuhsatBelgesi");
+
+                HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+                SaveLicenseCertificateResponse response = xmlRestTemplate.postForEntity(
+                        "https://pws.hedeffilotest.com/SaveRuhsatBelgesiDGA.asmx",
+                        httpEntity,
+                        SaveLicenseCertificateResponse.class
+                ).getBody();
+
+                return response;
+
+            } catch (Exception e) {
+                log.error("MilesApi.saveLicenseCertificate error", e);
+                throw new RuntimeException("SaveLicenseCertificate failed", e);
+            }
+        }
+
+        public TracksysUsersResponse getTracksysUsers(){
+            log.info("triggering GetTracksysUsers");
+            String body = PRJ_SM_TracksysUsersRequest
+                    .replace("{sessionId}", sessionId);
+            try {
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_XML);
+                HttpEntity<String> request = new HttpEntity<>(body, headers);
+                TracksysUsersResponse users = xmlRestTemplate.postForEntity(
+                                baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch",
+                                request, TracksysUsersResponse.class)
+                        .getBody();
+                return users;
+            } catch (Exception e) {
+                log.error("MilesApi.getLeasingsList", e.getStackTrace());
+                return null;
+            }
+        }
 
 }

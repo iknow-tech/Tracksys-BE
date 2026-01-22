@@ -217,6 +217,22 @@ public class MilesService {
         return milesApi.getLeasingsList();
     }
 
+    public TriggerMWSBulkProcessor_ApproveContractResponse triggerMWSBulkProcessor(TriggerMWSBulkProcessor_ApproveContractRequest request) {
+        return milesApi.approveContract(request);
+    }
+
+    public PRJ_SM_OwnerShipResponse getOwnerShip() {
+        return milesApi.getOwnerShip();
+    }
+
+    public SaveLicenseCertificateResponse saveLicenseCertificate(SaveLicenseCertificateRequest request) {
+        return milesApi.saveLicenseCertificate(request);
+    }
+
+    public TracksysUsersResponse getTracksysUsers() {
+        return milesApi.getTracksysUsers();
+    }
+
 
 
     /**
