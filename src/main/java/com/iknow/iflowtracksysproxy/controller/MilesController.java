@@ -1,10 +1,12 @@
 package com.iknow.iflowtracksysproxy.controller;
 
 import com.iknow.iflowtracksysproxy.cache.CustomerContractCache;
+import com.iknow.iflowtracksysproxy.dto.response.OrderUpdateResult;
 import com.iknow.iflowtracksysproxy.integration.miles.model.request.*;
 import com.iknow.iflowtracksysproxy.integration.miles.model.response.*;
 import com.iknow.iflowtracksysproxy.service.MilesContractSyncService;
 import com.iknow.iflowtracksysproxy.service.MilesService;
+import com.iknow.iflowtracksysproxy.service.MilesUpdateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -21,8 +23,7 @@ import java.util.List;
 public class MilesController {
 
     private final MilesService milesService;
-    private final CustomerContractCache customerContractCache;
-    private final MilesContractSyncService milesContractSyncService;
+    private final  MilesUpdateService milesUpdateService;
 
     /**
      * Get current session information
@@ -506,6 +507,12 @@ public class MilesController {
             log.error("Error triggering saveLicenseCertificate", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    //UPDATE HDF_SND.ORDERS SET SUPPLIER_ID= , CONTACT_ID= WHERE ORDERS_ID=
+    @PostMapping("/update-supplier-contact/{contractId}")
+    public ResponseEntity<OrderUpdateResult> updateSupplierAndContact(@PathVariable String contractId) throws Exception {
+        return ResponseEntity.ok(milesUpdateService.updateSupplierAndContact(contractId)) ;
     }
 
 

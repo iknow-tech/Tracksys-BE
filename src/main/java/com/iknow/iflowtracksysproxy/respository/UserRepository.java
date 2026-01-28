@@ -1,4 +1,4 @@
-package com.iknow.iflowtracksysproxy.repository;
+package com.iknow.iflowtracksysproxy.respository;
 
 import com.iknow.iflowtracksysproxy.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;

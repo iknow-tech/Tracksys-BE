@@ -5,7 +5,7 @@ import com.iknow.iflowtracksysproxy.dto.auth.LoginRequest;
 import com.iknow.iflowtracksysproxy.dto.auth.RegisterRequest;
 import com.iknow.iflowtracksysproxy.entity.User;
 import com.iknow.iflowtracksysproxy.integration.miles.model.response.TracksysUsersResponse;
-import com.iknow.iflowtracksysproxy.repository.UserRepository;
+import com.iknow.iflowtracksysproxy.respository.UserRepository;
 import com.iknow.iflowtracksysproxy.util.JwtUtil;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;

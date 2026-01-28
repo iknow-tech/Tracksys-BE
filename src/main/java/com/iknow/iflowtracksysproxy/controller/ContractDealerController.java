@@ -2,8 +2,10 @@ package com.iknow.iflowtracksysproxy.controller;
 
 import com.iknow.iflowtracksysproxy.dto.DealerContractInfo;
 import com.iknow.iflowtracksysproxy.dto.request.AssignDealerRequest;
+import com.iknow.iflowtracksysproxy.dto.request.DealerContractUpdateRequest;
 import com.iknow.iflowtracksysproxy.dto.request.UnassignDealerRequest;
 import com.iknow.iflowtracksysproxy.dto.response.AssignDealerResponse;
+import com.iknow.iflowtracksysproxy.entity.ContractDealerAssignment;
 import com.iknow.iflowtracksysproxy.service.ContractDealerAssignmentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,9 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
-
-import static com.fasterxml.jackson.databind.type.LogicalType.Map;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -77,4 +76,16 @@ public class ContractDealerController {
         ));
     }
 
+    @PutMapping("/dealer-contract/update")
+    public ResponseEntity<Void> updateDealerContracts(@RequestBody DealerContractUpdateRequest request
+    ) {
+        assignmentService.updateDealerContracts(request);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/dealer-contract/{contractId}")
+    public ResponseEntity<ContractDealerAssignment> getByContractId(@PathVariable String contractId) {
+       ContractDealerAssignment contractDealerAssignment=  assignmentService.findByContractId(contractId);
+       return ResponseEntity.ok(contractDealerAssignment);
+    }
 }

@@ -7,6 +7,8 @@ import java.util.List;
 
 @Data
 public class CustomerContractResponse {
+    @JsonAlias("id ")
+    private String id ;
     @JsonAlias("contract_id")
     private String contractId;
     @JsonAlias("contractstate")
@@ -47,6 +49,8 @@ public class CustomerContractResponse {
     private String netPrice;
     @JsonAlias("deliveryperson")
     private String deliveryPerson;
+    @JsonAlias("deliveryterms")
+    private String deliveryTerms;
     @JsonAlias("deliverysupplier")
     private String deliverySupplier;
     @JsonAlias("discountedprice")
@@ -57,8 +61,13 @@ public class CustomerContractResponse {
     private String options;
     @JsonAlias("contractapproveddate")
     private String contractapproveddate;
-    @JsonAlias("id ")
-    private String id ;
+    @JsonAlias("uttsgpsinstallation")
+    private String uttsGpsInstallation;
+    @JsonAlias("treasuryapprovaldate")
+    private String treasuryApprovalDate;
+    @JsonAlias("deliverydate")
+    private String deliveryDate;
+
 
     // assigned dealer
     private String assignedDealer;

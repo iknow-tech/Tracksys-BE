@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -24,9 +25,12 @@ public class DealerContractInfo {
     private String deliveryPerson;
     private String recipientPerson;
     private String ordersId;
+    private String options;
+    private String uttsGpsInstallation;
+    private String treasuryApprovalDate;
     private String ettn;
-    private Double netPrice;
-    private Double otv;
+    private BigDecimal netPrice;
+    private BigDecimal otv;
     private String chassisNumber;
     private String motorNumber;
     private String shipmentStartDate;
@@ -38,5 +42,8 @@ public class DealerContractInfo {
     private String sysEnumerationId;
     private String assignedBy;
     private String status;
+    private String delivery;
+    private String deliveryLocation;
     private boolean hasProforma;
+    private String deliveryTerms;
 }

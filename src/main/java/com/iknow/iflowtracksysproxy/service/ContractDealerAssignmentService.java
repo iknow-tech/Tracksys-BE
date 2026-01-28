@@ -3,6 +3,8 @@ package com.iknow.iflowtracksysproxy.service;
 import com.iknow.iflowtracksysproxy.cache.CustomerContractCache;
 import com.iknow.iflowtracksysproxy.dto.DealerContractInfo;
 import com.iknow.iflowtracksysproxy.dto.request.AssignDealerRequest;
+import com.iknow.iflowtracksysproxy.dto.request.DealerContractUpdateItemRequest;
+import com.iknow.iflowtracksysproxy.dto.request.DealerContractUpdateRequest;
 import com.iknow.iflowtracksysproxy.dto.request.UnassignDealerRequest;
 import com.iknow.iflowtracksysproxy.dto.response.AssignDealerResponse;
 import com.iknow.iflowtracksysproxy.entity.ContractDealerAssignment;
@@ -152,10 +154,21 @@ public class ContractDealerAssignmentService {
                         .version(contract.getVersion())
                         .color(contract.getColor())
                         .deliveryPerson(contract.getDeliveryPerson())
-                        //.recipientPerson(contract.getRecipientPerson())
+                        .deliveryLocation(contract.getDeliveryLocation())
                         .ordersId(contract.getOrdersId())
-                        // .ettn(contract.getEttn())
-
+                        .ettn(assignment.getEttn())
+                        .delivery(assignment.getDelivery())
+                        .shipmentStartDate(assignment.getShipmentBeginDate())
+                        .shipmentEndDate(assignment.getShipmentEndDate())
+                        .deliveryDate(contract.getDeliveryDate())
+                        .netPrice(assignment.getNetPrice())
+                        .otv(assignment.getOtv())
+                        .chassisNumber(assignment.getChassisNumber())
+                        .motorNumber(assignment.getMotorNumber())
+                        .options(contract.getOptions())
+                        .uttsGpsInstallation(contract.getUttsGpsInstallation())
+                        .treasuryApprovalDate(contract.getTreasuryApprovalDate())
+                        .deliveryTerms(contract.getDeliveryTerms())
 
                         // Atama Bilgileri (assignment objesinden)
                         .dealerName(assignment.getDealerName())
@@ -198,6 +211,70 @@ public class ContractDealerAssignmentService {
         assignmentRepository.save(assignment);
 
         log.info("Contract {} dealer assignment cancelled", request.getContractId());
+    }
+
+    @Transactional
+    public void updateDealerContracts(DealerContractUpdateRequest request) {
+        if (request.getUpdates() == null || request.getUpdates().isEmpty()) {
+            return;
+        }
+
+        try{
+        for (DealerContractUpdateItemRequest item: request.getUpdates()) {
+            ContractDealerAssignment contractDealerAssignment = assignmentRepository.findByContractIdAndStatus(item.getContractId(),"ACTIVE")
+                            .orElseThrow(() ->
+                                    new IllegalArgumentException(
+                                            "Contract not found: " + item.getContractId()
+                                    )
+                            );
+            if (item.getNetPrice() != null) {
+                contractDealerAssignment.setNetPrice(item.getNetPrice());
+            }
+            if (item.getOtv() != null) {
+                contractDealerAssignment.setOtv(item.getOtv());
+            }
+            if (item.getMotorNumber() != null && !item.getMotorNumber().isBlank()) {
+                contractDealerAssignment.setMotorNumber(item.getMotorNumber());
+            }
+            if (item.getChassisNumber() != null && !item.getChassisNumber().isBlank()) {
+                contractDealerAssignment.setChassisNumber(item.getChassisNumber());
+            }
+
+            if(item.getDelivery() != null && !item.getDelivery().isBlank()){
+                contractDealerAssignment.setDelivery(item.getDelivery());
+            }
+
+            if(item.getShipmentBeginDate() != null ){
+                contractDealerAssignment.setShipmentBeginDate(item.getShipmentBeginDate());
+            }
+            if(item.getShipmentEndDate() != null ){
+                contractDealerAssignment.setShipmentEndDate(item.getShipmentEndDate());
+            }
+            if(item.getEttn() != null && !item.getEttn().isBlank()){
+                contractDealerAssignment.setEttn(item.getEttn());
+            }
+            if(item.getDeliveryDate() != null ){
+                contractDealerAssignment.setDeliveryDate(item.getDeliveryDate());
+            }
+
+            contractDealerAssignment.setUpdatedBy(null);
+            contractDealerAssignment.setUpdatedDate(LocalDateTime.now());
+
+            assignmentRepository.save(contractDealerAssignment);
+        }}
+        catch (Exception e){
+            log.error(e.getMessage());
+        }
+    }
+
+    public ContractDealerAssignment findByContractId(String contractId){
+        ContractDealerAssignment contractDealerAssignment = new ContractDealerAssignment();
+        Optional<ContractDealerAssignment> optionalContractDealerAssignment= assignmentRepository.findByContractIdAndStatus(contractId,"ACTIVE");
+
+        if(optionalContractDealerAssignment.isPresent()){
+            contractDealerAssignment=  optionalContractDealerAssignment.get();
+        }
+        return contractDealerAssignment;
     }
 
 

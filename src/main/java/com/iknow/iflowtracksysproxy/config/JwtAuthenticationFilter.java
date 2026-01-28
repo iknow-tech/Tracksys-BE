@@ -1,6 +1,6 @@
 package com.iknow.iflowtracksysproxy.config;
 
-import com.iknow.iflowtracksysproxy.repository.UserRepository;
+import com.iknow.iflowtracksysproxy.respository.UserRepository;
 import com.iknow.iflowtracksysproxy.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -44,6 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 if (userOptional.isPresent() && jwtUtil.validateToken(jwt, userEmail)) {
                     var user = userOptional.get();
                     var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+
 
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userEmail,
                             null, authorities);
