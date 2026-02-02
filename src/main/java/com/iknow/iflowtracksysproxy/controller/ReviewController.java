@@ -1,13 +1,21 @@
 package com.iknow.iflowtracksysproxy.controller;
 
+import com.iknow.iflowtracksysproxy.dto.AdditionalDocumentRequestDto;
 import com.iknow.iflowtracksysproxy.entity.ProformaReview;
 import com.iknow.iflowtracksysproxy.service.ReviewService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @RestController
@@ -64,14 +72,35 @@ public class ReviewController {
         return reviewService.getReadReviews();
     }
 
-    // Ek Belge Talebi
-
-    @PostMapping("/{id}/additional-document")
-    public ResponseEntity<Void> requestAdditionalDocument(@PathVariable Long id, @RequestParam("file") MultipartFile file, @RequestParam("description") String description
-    ) {
-        reviewService.requestAdditionalDocument(id, file, description);
-        return ResponseEntity.ok().build();
+    @PostMapping( "/additional-document")
+    public ResponseEntity<ProformaReview> createAdditionalDocumentRequest( @ModelAttribute  AdditionalDocumentRequestDto req, @RequestPart("file") MultipartFile file) {
+        return ResponseEntity.ok(reviewService.createAdditionalDocumentRequest(req, file));
     }
 
+    @GetMapping("/{id}/download")
+    public ResponseEntity<Resource> downloadAdditionalDocument(@PathVariable String id) {
+
+        ProformaReview review = reviewService.findById(Long.valueOf(id))
+                .orElseThrow(() -> new RuntimeException("Bildirim bulunamadı"));
+
+        if (review.getAdditionalDocumentPath() == null) {
+            throw new RuntimeException("Bu bildirim için ek belge bulunmuyor");
+        }
+
+        Path filePath = Paths.get(review.getAdditionalDocumentPath());
+        Resource resource;
+
+        try {
+            resource = new UrlResource(filePath.toUri());
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Dosya okunamadı");
+        }
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + review.getAdditionalDocumentName() + "\"")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(resource);
+    }
 
 }

@@ -42,9 +42,7 @@ public class ProformaReview {
     @Column(name = "additional_document_name")
     private String additionalDocumentName;
 
-    // Bu kayıt ek belge talebi mi?
-    @Column(nullable = false)
-    private Boolean additionalDocumentRequested;
+
 
     private LocalDateTime createdAt;
 

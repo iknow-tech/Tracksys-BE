@@ -197,6 +197,7 @@ public class MilesService {
         return milesApi.updateDeliveryDealerArea(request);
     }
 
+    //kredi onay tarihinin güncellenmesi
     public  ApprovalDateUpdateBaseResponse updateCreditApprovalDate(ApprovalDateUpdateRequest approvalDateUpdateRequest){
         return milesApi.updateCreditApprovalDate(approvalDateUpdateRequest);
     }

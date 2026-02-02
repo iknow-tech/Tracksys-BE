@@ -2,7 +2,6 @@ package com.iknow.iflowtracksysproxy.integration.miles;
 
 import com.iknow.iflowtracksysproxy.integration.miles.model.request.*;
 import com.iknow.iflowtracksysproxy.integration.miles.model.response.*;
-import com.iknow.iflowtracksysproxy.service.MilesContractSyncService;
 import com.iknow.iflowtracksysproxy.util.ResourceReader;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -84,6 +83,8 @@ public class MilesApi {
                 .asString("xml/PRJ_SM_OwnerShip.xml");
         private static final String PRJ_SM_TracksysUsersRequest = ResourceReader
                 .asString("xml/PRJ_SM_TracksysUsers.xml");
+        private static final String PRJ_SM_VehicleOrderSupplierRequest = ResourceReader
+                .asString("xml/PRJ_SM_VehicleOrderSupplierUpdate.xml");
 
 
         private final RestTemplate xmlRestTemplate;
@@ -188,6 +189,7 @@ public class MilesApi {
                 }
         }
 
+        //net bedel alanının güncellenmesi
         public NetAmountUpdateResponse updateNetAmount(NetAmountUpdateRequest request) {
                 log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService?sessionId={}",
                                 baseUrl, sessionId);
@@ -214,6 +216,7 @@ public class MilesApi {
                 }
         }
 
+        //vergi alanının güncellenmesi
         public TaxUpdateResponse updateTax(TaxUpdateRequest request) {
                 // Log bilgisi
                 log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService?sessionId={}",
@@ -248,6 +251,7 @@ public class MilesApi {
                 }
         }
 
+        //indirim alanının güncellenmesi
         public DiscountUpdateResponse updateDiscount(DiscountUpdateRequest request, String vehicleOrderItem) {
                 log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService?sessionId={}",
                                 baseUrl, sessionId);
@@ -846,6 +850,34 @@ public class MilesApi {
 
                 } catch (Exception e) {
                         log.error("MilesApi.updateTax error: ", e);
+                        return null;
+                }
+        }
+
+        // Vehicle Order Üzerinde Supplier ve Contact Alanının Güncellenmesi
+        public VehicleOrderSupplierUpdateBaseResponse vehicleorderSupplierUpdate (VehicleOrderSupplierUpdateRequest request) {
+                log.info("Updating Vehicle Order Supplier for ordersId: {}", request.getOrdersId());
+
+                String body =PRJ_SM_VehicleOrderSupplierRequest
+                        .replace("{sessionId}", sessionId)
+                        .replace("{supplierId}", request.getSupplierId())
+                        .replace("{contactId}", request.getSupplierId())
+                        .replace("{ordersId}", request.getOrdersId());
+
+                try {
+
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.setContentType(MediaType.APPLICATION_XML);
+
+                        HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+                        return xmlRestTemplate.postForEntity(
+                                baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch",
+                                httpEntity,
+                                VehicleOrderSupplierUpdateBaseResponse.class).getBody();
+
+                } catch (Exception e) {
+                        log.error("MilesApi.vehicleorderSupplierUpdate error: ", e);
                         return null;
                 }
         }

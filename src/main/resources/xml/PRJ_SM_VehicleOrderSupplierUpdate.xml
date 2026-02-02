@@ -1,0 +1,7 @@
+<SofEnvelope>
+    <sessionID>{sessionId}</sessionID>
+    <selection>PRJ_SM_VehicleOrderSupplierUpdate</selection>
+    <arg0>{supplierId}</arg0> --Supplier_id
+    <arg1>{contactId}</arg1> --Contact_id
+    <arg2>{ordersId}</arg2> --Orders_id
+</SofEnvelope>

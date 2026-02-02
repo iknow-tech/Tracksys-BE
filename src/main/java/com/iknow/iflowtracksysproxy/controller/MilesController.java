@@ -1,10 +1,9 @@
 package com.iknow.iflowtracksysproxy.controller;
 
-import com.iknow.iflowtracksysproxy.cache.CustomerContractCache;
-import com.iknow.iflowtracksysproxy.dto.response.OrderUpdateResult;
+import com.iknow.iflowtracksysproxy.dto.MilesUpdatedDto;
+import com.iknow.iflowtracksysproxy.dto.response.MilesUpdatedResponse;
 import com.iknow.iflowtracksysproxy.integration.miles.model.request.*;
 import com.iknow.iflowtracksysproxy.integration.miles.model.response.*;
-import com.iknow.iflowtracksysproxy.service.MilesContractSyncService;
 import com.iknow.iflowtracksysproxy.service.MilesService;
 import com.iknow.iflowtracksysproxy.service.MilesUpdateService;
 import lombok.RequiredArgsConstructor;
@@ -509,10 +508,17 @@ public class MilesController {
         }
     }
 
+    // bu durum satın alma birimi bayiye atama yaptığı durumda mı gerçekleşecek ? // TO-DO
     //UPDATE HDF_SND.ORDERS SET SUPPLIER_ID= , CONTACT_ID= WHERE ORDERS_ID=
     @PostMapping("/update-supplier-contact/{contractId}")
-    public ResponseEntity<OrderUpdateResult> updateSupplierAndContact(@PathVariable String contractId) throws Exception {
-        return ResponseEntity.ok(milesUpdateService.updateSupplierAndContact(contractId)) ;
+    public ResponseEntity<Boolean> updateSupplierAndContact(@PathVariable String contractId) throws Exception {
+        return ResponseEntity.ok(milesUpdateService.vehicleOrderSupplierUpdate(contractId)) ;
+    }
+
+    //net bedel, alanlarının miles tarafında güncellenmesi
+    @PostMapping("/update")
+    public ResponseEntity<MilesUpdatedResponse> update(@RequestBody MilesUpdatedDto milesUpdatedDto) throws Exception {
+        return ResponseEntity.ok(milesUpdateService.update(milesUpdatedDto));
     }
 
 

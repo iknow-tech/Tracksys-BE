@@ -45,6 +45,8 @@ public class CustomerContractResponse {
     private String ordersId;
     @JsonAlias("vehicleorder_id")
     private String vehicleOrderId;
+    @JsonAlias("vehicleorderitem_id")
+    private String vehicleOrderItemId;
     @JsonAlias("netprice")
     private String netPrice;
     @JsonAlias("deliveryperson")

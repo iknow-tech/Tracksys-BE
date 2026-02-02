@@ -53,6 +53,11 @@ public class DataResponse {
     @JacksonXmlProperty(localName = "PRJ_SM_OwnerShip")
     private List<GetLeasingResponse> leasings;
 
+    @JsonProperty
+    @JacksonXmlElementWrapper(localName = "PRJ_SM_VehicleOrderSupplierUpdate_Set")
+    @JacksonXmlProperty(localName = "PRJ_SM_VehicleOrderSupplierUpdate")
+    private List<VehicleOrderSupplierUpdateResponse> responseVehicleOrderSupplierUpdate;
+
     @Data
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class MWSBulkAttributeUpdate {

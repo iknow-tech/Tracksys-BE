@@ -1,5 +1,6 @@
 package com.iknow.iflowtracksysproxy.service;
 
+import com.iknow.iflowtracksysproxy.dto.AdditionalDocumentRequestDto;
 import com.iknow.iflowtracksysproxy.entity.NotificationStatus;
 import com.iknow.iflowtracksysproxy.entity.ProformaReview;
 import com.iknow.iflowtracksysproxy.entity.ReviewStatus;
@@ -7,13 +8,23 @@ import com.iknow.iflowtracksysproxy.entity.ReviewType;
 import com.iknow.iflowtracksysproxy.respository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +32,7 @@ import java.util.List;
 public class ReviewService {
 
     private final ReviewRepository proformaReviewRepository;
+    private final FileStorageService fileStorageService;
 
     @Transactional
     public ProformaReview createReview(@RequestBody ProformaReview proformaReview) {
@@ -60,7 +72,7 @@ public class ReviewService {
                 .orElseThrow(() ->
                         new IllegalArgumentException("Bildirim bulunamadı"));
 
-        if (review.getStatus() == ReviewStatus.RESOLVED) {
+        if (review.getStatus().equals(ReviewStatus.RESOLVED.toString())) {
             return;
         }
 
@@ -83,19 +95,31 @@ public class ReviewService {
         return proformaReviewRepository.findByNotificationStatusOrderByCreatedAtDesc(NotificationStatus.READ);
     }
 
-    public void requestAdditionalDocument(Long id, MultipartFile file, String description) {
-        ProformaReview review = new ProformaReview();
+    @Transactional
+    public ProformaReview createAdditionalDocumentRequest(AdditionalDocumentRequestDto req, MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new RuntimeException("Ek belge zorunludur");
+        }
 
-      //  String path = fileStorageService.store(file);
+        String path = fileStorageService.store(file);
 
-      //  review.setAdditionalDocumentPath(path);
-        review.setAdditionalDocumentName(file.getOriginalFilename());
-        review.setDescription(description);
-        review.setAdditionalDocumentRequested(true);
-        review.setStatus(ReviewStatus.ADDITIONAL_DOCUMENT_REQUESTED);
+        ProformaReview entity = ProformaReview.builder()
+                .contractId(req.getContractId())
+                .description(req.getDescription())
+                .target(ReviewType.DEALER)
+                .source(ReviewType.PURCHASING)
+                .status(ReviewStatus.OPEN)
+                .notificationStatus(NotificationStatus.NEW)
+               // .additionalDocumentRequested(true)
+                .additionalDocumentPath(path)
+                .additionalDocumentName(file.getOriginalFilename())
+                .createdAt(LocalDateTime.now())
+                .build();
 
+        return proformaReviewRepository.save(entity);
     }
 
+    public Optional<ProformaReview> findById (Long id){
+        return proformaReviewRepository.findById(id);
 
-
-}
+}}

@@ -71,6 +71,27 @@ public class ContractMilesChangeDetector {
                 contractId,
                 batchId);
 
+        compare(events,
+                oldC.getOrdersId(),
+                newC.getOrdersId(),
+                ContractFieldKey.ORDERSID,
+                contractId,
+                batchId);
+
+        compare(events,
+                oldC.getDeliveryTerms(),
+                newC.getDeliveryLocation(),
+                ContractFieldKey.DELIVERY_TERMS,
+                contractId,
+                batchId);
+
+        compare(events,
+                oldC.getDeliveryDate(),
+                newC.getDeliveryDate(),
+                ContractFieldKey.DELIVERY_DATE,
+                contractId,
+                batchId);
+
         return events;
     }
 
