@@ -55,4 +55,6 @@ public class StockVehicleContractResponse {
     private String motornumber;
     @JsonAlias("deliveryperson")
     private String deliveryPerson;
+    @JsonAlias("ordertype")
+    private String orderType;
 }

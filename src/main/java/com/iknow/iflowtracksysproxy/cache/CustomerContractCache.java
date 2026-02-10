@@ -36,4 +36,9 @@ public class CustomerContractCache {
         List<CustomerContractResponse> data=  cache.get();
         return data == null ? new ArrayList<>() : new ArrayList<>(data);
     }
+
+    public void clear() {
+        cache.set(Collections.emptyList());
+        lastUpdatedAt = null;
+    }
 }

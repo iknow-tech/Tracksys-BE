@@ -14,6 +14,10 @@ public class MilesUpdatedResponse {
     Boolean netAmountUpdateSuccess;
     Boolean otvUpdateSuccess;
     Boolean discountUpdateSuccess;
+    Boolean creditApprovalUpdateSuccess;
+    Boolean bulkProcessorSuccess;
+    Boolean chassisNoUpdateSuccess;
+    Boolean motorNoUpdateSuccess;
 
 
 }

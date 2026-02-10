@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -39,6 +40,7 @@ public class DealerContractInfo {
     private String dealerName;
     private LocalDateTime assignedDate;
     private String leasingName;
+    private LocalDate leasingInvoiceDate;
     private String sysEnumerationId;
     private String assignedBy;
     private String status;
@@ -46,4 +48,7 @@ public class DealerContractInfo {
     private String deliveryLocation;
     private boolean hasProforma;
     private String deliveryTerms;
+    private String deliveryMethod;
+    private String deliveryDocumentId;
+    private String deliveryDocumentName;
 }

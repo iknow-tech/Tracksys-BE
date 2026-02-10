@@ -14,6 +14,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import jakarta.persistence.Id;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -72,6 +73,12 @@ public class ContractDealerAssignment {
     @Column(name = "deliveryDate")
     private String deliveryDate;
 
+    @Column(name = "leasing_invoice_date")
+    private LocalDate leasingInvoiceDate;
+
+    @Column(name = "delivery_method")
+    private String deliveryMethod;
+
     @Column(name = "status", length = 20)
     @Builder.Default
     private String status = "ACTIVE";
@@ -83,10 +90,14 @@ public class ContractDealerAssignment {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    //sipariş durumu
+    private ContractStatus contractStatus= ContractStatus.ACTIVE;
+
     private String cancelledBy;
     private LocalDateTime cancelledDate;
-
     private String updatedBy;
     private LocalDateTime updatedDate;
+    private LocalDateTime completedDate;
+    private String completedBy;
 
 }

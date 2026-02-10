@@ -1,0 +1,14 @@
+<SofEnvelope>
+    <sessionID>{sessionId}</sessionID>
+    <bulkprocessorid>{bulkProcessorId}</bulkprocessorid>
+    <action>execute</action>
+    <data>
+        <MWSBulkProcessorArgument_Set>
+            <id>{bulkProcessorId}</id>
+            <MWSBulkProcessorArgument>
+                <name>orderid</name>
+                <value>1|{ordersId}</value>
+            </MWSBulkProcessorArgument>
+        </MWSBulkProcessorArgument_Set>
+    </data>
+</SofEnvelope>

@@ -510,9 +510,9 @@ public class MilesController {
 
     // bu durum satın alma birimi bayiye atama yaptığı durumda mı gerçekleşecek ? // TO-DO
     //UPDATE HDF_SND.ORDERS SET SUPPLIER_ID= , CONTACT_ID= WHERE ORDERS_ID=
-    @PostMapping("/update-supplier-contact/{contractId}")
-    public ResponseEntity<Boolean> updateSupplierAndContact(@PathVariable String contractId) throws Exception {
-        return ResponseEntity.ok(milesUpdateService.vehicleOrderSupplierUpdate(contractId)) ;
+    @PostMapping("/update-supplier-contact")
+    public ResponseEntity<Boolean> updateSupplierAndContact(@RequestBody List<CustomerContractResponse> customerContractResponseList) throws Exception {
+        return ResponseEntity.ok(milesUpdateService.vehicleOrderSupplierUpdate(customerContractResponseList)) ;
     }
 
     //net bedel, alanlarının miles tarafında güncellenmesi

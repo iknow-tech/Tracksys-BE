@@ -1,8 +1,12 @@
 package com.iknow.iflowtracksysproxy.integration.miles.model.response;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.iknow.iflowtracksysproxy.entity.ContractStatus;
+import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -80,7 +84,30 @@ public class CustomerContractResponse {
 
     //proforma
     private boolean hasProforma;
+    private LocalDate leasingInvoiceDate;
+    private String deliveryMethod;
 
     private ContractMilesUpdateResponse contractMilesUpdate;
+
+    private boolean updateVehicleOrderDesc;
+    private boolean updateVehicleOrderItemStatu;
+    private String deliveryDocumentId;
+    private String deliveryDocumentName;
+    private ContractStatus status = ContractStatus.ACTIVE;
+
+    // sipariş teslim mi edildi?
+    private String deliveredBy;
+    private LocalDateTime orderDeliveredDate;
+
+    // sipariş iptal mi edildi?
+    private String canceledBy;
+    private LocalDateTime canceledDate;
+
+    // fleet vehicle üzerinde mülkiyet türü - ak leasing
+    private boolean mulkiyetUpdateSuccess;
+
+    // fleet vehicle üzerinde mülk alanı update
+    private boolean mulkUpdateSuccess;
+
 
 }

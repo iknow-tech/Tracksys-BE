@@ -8,20 +8,11 @@ import com.iknow.iflowtracksysproxy.entity.ReviewType;
 import com.iknow.iflowtracksysproxy.respository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.net.MalformedURLException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -29,7 +20,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ReviewService {
+public class ProformaReviewService {
 
     private final ReviewRepository proformaReviewRepository;
     private final FileStorageService fileStorageService;
@@ -106,8 +97,8 @@ public class ReviewService {
         ProformaReview entity = ProformaReview.builder()
                 .contractId(req.getContractId())
                 .description(req.getDescription())
-                .target(ReviewType.DEALER)
-                .source(ReviewType.PURCHASING)
+                .target(req.getTarget() !=null ? req.getTarget() : ReviewType.DEALER)
+                .source(req.getSource() != null ? req.getSource(): ReviewType.PURCHASING)
                 .status(ReviewStatus.OPEN)
                 .notificationStatus(NotificationStatus.NEW)
                // .additionalDocumentRequested(true)

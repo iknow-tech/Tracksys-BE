@@ -22,4 +22,5 @@ public class MilesUpdatedDto {
     private LocalDate shipmentStartDate;
     private LocalDate shipmentEndDate;
     private String delivery;
+    private Boolean creditApprovalCheck;
 }

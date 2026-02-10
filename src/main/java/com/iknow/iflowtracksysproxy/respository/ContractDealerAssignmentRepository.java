@@ -17,6 +17,7 @@ public interface ContractDealerAssignmentRepository extends JpaRepository<Contra
      */
     Optional<ContractDealerAssignment> findByContractIdAndStatus(String contractId, String status);
 
+    Optional<ContractDealerAssignment> findByContractId(String contractId);
 
     /**
      * Bayinin aktif kontratlarını bul (TÜM OBJE)

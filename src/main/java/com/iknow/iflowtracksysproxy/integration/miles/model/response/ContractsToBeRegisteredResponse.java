@@ -21,6 +21,8 @@ public class ContractsToBeRegisteredResponse {
     private String py;
     @JsonAlias("fleetvehicle_id")
     private String fleetVehicleId;
+    @JsonAlias("fleetvehiclestatus")
+    private String fleetVehicleStatus;
     @JsonAlias("licenseplate")
     private String licensePlate;
     @JsonAlias("chassisnumber")
@@ -37,10 +39,21 @@ public class ContractsToBeRegisteredResponse {
     private String modelYear;
     @JsonAlias("deliverylocation")
     private String deliveryLocation;
+    @JsonAlias("tyrespecification")
+    private String tyreSpecification;
+    @JsonAlias("region")
+    private String region;
+    @JsonAlias("deliverysupplier")
+    private String deliverySupplier;
     @JsonAlias("orders_id")
     private String ordersId;
     @JsonAlias("vehicleorder_id")
     private String vehicleOrderId;
     @JsonAlias("netprice")
     private String netPrice;
+    @JsonAlias("logoservice")
+    private String logoService;
+
+    // satın alma birimin atadaığı bayi bilgisi
+    private String assignedDealer;
 }

@@ -88,4 +88,14 @@ public class ContractDealerController {
        ContractDealerAssignment contractDealerAssignment=  assignmentService.findByContractId(contractId);
        return ResponseEntity.ok(contractDealerAssignment);
     }
+
+    // Sipariş teslim edildi
+    @PostMapping("/{contractId}/complete")
+    public ResponseEntity<ContractDealerAssignment> deliveredContract(@PathVariable String contractId, @RequestParam(required = false) String completedBy
+    ) {
+       ContractDealerAssignment contractDealerAssignment=  assignmentService.deliveredContract(contractId, completedBy);
+        return ResponseEntity.ok(contractDealerAssignment);
+    }
+
+
 }

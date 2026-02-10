@@ -47,7 +47,9 @@ public class ContractLeasingAssignment {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    private String cancelledBy;
-    private LocalDateTime cancelledDate;
+    private ContractStatus contractStatus=ContractStatus.ACTIVE;
+
+    private String deliveredBy;
+    private LocalDateTime deliveredDate;
 
 }

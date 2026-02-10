@@ -2,7 +2,7 @@ package com.iknow.iflowtracksysproxy.controller;
 
 import com.iknow.iflowtracksysproxy.dto.AdditionalDocumentRequestDto;
 import com.iknow.iflowtracksysproxy.entity.ProformaReview;
-import com.iknow.iflowtracksysproxy.service.ReviewService;
+import com.iknow.iflowtracksysproxy.service.ProformaReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -21,9 +21,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/proforma/review")
 @RequiredArgsConstructor
-public class ReviewController {
+public class ProformaReviewController {
 
-    private final ReviewService reviewService;
+    private final ProformaReviewService reviewService;
 
     @PostMapping
     public ResponseEntity<ProformaReview> createReview(@RequestBody ProformaReview req) {
@@ -73,7 +73,7 @@ public class ReviewController {
     }
 
     @PostMapping( "/additional-document")
-    public ResponseEntity<ProformaReview> createAdditionalDocumentRequest( @ModelAttribute  AdditionalDocumentRequestDto req, @RequestPart("file") MultipartFile file) {
+    public ResponseEntity<ProformaReview> createAdditionalDocumentRequest(@ModelAttribute  AdditionalDocumentRequestDto req, @RequestPart("file") MultipartFile file) {
         return ResponseEntity.ok(reviewService.createAdditionalDocumentRequest(req, file));
     }
 

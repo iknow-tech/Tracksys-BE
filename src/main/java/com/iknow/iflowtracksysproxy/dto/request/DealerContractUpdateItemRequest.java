@@ -22,5 +22,7 @@ public class DealerContractUpdateItemRequest{
     private String shipmentEndDate;
     private String ettn;
     private String deliveryDate;
+    private LocalDate leasingInvoiceDate;
+    private String deliveryMethod;
 
 }
