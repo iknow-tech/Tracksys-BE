@@ -58,13 +58,23 @@ public class AIService {
                 KURALLAR:
                 Özellikle dikkat et: O ≠ 0 , I ≠ 1 ,  Z ≠ 2 , S ≠ 5 , B ≠ 8
                 
-                1. TARİH FORMATI: Tarih içeren tüm alanları mutlaka 'DD/MM/YYYY' formatına çevir.
-                2. STANDARTLAŞTIRMA: Plaka boşluksuz olsun (34ABC123 -> 34 ABC 123), Markaları düzelt.
-                3. KAYIP VERİ: Okuyamıyorsan 'Bilinmiyor' yaz.
-                4. MOTOR NO: Genelde 'Motor No' ibaresinin yanındadır, dikkatli bul.
-                5. BELGE SERİ NO: FO No kısmını alma, sadece No-123456 formatında ver.
-                6. TEMİZLİK: Sadece saf JSON ver. Markdown kullanma.
-                
+                1. TARİH FORMATI: Tarih içeren tüm alanları mutlaka 'DD/MM/YYYY' formatına çevir.(Örn: '12.01 2023' -> '12/01/2023', '2023-01-12' -> '12/01/2023').
+                2. STANDARTLAŞTIRMA: Plaka boşluksuz olsun (34ABC123 -> 34 ABC 123), Markaları düzelt. Eğer aşağıdaki alanlarda metni tam okuyamıyorsan ve metinde aşağıda yazdıklarıma benzer ifadeler varsa, yazan metni buna benzeterek düzelt:
+                    - Yakıt Cinsi: [BENZİN, DİZEL, LPG, ELEKTRİK, HİBRİT, BENZİN/LPG, DİZEL/HİBRİT]
+                    - Vites/Tip: [MANUEL, OTOMATİK, YARI OTOMATİK]
+                    - Kullanım Amacı: [HUSUSİ, TİCARİ, YOLCU NAKLİ, YÜK NAKLİ]
+                3. KAYIP VERİ: Eğer bir veriyi metinde kesinlikle bulamazsan, okuyamıyorsan değerine 'Bilinmiyor' yaz. (Boş bırakma). Yanlış tahmin etme, açıklama ekleme.
+                4. MOTOR NO: Motor No genellikle 'Motor No', 'Motor Numarası', 'Motor No:', 'Motor No -', 'Motor No .' gibi etiketlerle belirtilir. Motor numaraları standart değildir. Kısa (5-6 hane) veya uzun olabilir. - Genelde "Motor No", "Motor", "M.No" ibarelerinin yanında veya altındadır. Sadece sayı veya sayı+harf kombinasyonu olabilir.
+                5. BELGE SERİ NO: Belgede FO No 123456 formatında olan görsel sadece "No-123456" formatında dönecek. Fo kısmını dahil etme
+                6. TEMİZLİK: Çıktıda JSON dışında hiçbir 'Merhaba', 'İşte sonuç' veya '```json' etiketi kullanma. Sadece saf JSON ver.
+                7. DİĞER BİLGİLER: Eğer "Diğer Bilgiler" kısmında Eğer "mua.geç.trh", "mua. geç. trh", "muayene geçerlilik", "muayene geç. trh" gibi bir ifade varsa bu alanı "IlkMuayeneGecerlilikTarihi" alanına yaz ve ve "Diğer Bilgiler" alanını boş bırak. Eğer muayene tarihi dışında başka ibareler varsa (rehinlidir, engelli aracı, LPG'li vb.) bunları "DigerBilgiler" alanına yaz.- Muayene Tarihi: 'Mum. Geç. Trh', 'M.G.T', 'Muayene' geçen tarihleri yakala. (Örn: "Muayene Geçerlilik: 10/10/2025"). Bunun dışında:
+                    - Trafik Durumu: 'Trafikten Çekme', 'Hurdaya Ayrılma' veya 'Men' ibareleri ve varsa tarihlerini yakala. Diğer Bilgiler içerisine yaz.
+                    - Hak Mahrumiyeti: 'Rehinlidir', 'Hacizlidir', 'Satılamaz' gibi şerhleri yakala.
+                    - LPG/Tadilat: Varsa tadilat tarihlerini yakala.
+                     *Eğer bu bilgilerden birden fazlası varsa aralarına virgül koyarak tek bir string olarak yaz. Bunlardan başka bir bilgi varsa stringi oku.*
+                8. PLAKA: Eğer plaka [İl Kodu] + [Harf Grubu] + [Rakam Grubu] kombinasyonundan oluşuyorsa bunu aralarında boşluk olacak şekilde yaz. Örneğin "11AA111" gibi değil "11 AA 111" formatına çevir. 
+                9. ÖNCELİK: Bizim için en kritik çıktılar: Plaka, Tescil Tarihi, Belge Seri No ve Şasi No'dur. Bunları bulmak için ekstra çaba sarf et.
+
                 İSTENEN JSON FORMATI:
                 {
                   "VerildigiIlIlce": "...", "Plaka": "...", "IlkTescilTarihi": "...", "TescilSiraNo": "...",
@@ -73,7 +83,7 @@ public class AIService {
                   "NetAgirligi": "...", "AzamiYukluAgirligi": "...", "KoltukSayisi": "...", "SilindirHacmi": "...",
                   "MotorGucu": "...", "YakitCinsi": "...", "KullanimAmaci": "...", "TipOnayNo": "...",
                   "TCKimlikVergiNo": "...", "SahibiAdSoyadUnvan": "...", "Adres": "...", "NoterSatisTarihi": "...",
-                  "DigerBilgiler": "...", "BelgeSeriNo": "..."
+                    "IlkMuayeneGecerlilikTarihi": "...", "DigerBilgiler": "...", "BelgeSeriNo": "..."
                 }
                 """;
 
