@@ -65,7 +65,7 @@ public class AIService {
                     - Kullanım Amacı: [HUSUSİ, TİCARİ, YOLCU NAKLİ, YÜK NAKLİ]
                 3. KAYIP VERİ: Eğer bir veriyi metinde kesinlikle bulamazsan, okuyamıyorsan değerine 'Bilinmiyor' yaz. (Boş bırakma). Yanlış tahmin etme, açıklama ekleme.
                 4. MOTOR NO: Motor No genellikle 'Motor No', 'Motor Numarası', 'Motor No:', 'Motor No -', 'Motor No .' gibi etiketlerle belirtilir. Motor numaraları standart değildir. Kısa (5-6 hane) veya uzun olabilir. - Genelde "Motor No", "Motor", "M.No" ibarelerinin yanında veya altındadır. Sadece sayı veya sayı+harf kombinasyonu olabilir.
-                5. BELGE SERİ NO: Belgede FO No 123456 formatında olan görsel sadece "No-123456" formatında dönecek. Fo kısmını dahil etme
+                5. BELGE SERİ NO: Belgede FO No 123456 formatında olan görsel sadece "No-123456" formatında dönecek. Fo kısmını dahil etme. Yazan sayının başına no ekleyeceksin. "No-123456".
                 6. TEMİZLİK: Çıktıda JSON dışında hiçbir 'Merhaba', 'İşte sonuç' veya '```json' etiketi kullanma. Sadece saf JSON ver.
                 7. DİĞER BİLGİLER: Eğer "Diğer Bilgiler" kısmında Eğer "mua.geç.trh", "mua. geç. trh", "muayene geçerlilik", "muayene geç. trh" gibi bir ifade varsa bu alanı "IlkMuayeneGecerlilikTarihi" alanına yaz ve ve "Diğer Bilgiler" alanını boş bırak. Eğer muayene tarihi dışında başka ibareler varsa (rehinlidir, engelli aracı, LPG'li vb.) bunları "DigerBilgiler" alanına yaz.- Muayene Tarihi: 'Mum. Geç. Trh', 'M.G.T', 'Muayene' geçen tarihleri yakala. (Örn: "Muayene Geçerlilik: 10/10/2025"). Bunun dışında:
                     - Trafik Durumu: 'Trafikten Çekme', 'Hurdaya Ayrılma' veya 'Men' ibareleri ve varsa tarihlerini yakala. Diğer Bilgiler içerisine yaz.
