@@ -4,6 +4,7 @@ import com.iknow.iflowtracksysproxy.entity.ContractChangeEvent;
 import com.iknow.iflowtracksysproxy.respository.ContractChangeEventRepository;
 import com.iknow.iflowtracksysproxy.service.ContractMilesChangeDetector;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,6 +23,7 @@ public class ContractChangeController {
     private final ContractChangeEventRepository contractChangeEventRepository;
 
     @GetMapping("/changed-fields")
+    @Transactional(readOnly = true)
     public Map<String, Set<String>> getChangedFields() {
 
         List<ContractChangeEvent> events =

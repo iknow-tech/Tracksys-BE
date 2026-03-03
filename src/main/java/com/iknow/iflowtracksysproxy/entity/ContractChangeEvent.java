@@ -27,11 +27,9 @@ public class ContractChangeEvent {
     @Column(name = "field_label", nullable = false)
     private String fieldLabel;
 
-    @Lob
     @Column(name = "old_value")
     private String oldValue;
 
-    @Lob
     @Column(name = "new_value")
     private String newValue;
 

@@ -20,7 +20,6 @@ public class ProformaReview {
     @Column(nullable = false)
     private String contractId;
 
-    @Lob
     @Column(nullable = false)
     private String description;
 
