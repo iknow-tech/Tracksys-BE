@@ -1,0 +1,17 @@
+<MWSLicensePlateUsage_Set>
+    <MWSLicensePlateUsage>
+        <id></id>
+        <fromDate>{registrationDate}</fromDate>
+        <toDate>3000-12-31T00:00:00+03:00</toDate>
+        <businessPartnerId/>
+        <MWSLicensePlate>
+            <id></id>
+            <licenseNumber>{licensePlate}</licenseNumber>
+            <registrationDate>{registrationDate}</registrationDate>
+            <cancellationDate>1900-01-01T00:00:00+01:56</cancellationDate>
+            <region/>
+            <licensePlateStatus id="" type="377" group=""/>
+            <countryId>215</countryId>
+        </MWSLicensePlate>
+    </MWSLicensePlateUsage>
+</MWSLicensePlateUsage_Set>

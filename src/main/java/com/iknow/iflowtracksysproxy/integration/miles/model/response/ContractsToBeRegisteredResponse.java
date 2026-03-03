@@ -3,6 +3,8 @@ package com.iknow.iflowtracksysproxy.integration.miles.model.response;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.Data;
 
+import java.time.LocalDate;
+
 @Data
 public class ContractsToBeRegisteredResponse {
     @JsonAlias("contract_id")
@@ -56,4 +58,17 @@ public class ContractsToBeRegisteredResponse {
 
     // satın alma birimin atadaığı bayi bilgisi
     private String assignedDealer;
+
+    private String licenseSerialNumber;
+    private LocalDate expirationDate;
+    private String hgsTagNo;
+    private LocalDate hgsDate;
+    private LocalDate licensePlateEquipmentRequestDate;
+    private LocalDate licensePlateEquipmentTransferDate;
+    private LocalDate trafficInsuranceDate;
+    private LocalDate hgsRequestedDate;
+
+
+
+
 }

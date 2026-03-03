@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -22,5 +23,25 @@ public class MilesUpdatedDto {
     private LocalDate shipmentStartDate;
     private LocalDate shipmentEndDate;
     private String delivery;
-    private Boolean creditApprovalCheck;
+    private Boolean creditApprovalCheck= false;
+    private String deliveryConditionId;
+
+    // ----------------------vehicle-document--------------------------------
+    private String licensePlate;
+    private String licenseSerialNumber;
+    private String fleetVehicleId;
+    private LocalDate expirationDate;
+    private String hgsTagNo;
+    private LocalDate hgsRequestedDate;
+    private LocalDate licensePlateEquipmentRequestDate;
+    private LocalDate licensePlateEquipmentTransferDate;
+    private LocalDate trafficInsuranceDate;
+
+
+
+
+
+
+
+
 }

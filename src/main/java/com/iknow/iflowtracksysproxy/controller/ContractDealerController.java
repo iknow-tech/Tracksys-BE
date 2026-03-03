@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -23,30 +24,10 @@ public class ContractDealerController {
     private final ContractDealerAssignmentService assignmentService;
 
     @PostMapping("/assign-dealer")
-    public ResponseEntity<AssignDealerResponse> assignDealer(@RequestBody AssignDealerRequest request) {
+    public ResponseEntity<AssignDealerResponse> assignDealer(@RequestBody AssignDealerRequest request) throws Exception {
 
-        log.info("Dealer assignment request received:");
-
-        try {
-            AssignDealerResponse response = assignmentService.assignDealerToContracts(request);
-
-            log.info("Assignment completed: {} successful, {} failed",
-                    response.getAssignedCount(),
-                    response.getFailedCount());
-
-
-            return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            log.error("Assignment failed: {}", e.getMessage(), e);
-
-            AssignDealerResponse errorResponse = AssignDealerResponse.builder()
-                    .success(false)
-                    .assignedCount(0)
-                    .failedCount(request.getContracts().size())
-                    .build();
-            return ResponseEntity.status(500).body(errorResponse);
-        }
+        AssignDealerResponse response = assignmentService.assignDealerToContracts(request);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/dealer/{dealerId}/contracts/detailed")
@@ -85,15 +66,15 @@ public class ContractDealerController {
 
     @GetMapping("/dealer-contract/{contractId}")
     public ResponseEntity<ContractDealerAssignment> getByContractId(@PathVariable String contractId) {
-       ContractDealerAssignment contractDealerAssignment=  assignmentService.findByContractId(contractId);
-       return ResponseEntity.ok(contractDealerAssignment);
+        ContractDealerAssignment contractDealerAssignment = assignmentService.findByContractId(contractId);
+        return ResponseEntity.ok(contractDealerAssignment);
     }
 
     // Sipariş teslim edildi
     @PostMapping("/{contractId}/complete")
     public ResponseEntity<ContractDealerAssignment> deliveredContract(@PathVariable String contractId, @RequestParam(required = false) String completedBy
     ) {
-       ContractDealerAssignment contractDealerAssignment=  assignmentService.deliveredContract(contractId, completedBy);
+        ContractDealerAssignment contractDealerAssignment = assignmentService.deliveredContract(contractId, completedBy);
         return ResponseEntity.ok(contractDealerAssignment);
     }
 

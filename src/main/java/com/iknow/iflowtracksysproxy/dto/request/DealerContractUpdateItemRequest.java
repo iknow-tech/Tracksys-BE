@@ -17,8 +17,8 @@ public class DealerContractUpdateItemRequest{
     private BigDecimal otv;
     private String chassisNumber;
     private String motorNumber;
-    private String delivery;
-    private String shipmentBeginDate;
+    private String deliverySupplier;
+    private String shipmentStartDate;
     private String shipmentEndDate;
     private String ettn;
     private String deliveryDate;

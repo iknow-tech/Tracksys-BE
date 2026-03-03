@@ -73,6 +73,8 @@ public class CustomerContractResponse {
     private String treasuryApprovalDate;
     @JsonAlias("deliverydate")
     private String deliveryDate;
+    @JsonAlias("deliverycondition_id")
+    private String deliveryConditionId;
 
 
     // assigned dealer
@@ -108,6 +110,7 @@ public class CustomerContractResponse {
 
     // fleet vehicle üzerinde mülk alanı update
     private boolean mulkUpdateSuccess;
+
 
 
 }

@@ -58,9 +58,9 @@ public class AuthService {
     }
 
     public AuthResponse register(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already registered");
-        }
+//        if (userRepository.existsByEmail(request.getEmail())) {
+//            throw new RuntimeException("Email already registered");
+//        }
 
         TracksysUsersResponse tracksysUsers = milesService.getTracksysUsers();
         var users = tracksysUsers.getData().getTracksysUsersSet().getTracksysUsers();
@@ -89,6 +89,14 @@ public class AuthService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole())
+                .dealerBusinessPartnerId(
+                        request.getDealerInfo() != null ? request.getDealerInfo().getBusinessPartnerId() : null)
+                .dealerContactId(
+                        request.getDealerInfo() != null ? request.getDealerInfo().getContactId() : null)
+                .dealerName(
+                        request.getDealerInfo() != null ? request.getDealerInfo().getDealer() : null)
+                .dealerContactName(
+                        request.getDealerInfo() != null ? request.getDealerInfo().getContactName() : null)
                 .build();
 
         User savedUser = userRepository.save(user);
@@ -128,11 +136,21 @@ public class AuthService {
     }
 
     private AuthResponse.UserDto toUserDto(User user) {
+        AuthResponse.UserDto.DealerInfoDto dealerInfo = null;
+        if (user.getRole() == User.Role.DEALER && user.getDealerBusinessPartnerId() != null) {
+            dealerInfo = AuthResponse.UserDto.DealerInfoDto.builder()
+                    .businessPartnerId(user.getDealerBusinessPartnerId())
+                    .dealer(user.getDealerName())
+                    .contactId(user.getDealerContactId())
+                    .contactName(user.getDealerContactName())
+                    .build();
+        }
         return AuthResponse.UserDto.builder()
                 .id(user.getId())
                 .email(user.getEmail())
                 .name(user.getName())
                 .role(user.getRole().name())
+                .dealerInfo(dealerInfo)
                 .build();
     }
 }

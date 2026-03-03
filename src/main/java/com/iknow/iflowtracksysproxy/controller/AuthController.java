@@ -5,6 +5,7 @@ import com.iknow.iflowtracksysproxy.dto.auth.LoginRequest;
 import com.iknow.iflowtracksysproxy.dto.auth.RegisterRequest;
 import com.iknow.iflowtracksysproxy.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,7 +14,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping(
+        value = "/api/auth",
+        produces = MediaType.APPLICATION_JSON_VALUE
+)
 @RequiredArgsConstructor
 //@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class AuthController {

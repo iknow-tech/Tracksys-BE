@@ -15,19 +15,19 @@
             </MWSBulkProcessorArgument>
             <MWSBulkProcessorArgument>
                 <name>deliverymileage</name>
-                <value>1|{deliveryMileage}</value>
+                <value>1|0</value>
             </MWSBulkProcessorArgument>
             <MWSBulkProcessorArgument>
                 <name>receiptbycontact</name>
-                <value>1|{receiptByContact}</value>
+                <value>1|</value>
             </MWSBulkProcessorArgument>
             <MWSBulkProcessorArgument>
                 <name>isdriver</name>
-                <value>12|{isDriver}</value>
+                <value>12|1</value>
             </MWSBulkProcessorArgument>
             <MWSBulkProcessorArgument>
                 <name>deliveryLocation</name>
-                <value>3|{deliveryLocation}</value>
+                <value>3|</value>
             </MWSBulkProcessorArgument>
         </MWSBulkProcessorArgument_Set>
     </data>

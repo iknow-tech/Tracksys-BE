@@ -31,6 +31,11 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
+    private String dealerBusinessPartnerId;
+    private String dealerContactId;
+    private String dealerName;
+    private String dealerContactName;
+
     public enum Role {
         ADMIN,
         PURCHASING_UNIT,

@@ -61,10 +61,10 @@ public class ContractDealerAssignment {
     @Column(name = "delivery")
     private String delivery;
 
-    @Column(name = "shipmentBeginDate")
+    @Column(name = "shipment_begin_date")
     private String shipmentBeginDate;
 
-    @Column(name = "shipmentEndDate")
+    @Column(name = "shipment_end_date")
     private String shipmentEndDate;
 
     @Column(name = "ettn")
@@ -99,5 +99,9 @@ public class ContractDealerAssignment {
     private LocalDateTime updatedDate;
     private LocalDateTime completedDate;
     private String completedBy;
+
+    // bayinin keseceği fatura için; satın alma biriminin bayiye gönderdiği mail tarihi
+    private LocalDateTime dealerInvoiceMailSentAt;
+
 
 }

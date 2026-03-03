@@ -16,6 +16,7 @@ public class AssignDealerResponse {
     private boolean success;
     private int assignedCount;
     private int failedCount;
+    private List<Boolean> isMilesUpdateSuccess;
     private List<String> failedContractIds;
 
     private List<AssignedContractInfo> assignedContracts;
@@ -36,5 +37,7 @@ public class AssignDealerResponse {
         private String status;
         private boolean wasReassigned;
         private String previousDealer;
+        private Boolean updatedSupplierContact;
+
     }
 }
