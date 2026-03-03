@@ -197,7 +197,7 @@ public class MilesController {
      * Update Ruhsat Belge No - 1.6.11.2 Ruhsat Belge No Alanının Güncellenmesi
      */
     @PutMapping("/update-ruhsat-belge-no")
-    public ResponseEntity<BaseResponse> updateRuhsatBelgeNo(@RequestBody RuhsatBelgeNoUpdateRequest request) {
+    public ResponseEntity<BaseResponse> updateRuhsatBelgeNo(@RequestBody RuhsatUpdateRequest request) {
         try {
             log.info("Updating ruhsat belge no for vehiclePropertyId: {}", request.getVehiclePropertyId());
             BaseResponse response = milesService.updateRuhsatBelgeNo(request);
@@ -508,17 +508,22 @@ public class MilesController {
         }
     }
 
-    // bu durum satın alma birimi bayiye atama yaptığı durumda mı gerçekleşecek ? // TO-DO
-    //UPDATE HDF_SND.ORDERS SET SUPPLIER_ID= , CONTACT_ID= WHERE ORDERS_ID=
-    @PostMapping("/update-supplier-contact")
-    public ResponseEntity<Boolean> updateSupplierAndContact(@RequestBody List<CustomerContractResponse> customerContractResponseList) throws Exception {
-        return ResponseEntity.ok(milesUpdateService.vehicleOrderSupplierUpdate(customerContractResponseList)) ;
-    }
-
     //net bedel, alanlarının miles tarafında güncellenmesi
     @PostMapping("/update")
     public ResponseEntity<MilesUpdatedResponse> update(@RequestBody MilesUpdatedDto milesUpdatedDto) throws Exception {
         return ResponseEntity.ok(milesUpdateService.update(milesUpdatedDto));
+    }
+
+    @PostMapping(value="/add-licenseplate-row")
+    public ResponseEntity<SaveLicenseCertificateResponse> addLicensePlateRow(@RequestBody AddLicensePlateRowRequest request) {
+        try {
+          //  SaveLicenseCertificateResponse response = milesService.saveLicenseCertificate(request);
+         //   return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
+        return null;
     }
 
 

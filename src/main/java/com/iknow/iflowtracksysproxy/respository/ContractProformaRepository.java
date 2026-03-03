@@ -15,6 +15,4 @@ public interface ContractProformaRepository extends JpaRepository<ContractProfor
 
     boolean existsByContractId(String contractId);
 
-    Optional<ContractProforma> findById(String proformaId);
-
 }

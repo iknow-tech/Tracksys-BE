@@ -10,7 +10,9 @@ import com.iknow.iflowtracksysproxy.dto.request.UnassignDealerRequest;
 import com.iknow.iflowtracksysproxy.dto.response.AssignDealerResponse;
 import com.iknow.iflowtracksysproxy.entity.*;
 import com.iknow.iflowtracksysproxy.integration.miles.MilesApi;
+import com.iknow.iflowtracksysproxy.integration.miles.model.request.VehicleOrderSupplierUpdateRequest;
 import com.iknow.iflowtracksysproxy.integration.miles.model.response.CustomerContractResponse;
+import com.iknow.iflowtracksysproxy.integration.miles.model.response.VehicleOrderSupplierUpdateBaseResponse;
 import com.iknow.iflowtracksysproxy.respository.ContractDealerAssignmentRepository;
 import com.iknow.iflowtracksysproxy.respository.ContractLeasingAssignmentRepository;
 import com.iknow.iflowtracksysproxy.respository.ContractProformaRepository;
@@ -20,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,9 +44,10 @@ public class ContractDealerAssignmentService {
     private final MilesService milesService;
     private final ProformaReviewService proformaReviewService;
     private final MilesUpdateService milesUpdateService;
+    private final MilesApi milesApi;
 
     @Transactional
-    public AssignDealerResponse assignDealerToContracts(AssignDealerRequest request) {
+    public AssignDealerResponse assignDealerToContracts(AssignDealerRequest request) throws Exception {
 
         List<CustomerContractResponse> contracts = request.getContracts();
         int assignedCount = 0;
@@ -52,10 +56,10 @@ public class ContractDealerAssignmentService {
         List<AssignDealerResponse.AssignedContractInfo> assignedContracts = new ArrayList<>();
 
         log.info("Dealer: {} (ID: {})", request.getDealerName(), request.getDealerId());
+        List<Boolean> updatedMilesSupplier = new ArrayList<>();
 
         for (CustomerContractResponse contract : contracts) {
             try {
-
                 Optional<ContractDealerAssignment> existingAssignment = assignmentRepository.findByContractId(contract.getId());
                 if (existingAssignment.isPresent()) {
                     ContractDealerAssignment contractDealerAssignment = existingAssignment.get();
@@ -80,9 +84,32 @@ public class ContractDealerAssignmentService {
                             .build();
 
                     contract.setAssignedDealer(request.getDealerName());
-                    assignmentRepository.save(newAssignment);
+                    newAssignment = assignmentRepository.save(newAssignment);
                 }
 
+                if(contract.getOrdersId() != null) {
+                    // Supplier ve Contact Bilgisinin Güncellenmesi
+                    VehicleOrderSupplierUpdateRequest vehicleOrderSupplierUpdateRequest = new VehicleOrderSupplierUpdateRequest();
+                    vehicleOrderSupplierUpdateRequest.setOrdersId(contract.getOrdersId());
+                    vehicleOrderSupplierUpdateRequest.setSupplierId(request.getDealerId());
+                    vehicleOrderSupplierUpdateRequest.setContactId(request.getDealerContactId());
+                    VehicleOrderSupplierUpdateBaseResponse response = milesApi.vehicleorderSupplierUpdate(vehicleOrderSupplierUpdateRequest);
+
+                    Boolean isMilesUpdateSuccess = response.getData()
+                            .getResponseVehicleOrderSupplierUpdate()
+                            .stream()
+                            .findFirst()
+                            .orElseThrow(() ->
+                                    new IllegalStateException("Supplier update sonucu yok"))
+                            .getResult().equals("1");
+
+                    updatedMilesSupplier.add(isMilesUpdateSuccess);
+                }
+                else {
+                    throw new IllegalArgumentException(
+                            "OrdersId bulunamadı. Bu kontrat için önce Miles sipariş kaydı oluşmalıdır."
+                    );
+                }
 
                 assignedCount++;
 
@@ -92,12 +119,15 @@ public class ContractDealerAssignmentService {
                 log.error("Failed to assign contract {}: {}", contract.getId(), e.getMessage(), e);
                 failedCount++;
                 failedContractIds.add(contract.getId());
+                throw new Exception("Atama sırasında bir hata oluştu");
+
             }
         }
 
         return AssignDealerResponse.builder()
                 .success(failedCount == 0)
                 .assignedCount(assignedCount)
+                .isMilesUpdateSuccess(updatedMilesSupplier)
                 .failedCount(failedCount)
                 .failedContractIds(failedContractIds)
                 .assignedContracts(assignedContracts)
@@ -175,6 +205,10 @@ public class ContractDealerAssignmentService {
                     deliveryDocumentName = deliveryDocument.getFileName();
                 }
 
+                if (assignment.getDealerInvoiceMailSentAt() == null && contract.getTreasuryApprovalDate() != null && contract.getOrdersId() != null) {
+
+                }
+
                 DealerContractInfo contractInfo = DealerContractInfo.builder()
                         .id(contract.getId())
                         .contractId(contract.getId())
@@ -191,7 +225,7 @@ public class ContractDealerAssignmentService {
                         .deliveryLocation(contract.getDeliveryLocation())
                         .ordersId(contract.getOrdersId())
                         .ettn(assignment.getEttn())
-                        .delivery(assignment.getDelivery())
+                        .deliverySupplier(assignment.getDelivery())
                         .shipmentStartDate(assignment.getShipmentBeginDate())
                         .shipmentEndDate(assignment.getShipmentEndDate())
                         .deliveryDate(contract.getDeliveryDate())
@@ -257,10 +291,20 @@ public class ContractDealerAssignmentService {
         if (request.getUpdates() == null || request.getUpdates().isEmpty()) {
             return;
         }
+        List<CustomerContractResponse> allContracts = milesService.getCustomerContracts();
+        CustomerContractResponse contractResponse = new CustomerContractResponse();
 
         try {
             for (DealerContractUpdateItemRequest item : request.getUpdates()) {
-                MilesUpdatedDto milesUpdatedDto= new MilesUpdatedDto();
+                if (item.getContractId() != null) {
+                    Optional<CustomerContractResponse> optionalCustomerContractResponse = allContracts.stream().filter(
+                            contract -> contract.getId().equals(item.getContractId())).findFirst();
+                    if (optionalCustomerContractResponse.isPresent()) {
+                        contractResponse = optionalCustomerContractResponse.get();
+                    }
+                }
+
+                MilesUpdatedDto milesUpdatedDto = new MilesUpdatedDto();
                 milesUpdatedDto.setContractId(item.getContractId());
                 ContractDealerAssignment contractDealerAssignment = assignmentRepository.findByContractIdAndStatus(item.getContractId(), "ACTIVE")
                         .orElseThrow(() ->
@@ -282,17 +326,24 @@ public class ContractDealerAssignmentService {
                 }
                 if (item.getChassisNumber() != null && !item.getChassisNumber().isBlank()) {
                     contractDealerAssignment.setChassisNumber(item.getChassisNumber());
+                    milesUpdatedDto.setChassisNumber(item.getChassisNumber().toString());
+
                 }
 
-                if (item.getDelivery() != null && !item.getDelivery().isBlank()) {
-                    contractDealerAssignment.setDelivery(item.getDelivery());
+                if (item.getDeliverySupplier() != null && !item.getDeliverySupplier().isBlank()) {
+                    contractDealerAssignment.setDelivery(item.getDeliverySupplier());
+                    milesUpdatedDto.setDelivery(item.getDeliverySupplier().toString());
                 }
 
-                if (item.getShipmentBeginDate() != null) {
-                    contractDealerAssignment.setShipmentBeginDate(item.getShipmentBeginDate());
+                if (item.getShipmentStartDate() != null) {
+                    contractDealerAssignment.setShipmentBeginDate(item.getShipmentStartDate());
+                    milesUpdatedDto.setShipmentStartDate(LocalDate.parse(item.getShipmentStartDate()));
+                    milesUpdatedDto.setDeliveryConditionId(contractResponse.getDeliveryConditionId());
                 }
                 if (item.getShipmentEndDate() != null) {
                     contractDealerAssignment.setShipmentEndDate(item.getShipmentEndDate());
+                    milesUpdatedDto.setShipmentEndDate(LocalDate.parse(item.getShipmentEndDate()));
+                    milesUpdatedDto.setDeliveryConditionId(contractResponse.getDeliveryConditionId());
                 }
                 if (item.getEttn() != null && !item.getEttn().isBlank()) {
                     contractDealerAssignment.setEttn(item.getEttn());
@@ -310,8 +361,8 @@ public class ContractDealerAssignmentService {
                 contractDealerAssignment.setUpdatedBy(null);
                 contractDealerAssignment.setUpdatedDate(LocalDateTime.now());
 
-               assignmentRepository.save(contractDealerAssignment);
-               milesUpdateService.update(milesUpdatedDto);
+                assignmentRepository.save(contractDealerAssignment);
+                milesUpdateService.update(milesUpdatedDto);
             }
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -338,7 +389,7 @@ public class ContractDealerAssignmentService {
 
             List<CustomerContractResponse> allContracts = milesService.getCustomerContracts();
 
-            CustomerContractResponse contractResponse =  allContracts.stream().filter(
+            CustomerContractResponse contractResponse = allContracts.stream().filter(
                             contract -> contract.getId().equals(contractId)).findFirst()
                     .orElseThrow(() -> new Exception("İlgili Contract Bulunamadı"));
 
@@ -364,7 +415,7 @@ public class ContractDealerAssignmentService {
             assignment.setCompletedDate(LocalDateTime.now());
             assignment.setCompletedBy(null);
 
-            ContractDealerAssignment contractDealerAssignment= assignmentRepository.save(assignment);
+            ContractDealerAssignment contractDealerAssignment = assignmentRepository.save(assignment);
 
             // notification to dealer
             ProformaReview proformaReview = new ProformaReview();
@@ -375,7 +426,7 @@ public class ContractDealerAssignmentService {
 
             return contractDealerAssignment;
         } catch (Exception e) {
-            throw new RuntimeException("Error complete order .. ",e);
+            throw new RuntimeException("Error complete order .. ", e);
         }
     }
 

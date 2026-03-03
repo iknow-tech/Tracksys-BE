@@ -13,4 +13,12 @@ public class RegisterRequest {
     private String email;
     private String password;
     private User.Role role;
-}
+    private DealerInfoDto dealerInfo;
+
+    @Data
+    public static class DealerInfoDto {
+        private String businessPartnerId;
+        private String dealer;
+        private String contactId;
+        private String contactName;
+    }}

@@ -112,6 +112,10 @@ public class DataResponse {
         @JsonProperty("MWSDateTimeValue")
         @JacksonXmlProperty(localName = "MWSDateTimeValue")
         private MWSDateTimeValue mwsDateTimeValue;
+
+        @JsonProperty("MWSDateValue")
+        @JacksonXmlProperty(localName = "MWSDateValue")
+        private MWSDateValue mwsDateValue;
     }
 
     @Data
@@ -144,6 +148,13 @@ public class DataResponse {
     @Data
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class MWSDateTimeValue {
+        @JsonProperty("value")
+        private String value;
+    }
+
+    @Data
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class MWSDateValue {
         @JsonProperty("value")
         private String value;
     }

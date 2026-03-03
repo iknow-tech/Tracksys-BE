@@ -1,5 +1,6 @@
 package com.iknow.iflowtracksysproxy.dto.auth;
 
+import com.iknow.iflowtracksysproxy.integration.miles.model.response.GetDealerResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,5 +23,17 @@ public class AuthResponse {
         private String email;
         private String name;
         private String role;
+        private DealerInfoDto dealerInfo;
+
+        @Data
+        @Builder
+        @NoArgsConstructor
+        @AllArgsConstructor
+        public static class DealerInfoDto {
+            private String businessPartnerId;
+            private String dealer;
+            private String contactId;
+            private String contactName;
+        }
     }
 }

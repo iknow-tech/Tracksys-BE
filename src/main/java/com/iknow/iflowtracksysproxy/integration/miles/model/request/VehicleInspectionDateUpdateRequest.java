@@ -2,6 +2,8 @@ package com.iknow.iflowtracksysproxy.integration.miles.model.request;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 public class VehicleInspectionDateUpdateRequest {
     private String vehiclePropertyId; // Vehicle Property Id (vehicleinspection'dan gelen)

@@ -14,13 +14,9 @@ import java.nio.charset.StandardCharsets;
 @Configuration
 public class CoreConfig {
 
-    @Bean
-    public XmlMapper xmlMapper() {
-        return new XmlMapper();
-    }
 
     @Bean
-    public RestTemplate xmlRestTemplate(XmlMapper xmlMapper) {
+    public RestTemplate xmlRestTemplate() {
 
         RestTemplate rt = new RestTemplate();
 

@@ -4,6 +4,7 @@ package com.iknow.iflowtracksysproxy.integration.miles.model.response;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlText;
 import lombok.Data;
 
 import java.util.List;
@@ -61,7 +62,7 @@ public class VehicleInspectionUpdateResponse {
         @JacksonXmlProperty(isAttribute = true)
         private String visibilityType;
 
-        @com.fasterxml.jackson.annotation.JsonValue
+        @JacksonXmlText
         private String value;
     }
 

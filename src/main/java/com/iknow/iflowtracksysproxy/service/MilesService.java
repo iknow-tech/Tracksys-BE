@@ -1,17 +1,11 @@
 package com.iknow.iflowtracksysproxy.service;
 
 import com.iknow.iflowtracksysproxy.cache.CustomerContractCache;
-import com.iknow.iflowtracksysproxy.entity.ContractDealerAssignment;
-import com.iknow.iflowtracksysproxy.entity.ContractLeasingAssignment;
-import com.iknow.iflowtracksysproxy.entity.ContractStatus;
-import com.iknow.iflowtracksysproxy.entity.DeliveryDocument;
+import com.iknow.iflowtracksysproxy.entity.*;
 import com.iknow.iflowtracksysproxy.integration.miles.MilesApi;
 import com.iknow.iflowtracksysproxy.integration.miles.model.request.*;
 import com.iknow.iflowtracksysproxy.integration.miles.model.response.*;
-import com.iknow.iflowtracksysproxy.respository.ContractDealerAssignmentRepository;
-import com.iknow.iflowtracksysproxy.respository.ContractLeasingAssignmentRepository;
-import com.iknow.iflowtracksysproxy.respository.ContractProformaRepository;
-import com.iknow.iflowtracksysproxy.respository.DeliveryDocumentRepository;
+import com.iknow.iflowtracksysproxy.respository.*;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -35,8 +29,8 @@ public class MilesService {
     private final CustomerContractCache customerContractCache;
     private final MilesContractSyncService milesContractSyncService;
     private final ContractProformaRepository contractProformaRepository;
-    private final DeliveryDocumentService deliveryDocumentService;
     private final DeliveryDocumentRepository deliveryDocumentRepository;
+    private final VehicleDocumentRepository vehicleDocumentRepository;
 
     /**
      * Get current session ID
@@ -92,27 +86,27 @@ public class MilesService {
 
                 // miles update (Leasing ile Satın Alınan Araçlarda Vehicle Order Statüsünün Güncellenmesi) -- Finansal Kiralama
                 PropertyTypeUpdateRequest propertyTypeUpdateRequest = new PropertyTypeUpdateRequest("266", "10282", "1005943");
-                PropertyTypeUpdateResponse propertyTypeUpdateResponse = updateProperty(propertyTypeUpdateRequest, contractResponse.getVehicleOrderId());
+                PropertyTypeUpdateResponse propertyTypeUpdateResponse = updateProperty(propertyTypeUpdateRequest, contractResponse.getOrdersId());
                 String businessErrorStr = propertyTypeUpdateResponse.getMetadata().getOperationStatus().getBusinessError();
                 boolean hasBusinessError = Boolean.parseBoolean(businessErrorStr);
                 contractResponse.setUpdateVehicleOrderItemStatu(!hasBusinessError);
 
-               // Fleet Vehicle Üzerinde Mülkiyet Türünün Güncellenmesi - AK Leasing
-                MulkUpdateRequest mulkiyetUpdateRequest= new MulkUpdateRequest();
+                // Fleet Vehicle Üzerinde Mülkiyet Türünün Güncellenmesi - AK Leasing
+                MulkUpdateRequest mulkiyetUpdateRequest = new MulkUpdateRequest();
                 mulkiyetUpdateRequest.setFleetVehicleId(contractResponse.getFleetVehicleId());
                 mulkiyetUpdateRequest.setFieldId("2942");
                 mulkiyetUpdateRequest.setSroid("68");
                 mulkiyetUpdateRequest.setValue(leasing.getLeasingEnumId());
-                MulkUpdateResponse mulkiyetUpdateResponse= updateMulk(mulkiyetUpdateRequest);
+                MulkUpdateResponse mulkiyetUpdateResponse = updateMulk(mulkiyetUpdateRequest);
                 contractResponse.setMulkiyetUpdateSuccess(!Boolean.parseBoolean(mulkiyetUpdateResponse.getResponsemetadata().getOperationStatus().getBusinessError()));
 
-               // Fleet Vehicle Üzerinde Mülk Alanının Güncellenmesi
-                MulkUpdateRequest mulkUpdateRequest= new MulkUpdateRequest();
+                // Fleet Vehicle Üzerinde Mülk Alanının Güncellenmesi
+                MulkUpdateRequest mulkUpdateRequest = new MulkUpdateRequest();
                 mulkUpdateRequest.setFleetVehicleId(contractResponse.getFleetVehicleId());
                 mulkUpdateRequest.setFieldId("1001733");
                 mulkUpdateRequest.setSroid("68");
                 mulkUpdateRequest.setValue("1006514");
-                MulkUpdateResponse mulkUpdateResponse= updateMulk(mulkUpdateRequest);
+                MulkUpdateResponse mulkUpdateResponse = updateMulk(mulkUpdateRequest);
                 contractResponse.setMulkUpdateSuccess(!Boolean.parseBoolean(mulkUpdateResponse.getResponsemetadata().getOperationStatus().getBusinessError()));
 
             } else {
@@ -121,7 +115,7 @@ public class MilesService {
             }
             ContractDealerAssignment dealer = dealerMap.get(contractResponse.getId());
             if (dealer != null && dealer.getStatus().equals("ACTIVE")) {
-                if(contractResponse.getTreasuryApprovalDate() != null && contractResponse.getOrdersId() != null) {
+                if (contractResponse.getTreasuryApprovalDate() != null && contractResponse.getOrdersId() != null) {
                     // milestan gelen bu 2 değer dolu ise ilgili bayiye mail gönderilmelidir.
 
 
@@ -132,7 +126,7 @@ public class MilesService {
                     contractResponse.setLeasingInvoiceDate(dealer.getLeasingInvoiceDate());
                     // miles update(Leasing ile Satın Alınan Araçlarda Vehicle Order Açıklamasının Finansal Kiralama Olarak Güncellenmesi)
                     VehicleOrderDescUpdateRequest vehicleOrderDescUpdateRequest = new VehicleOrderDescUpdateRequest();
-                    vehicleOrderDescUpdateRequest.setVehicleOrderId(contractResponse.getVehicleOrderId());
+                    vehicleOrderDescUpdateRequest.setVehicleOrderId(contractResponse.getOrdersId());
                     vehicleOrderDescUpdateRequest.setSroid("266");
                     vehicleOrderDescUpdateRequest.setValue(leasing.getLeasingName() + " " + dealer.getLeasingInvoiceDate() + " Fatura");
                     vehicleOrderDescUpdateRequest.setFieldId("1371");
@@ -160,7 +154,7 @@ public class MilesService {
     }
 
     public List<ContractsToBeRegisteredResponse> getContractsRegistered() {
-        List<ContractsToBeRegisteredResponse> contractsToBeRegisteredResponseList= milesApi.getContractsRegistered();
+        List<ContractsToBeRegisteredResponse> contractsToBeRegisteredResponseList = milesApi.getContractsRegistered();
         List<ContractDealerAssignment> dealerAssignments = contractDealerAssignmentRepository.findAll();
 
         Map<String, ContractDealerAssignment> dealerMap =
@@ -174,6 +168,20 @@ public class MilesService {
             if (dealer != null) {
                 registeredResponse.setAssignedDealer(dealer.getDealerName());
             }
+            Optional<VehicleDocumentAssignment> optionalVehicleDocumentAssignment = vehicleDocumentRepository.findByContractIdAndStatus(registeredResponse.getContractId(), "ACTIVE");
+            if (optionalVehicleDocumentAssignment.isPresent()) {
+                VehicleDocumentAssignment vehicleDocumentAssignment = optionalVehicleDocumentAssignment.get();
+                registeredResponse.setLicenseSerialNumber(vehicleDocumentAssignment.getLicenseSerialNumber());
+                registeredResponse.setExpirationDate(vehicleDocumentAssignment.getExpirationDate());
+                registeredResponse.setHgsTagNo(vehicleDocumentAssignment.getHgsTagNo());
+                registeredResponse.setHgsDate(vehicleDocumentAssignment.getExpirationDate());
+                registeredResponse.setLicensePlateEquipmentRequestDate(vehicleDocumentAssignment.getLicensePlateEquipmentRequestDate());
+                registeredResponse.setLicensePlateEquipmentTransferDate(vehicleDocumentAssignment.getLicensePlateEquipmentTransferDate());
+                registeredResponse.setTrafficInsuranceDate(vehicleDocumentAssignment.getTrafficInsuranceDate());
+                registeredResponse.setHgsRequestedDate(vehicleDocumentAssignment.getHgsRequestedDate());
+
+            }
+
         }
         return contractsToBeRegisteredResponseList;
     }
@@ -210,7 +218,7 @@ public class MilesService {
         return milesApi.updateMulk(request);
     }
 
-    public BaseResponse updateRuhsatBelgeNo(RuhsatBelgeNoUpdateRequest request) {
+    public BaseResponse updateRuhsatBelgeNo(RuhsatUpdateRequest request) {
         return milesApi.updateRuhsatBelgeNo(request);
     }
 
@@ -244,6 +252,10 @@ public class MilesService {
 
     public BaseResponse updateSevkBitisTarihi(SevkBitisTarihiUpdateRequest request) {
         return milesApi.updateSevkBitisTarihi(request);
+    }
+
+    public BaseResponse updateSevkBaslangicTarihi(SevkBaslangicTarihiUpdateRequest request) {
+        return milesApi.updateSevkBaslangicTarihi(request);
     }
 
     public VehicleInspectionUpdateResponse getVehicleInspection(VehicleInspectionUpdateRequest request) {
@@ -307,10 +319,14 @@ public class MilesService {
     // Vehicle Order Statüsünün Onaylandı Olarak Güncellenmesi
     public TriggerMWSBulkProcessorResponse triggerMWSBulkProcessorStatu(String ordersId) {
         TriggerMWSBulkProcessorResponse triggerMWSBulkProcessorResponse = new TriggerMWSBulkProcessorResponse();
-        if(ordersId !=null){
-            triggerMWSBulkProcessorResponse=  milesApi.triggerMWSBulkProcessorStatu(ordersId);
+        if (ordersId != null) {
+            triggerMWSBulkProcessorResponse = milesApi.triggerMWSBulkProcessorStatu(ordersId);
         }
         return triggerMWSBulkProcessorResponse;
+    }
+
+    public String SaveMWSFleetVehicle(String registrationDate, String licensePlate, String fleetVehicleId) {
+      return milesApi.SaveMWSFleetVehicle(registrationDate, licensePlate, fleetVehicleId);
     }
 
     /**
@@ -326,6 +342,10 @@ public class MilesService {
     @Data
     public static class SessionInfo {
         private String sessionId;
+    }
+
+    public SaveLicenseCertificateResponse add (SaveLicenseCertificateRequest request) {
+        return milesApi.saveLicenseCertificate(request);
     }
 
 }

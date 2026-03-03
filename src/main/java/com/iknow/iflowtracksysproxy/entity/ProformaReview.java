@@ -36,7 +36,7 @@ public class ProformaReview {
 
     // Satın alma biriminin yüklediği ek belge
     @Column(name = "additional_document_path")
-    private String additionalDocumentPath;
+        private String additionalDocumentPath;
 
     // Dosya adı (bayi görecek)
     @Column(name = "additional_document_name")

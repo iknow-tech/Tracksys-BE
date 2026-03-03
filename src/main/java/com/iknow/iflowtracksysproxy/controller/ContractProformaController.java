@@ -43,7 +43,7 @@ public class ContractProformaController {
     @GetMapping("/download/{proformaId}")
     public ResponseEntity<Resource> download(@PathVariable String proformaId) {
 
-        ContractProforma proforma = proformaService.findById(proformaId)
+        ContractProforma proforma = proformaService.findById(Long.getLong(proformaId))
                 .orElseThrow(() -> new RuntimeException("Proforma bulunamadı"));
 
         Resource resource = proformaService.loadProformaFile(proformaId);

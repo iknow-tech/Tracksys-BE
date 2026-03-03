@@ -18,6 +18,12 @@ public class MilesUpdatedResponse {
     Boolean bulkProcessorSuccess;
     Boolean chassisNoUpdateSuccess;
     Boolean motorNoUpdateSuccess;
-
-
+    Boolean licenceSerialNumberUpdateSuccess;
+    Boolean expirationDateUpdateSuccess;
+    Boolean hgsTagNoUpdateSuccess;
+    Boolean hgsDateUpdateSuccess;
+    Boolean licensePlataEquipmentUpdateSucceess;
+    Boolean licensePlataEquipmentTransferUpdateSucceess;
+    Boolean trafficInsuranceDateUpdateSuccess;
+    Boolean deliverySupplierUpdateSuccess;
 }

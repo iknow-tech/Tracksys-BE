@@ -44,7 +44,7 @@ public class DealerContractInfo {
     private String sysEnumerationId;
     private String assignedBy;
     private String status;
-    private String delivery;
+    private String deliverySupplier;
     private String deliveryLocation;
     private boolean hasProforma;
     private String deliveryTerms;

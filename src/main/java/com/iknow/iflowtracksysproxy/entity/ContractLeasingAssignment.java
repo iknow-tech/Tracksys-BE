@@ -52,4 +52,5 @@ public class ContractLeasingAssignment {
     private String deliveredBy;
     private LocalDateTime deliveredDate;
 
+
 }

@@ -13,7 +13,29 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.List;
 
@@ -62,8 +84,8 @@ public class MilesApi {
             .asString("xml/GenericAttributeUpdateService_PlakaAvadanlikAlindiTarihiUpdate.xml");
     private static final String GenericAttributeUpdateService_TrafikSigortasiTalepTarihiUpdateRequest = ResourceReader
             .asString("xml/GenericAttributeUpdateService_TrafikSigortasiTalepTarihiUpdate.xml");
-    private static final String GenericAttributeUpdateService_SevkBitisTarihiUpdateRequest = ResourceReader
-            .asString("xml/GenericAttributeUpdateService_SevkBitisTarihiUpdate.xml");
+    private static final String GenericAttributeUpdateService_SevkTarihiUpdateRequest = ResourceReader
+            .asString("xml/GenericAttributeUpdateService_SevkTarihiUpdate.xml");
     private static final String PRJ_SM_VehicleDocuments_GetTrafficInsuranceRequest = ResourceReader
             .asString("xml/PRJ_SM_VehicleDocuments_GetTrafficInsurance.xml");
     private static final String GenericAttributeUpdateService_TrafficRegistrationNumberUpdateRequest = ResourceReader
@@ -86,7 +108,10 @@ public class MilesApi {
             .asString("xml/PRJ_SM_VehicleOrderSupplierUpdate.xml");
     private static final String GenericAttributeUpdateService_VehicleOrderDescription = ResourceReader
             .asString("xml/GenericAttributeUpdateService_VehicleOrderDescription.xml");
-    private static final String TriggerMWSBulkProcessor= ResourceReader.asString("xml/TriggerMWSBulkProcessor.xml");
+    private static final String TriggerMWSBulkProcessor = ResourceReader.asString("xml/TriggerMWSBulkProcessor.xml");
+    private static final String GetMWSFleetVehicleRequest = ResourceReader.asString("xml/GetMWSFleetVehicle.xml");
+    private static final String SaveMWSFleetVehicleRequest = ResourceReader.asString("xml/SaveMWSFleetVehicle.xml");
+
 
     private final RestTemplate xmlRestTemplate;
 
@@ -416,10 +441,9 @@ public class MilesApi {
         log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService?sessionId={}",
                 baseUrl, sessionId);
 
-        // XML body template'ini request objesine göre oluştur
         String body = PRJ_SM_VehicleDocumentsRequest
                 .replace("{sessionId}", sessionId)
-                .replace("{ordersId}", request.getOrdersId());
+                .replace("{fleetvehicleId}", request.getOrdersId());
 
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -470,7 +494,7 @@ public class MilesApi {
         }
     }
 
-    public BaseResponse updateRuhsatBelgeNo(RuhsatBelgeNoUpdateRequest request) {
+    public BaseResponse updateRuhsatBelgeNo(RuhsatUpdateRequest request) {
         log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService?sessionId={}",
                 baseUrl, sessionId);
 
@@ -536,7 +560,7 @@ public class MilesApi {
                 .replace("{vehiclePropertyId}", request.getVehiclePropertyId())
                 .replace("{sroid}", request.getSroid())
                 .replace("{fieldId}", request.getFieldId())
-                .replace("{dateTimeValue}", request.getDateTimeValue());
+                .replace("{dateTimeValue}", request.getDateTimeValue().toString());
 
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -711,7 +735,7 @@ public class MilesApi {
         log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService?sessionId={}",
                 baseUrl, sessionId);
 
-        String body = GenericAttributeUpdateService_SevkBitisTarihiUpdateRequest
+        String body = GenericAttributeUpdateService_SevkTarihiUpdateRequest
                 .replace("{sessionId}", sessionId)
                 .replace("{deliveryConditionId}", request.getDeliveryConditionId())
                 .replace("{sroid}", request.getSroid())
@@ -736,6 +760,37 @@ public class MilesApi {
             return null;
         }
     }
+
+    public BaseResponse updateSevkBaslangicTarihi(SevkBaslangicTarihiUpdateRequest request) {
+        log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService?sessionId={}",
+                baseUrl, sessionId);
+
+        String body = GenericAttributeUpdateService_SevkTarihiUpdateRequest
+                .replace("{sessionId}", sessionId)
+                .replace("{deliveryConditionId}", request.getDeliveryConditionId())
+                .replace("{sroid}", request.getSroid())
+                .replace("{fieldId}", request.getFieldId())
+                .replace("{dateTimeValue}", request.getDateTimeValue());
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_XML);
+
+            HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+            BaseResponse response = xmlRestTemplate.postForEntity(
+                    baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GenericAttributeUpdateService",
+                    httpEntity,
+                    BaseResponse.class).getBody();
+
+            return response;
+
+        } catch (Exception e) {
+            log.error("MilesApi.updateSevkBitisTarihi error: ", e);
+            return null;
+        }
+    }
+
 
     public TrafficInsuranceGetResponse getTrafficInsurance(TrafficInsuranceGetRequest request) {
         log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch{}",
@@ -862,7 +917,7 @@ public class MilesApi {
         String body = PRJ_SM_VehicleOrderSupplierRequest
                 .replace("{sessionId}", sessionId)
                 .replace("{supplierId}", request.getSupplierId())
-                .replace("{contactId}", request.getSupplierId())
+                .replace("{contactId}", request.getContactId())
                 .replace("{ordersId}", request.getOrdersId());
 
         try {
@@ -961,11 +1016,7 @@ public class MilesApi {
         String body = MWS_TriggerMWSBulkProcessor_ApproveContractRequest
                 .replace("{sessionId}", sessionId)
                 .replace("{contractId}", request.getContractId())
-                .replace("{deliveryDate}", request.getDeliveryDate())
-                .replace("{deliveryMileage}", request.getDeliveryMileage())
-                .replace("{receiptByContact}", request.getReceiptByContact())
-                .replace("{isDriver}", request.getIsDriver())
-                .replace("{deliveryLocation}", request.getDeliveryLocation());
+                .replace("{deliveryDate}", request.getDeliveryDate());
 
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -1110,7 +1161,7 @@ public class MilesApi {
                 .replace("{sessionId}", sessionId)
                 .replace("{vehicleOrderId}", request.getVehicleOrderId())
                 .replace("{orderId}", request.getSroid())
-                .replace("{id}",request.getFieldId())
+                .replace("{id}", request.getFieldId())
                 .replace("{value}", request.getValue());
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -1133,7 +1184,7 @@ public class MilesApi {
 
         String body = TriggerMWSBulkProcessor
                 .replace("{sessionId}", sessionId)
-                .replace("{bulkProcessorId}", "1005853")
+                .replace("{bulkProcessorId}", "1005524")
                 .replace("{ordersId}", ordersId);
 
         try {
@@ -1143,11 +1194,119 @@ public class MilesApi {
             HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
 
             TriggerMWSBulkProcessorResponse response = xmlRestTemplate.postForEntity(
-                    baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/TriggerMWSBulkProcessorStatu",
+                    baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/TriggerMWSBulkProcessor",
                     httpEntity,
                     TriggerMWSBulkProcessorResponse.class).getBody();
 
             return response;
+
+        } catch (Exception e) {
+            log.error("MilesApi.triggerMWSBulkProcessorStatu error: ", e);
+            return null;
+        }
+    }
+
+    public String SaveMWSFleetVehicle(String registrationDate, String licensePlate, String fleetVehicleId) {
+        String mwsFleetVehicleXml = GetMWSFleetVehicle(fleetVehicleId);
+        if (mwsFleetVehicleXml == null) {
+            throw new RuntimeException("GetMWSFleetVehicle response null geldi");
+        }
+        String template = loadSaveTemplate();
+
+        String regRegistrationDate = LocalDate.parse(registrationDate)
+                .atTime(LocalTime.now(ZoneId.of("Europe/Istanbul")))
+                .atZone(ZoneOffset.UTC)
+                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+
+        String usageBlock = template
+                .replace("{registrationDate}", regRegistrationDate)
+                .replace("{licensePlate}", licensePlate);
+
+        String saveRequestXml = injectPlateBlock(mwsFleetVehicleXml, usageBlock);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_XML);
+
+        HttpEntity<String> entity = new HttpEntity<>(saveRequestXml, headers);
+
+        return xmlRestTemplate.postForObject(
+                baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/SaveMWSFleetVehicle",
+                entity,
+                String.class);
+
+    }
+
+    private String injectPlateBlock(String originalXml, String usageSetXml) {
+
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(false);
+            DocumentBuilder builder = factory.newDocumentBuilder();
+
+            Document originalDoc = builder.parse(
+                    new InputSource(new StringReader(originalXml)));
+
+            XPath xPath = XPathFactory.newInstance().newXPath();
+
+            Node usageSetNode = (Node) xPath.evaluate(
+                    "//MWSLicensePlateUsage_Set",
+                    originalDoc,
+                    XPathConstants.NODE);
+
+            if (usageSetNode == null) {
+                throw new RuntimeException("MWSLicensePlateUsage_Set bulunamadı");
+            }
+
+            Document tempDoc = builder.parse(
+                    new InputSource(new StringReader(usageSetXml)));
+
+            Node newUsageNode = tempDoc.getDocumentElement().getFirstChild();
+
+            Node importedNode = originalDoc.importNode(newUsageNode, true);
+
+            usageSetNode.appendChild(importedNode);
+
+            Transformer transformer = TransformerFactory.newInstance().newTransformer();
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+
+            StringWriter writer = new StringWriter();
+            transformer.transform(new DOMSource(originalDoc), new StreamResult(writer));
+
+            return writer.toString();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Inject işlemi başarısız", e);
+        }
+    }
+
+
+    private String loadSaveTemplate() {
+        try (InputStream inputStream =
+                     getClass().getClassLoader()
+                             .getResourceAsStream("xml/SaveMWSFleetVehicle.xml")) {
+
+            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+
+        } catch (Exception e) {
+            throw new RuntimeException("SaveMWSFleetVehicle.xml okunamadı", e);
+        }
+    }
+
+    public String GetMWSFleetVehicle(String fleetVehicleId) {
+        log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GetMWSFleetVehicle"
+                , sessionId);
+
+        String body = GetMWSFleetVehicleRequest
+                .replace("{sessionId}", sessionId)
+                .replace("{fleetVehicleId}", fleetVehicleId);
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_XML);
+
+            HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+
+            return xmlRestTemplate.postForObject(baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/GetMWSFleetVehicle", httpEntity, String.class);
 
         } catch (Exception e) {
             log.error("MilesApi.triggerMWSBulkProcessorStatu error: ", e);

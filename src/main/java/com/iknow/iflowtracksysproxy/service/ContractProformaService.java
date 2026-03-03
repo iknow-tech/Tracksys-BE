@@ -9,7 +9,6 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -80,13 +79,13 @@ public class ContractProformaService {
         return repository.findByContractIdOrderByUploadedAtDesc(contractId);
     }
 
-    public Optional<ContractProforma> findById(String proformaId) {
+    public Optional<ContractProforma> findById(Long proformaId) {
         return repository.findById(proformaId);
     }
 
     public Resource loadProformaFile(String proformaId) {
 
-        ContractProforma proforma = findById(proformaId)
+        ContractProforma proforma = findById(Long.getLong(proformaId))
                 .orElseThrow(() -> new RuntimeException("Proforma bulunamadı"));
 
         try {

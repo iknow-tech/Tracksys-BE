@@ -1,0 +1,5 @@
+<SofEnvelope>
+    <fleetvehicleid>{fleetVehicleId}</fleetvehicleid>
+    <action>execute</action>
+    <sessionID>{sessionId}</sessionID>
+</SofEnvelope>
