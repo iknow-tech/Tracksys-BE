@@ -51,4 +51,6 @@ public class DealerContractInfo {
     private String deliveryMethod;
     private String deliveryDocumentId;
     private String deliveryDocumentName;
+    private String vehicleOrderItemId;
+    private String fleetVehicleId;
 }

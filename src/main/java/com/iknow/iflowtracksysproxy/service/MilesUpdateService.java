@@ -158,9 +158,10 @@ public class MilesUpdateService {
             }
             VehicleInspectionUpdateRequest vehicleInspectionUpdateRequest = new VehicleInspectionUpdateRequest();
             vehicleInspectionUpdateRequest.setOrdersId(milesUpdatedDto.getFleetVehicleId());
-            VehicleInspectionUpdateResponse vehicleInspectionUpdateResponse = milesService.getVehicleInspection(vehicleInspectionUpdateRequest);
+            VehicleInspectionUpdateResponse vehicleInspectionUpdateResponse = new VehicleInspectionUpdateResponse();
 
             if (milesUpdatedDto.getLicenseSerialNumber() != null && !milesUpdatedDto.getLicenseSerialNumber().equals("")) {
+                vehicleInspectionUpdateResponse= milesService.getVehicleInspection(vehicleInspectionUpdateRequest);
                 String licenseDocumentNumber = null;
                 if (vehicleInspectionUpdateResponse != null && vehicleInspectionUpdateResponse.getData() != null) {
                     VehicleInspectionUpdateResponse.VehicleDocument document =
@@ -186,6 +187,7 @@ public class MilesUpdateService {
 
             if (milesUpdatedDto.getExpirationDate() != null && !milesUpdatedDto.getExpirationDate().equals("")) {
                 String vehicleInspection = null;
+                vehicleInspectionUpdateResponse= milesService.getVehicleInspection(vehicleInspectionUpdateRequest);
                 if (vehicleInspectionUpdateResponse != null && vehicleInspectionUpdateResponse.getData() != null) {
                     VehicleInspectionUpdateResponse.VehicleDocument document =
                             vehicleInspectionUpdateResponse.getData()
@@ -210,6 +212,7 @@ public class MilesUpdateService {
 
             if (milesUpdatedDto.getHgsTagNo() != null && !milesUpdatedDto.getHgsTagNo().equals("")) {
                 String hgsTagNo = null;
+                vehicleInspectionUpdateResponse= milesService.getVehicleInspection(vehicleInspectionUpdateRequest);
                 if (vehicleInspectionUpdateResponse != null && vehicleInspectionUpdateResponse.getData() != null) {
                     VehicleInspectionUpdateResponse.VehicleDocument document =
                             vehicleInspectionUpdateResponse.getData()

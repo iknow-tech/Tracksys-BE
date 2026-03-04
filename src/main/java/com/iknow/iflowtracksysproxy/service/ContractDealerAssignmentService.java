@@ -239,6 +239,9 @@ public class ContractDealerAssignmentService {
                         .deliveryTerms(contract.getDeliveryTerms())
                         .leasingInvoiceDate(assignment.getLeasingInvoiceDate())
                         .deliveryMethod(assignment.getDeliveryMethod())
+                        .vehicleOrderItemId(contract.getVehicleOrderItemId())
+                        .fleetVehicleId(contract.getFleetVehicleId())
+
 
                         // Atama Bilgileri (assignment objesinden)
                         .dealerName(assignment.getDealerName())
@@ -360,16 +363,16 @@ public class ContractDealerAssignmentService {
 
                 contractDealerAssignment.setUpdatedBy(null);
                 contractDealerAssignment.setUpdatedDate(LocalDateTime.now());
-
-                assignmentRepository.save(contractDealerAssignment);
                 milesUpdateService.update(milesUpdatedDto);
+                assignmentRepository.save(contractDealerAssignment);
             }
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("Error updating dealer contracts: {}", e.getMessage(), e);
             throw new RuntimeException("Error updating dealer contracts", e);
         }
     }
 
+    @Transactional(readOnly = true)
     public ContractDealerAssignment findByContractId(String contractId) {
         ContractDealerAssignment contractDealerAssignment = new ContractDealerAssignment();
         Optional<ContractDealerAssignment> optionalContractDealerAssignment = assignmentRepository.findByContractIdAndStatus(contractId, "ACTIVE");
@@ -436,6 +439,120 @@ public class ContractDealerAssignmentService {
         return deliveryDocument != null
                 && assignment.getDeliveryMethod() != null
                 && "ACTIVE".equals(assignment.getStatus());
+    }
+
+    public List<DealerContractInfo> getAllDealerContractsWithDetails() {
+
+        log.info("Fetching detailed contracts for all dealers");
+
+        List<ContractDealerAssignment> assignments =
+                assignmentRepository.findByStatus("ACTIVE");
+
+        if (assignments.isEmpty()) {
+            log.info("No active assignments found");
+            return new ArrayList<>();
+        }
+
+        List<CustomerContractResponse> allContracts = customerContractCache.get();
+
+        if (allContracts == null || allContracts.isEmpty()) {
+            milesContractSyncService.syncFromMiles("ADMIN_ON_DEMAND");
+            allContracts = customerContractCache.get();
+        }
+
+        if (allContracts == null || allContracts.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        Map<String, CustomerContractResponse> contractMap = allContracts.stream()
+                .collect(Collectors.toMap(
+                        CustomerContractResponse::getId,
+                        contract -> contract,
+                        (existing, replacement) -> existing
+                ));
+
+        List<DealerContractInfo> detailedContracts = new ArrayList<>();
+
+        for (ContractDealerAssignment assignment : assignments) {
+            try {
+                String contractId = assignment.getContractId();
+                CustomerContractResponse contract = contractMap.get(contractId);
+
+                if (contract == null) {
+                    log.warn("Contract {} not found in MilesApi response", contractId);
+                    continue;
+                }
+
+                boolean hasProforma = contractProformaRepository.existsByContractId(contractId);
+
+                ContractLeasingAssignment leasingAssignment = new ContractLeasingAssignment();
+                Optional<ContractLeasingAssignment> leasingOpt =
+                        contractLeasingAssignmentRepository.findByContractIdAndStatus(contractId, "ACTIVE");
+                if (leasingOpt.isPresent()) {
+                    leasingAssignment = leasingOpt.get();
+                }
+
+                String deliveryDocumentId = null;
+                String deliveryDocumentName = null;
+                Optional<DeliveryDocument> deliveryDocOpt =
+                        deliveryDocumentRepository.findByContractId(contractId);
+                if (deliveryDocOpt.isPresent()) {
+                    DeliveryDocument doc = deliveryDocOpt.get();
+                    deliveryDocumentId = doc.getId() != null ? doc.getId().toString() : null;
+                    deliveryDocumentName = doc.getFileName();
+                }
+
+                DealerContractInfo contractInfo = DealerContractInfo.builder()
+                        .id(contract.getId())
+                        .contractId(contract.getId())
+                        .contractApprovedDate(contract.getContractapproveddate())
+                        .customer(contract.getCustomer())
+                        .make(contract.getMake())
+                        .model(contract.getModel())
+                        .modelYear(contract.getModelYear())
+                        .leasingName(leasingAssignment.getLeasingName())
+                        .sysEnumerationId(leasingAssignment.getLeasingEnumId())
+                        .version(contract.getVersion())
+                        .color(contract.getColor())
+                        .deliveryPerson(contract.getDeliveryPerson())
+                        .deliveryLocation(contract.getDeliveryLocation())
+                        .ordersId(contract.getOrdersId())
+                        .ettn(assignment.getEttn())
+                        .deliverySupplier(assignment.getDelivery())
+                        .shipmentStartDate(assignment.getShipmentBeginDate())
+                        .shipmentEndDate(assignment.getShipmentEndDate())
+                        .deliveryDate(contract.getDeliveryDate())
+                        .netPrice(assignment.getNetPrice())
+                        .otv(assignment.getOtv())
+                        .chassisNumber(assignment.getChassisNumber())
+                        .motorNumber(assignment.getMotorNumber())
+                        .options(contract.getOptions())
+                        .uttsGpsInstallation(contract.getUttsGpsInstallation())
+                        .treasuryApprovalDate(contract.getTreasuryApprovalDate())
+                        .deliveryTerms(contract.getDeliveryTerms())
+                        .leasingInvoiceDate(assignment.getLeasingInvoiceDate())
+                        .deliveryMethod(assignment.getDeliveryMethod())
+                        .dealerName(assignment.getDealerName())
+                        .assignedDate(assignment.getAssignedDate())
+                        .assignedBy(assignment.getAssignedBy())
+                        .status(assignment.getStatus())
+                        .hasProforma(hasProforma)
+                        .deliveryDocumentId(deliveryDocumentId)
+                        .deliveryDocumentName(deliveryDocumentName)
+                        .vehicleOrderItemId(contract.getVehicleOrderItemId())
+                        .fleetVehicleId(contract.getFleetVehicleId())
+                        .build();
+
+                detailedContracts.add(contractInfo);
+
+            } catch (Exception e) {
+                log.error("Error processing assignment for contract {}: {}",
+                        assignment.getContractId(), e.getMessage(), e);
+            }
+        }
+
+        log.info("Returning {} total detailed contracts", detailedContracts.size());
+        return detailedContracts;
     }
 
 

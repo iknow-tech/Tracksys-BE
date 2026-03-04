@@ -8,6 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.core.io.Resource;
@@ -34,6 +35,7 @@ public class ContractProformaController {
     }
 
     @GetMapping("/contract/{contractId}")
+    @Transactional(readOnly = true)
     public ResponseEntity<List<ContractProforma>> getByContract( @PathVariable String contractId) {
         return ResponseEntity.ok(
                 proformaService.getByContractId(contractId)
