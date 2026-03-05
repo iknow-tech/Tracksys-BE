@@ -128,7 +128,7 @@ public class MilesService {
                     VehicleOrderDescUpdateRequest vehicleOrderDescUpdateRequest = new VehicleOrderDescUpdateRequest();
                     vehicleOrderDescUpdateRequest.setVehicleOrderId(contractResponse.getOrdersId());
                     vehicleOrderDescUpdateRequest.setSroid("266");
-                    vehicleOrderDescUpdateRequest.setValue(leasing.getLeasingName() + " " + dealer.getLeasingInvoiceDate() + " Fatura");
+                    vehicleOrderDescUpdateRequest.setValue("Leasing- "+leasing.getLeasingName() + " " + dealer.getLeasingInvoiceDate() + " Fatura");
                     vehicleOrderDescUpdateRequest.setFieldId("1371");
                     VehicleOrderDescUpdateResponse vehicleOrderDescUpdateResponse = updateVehicleOrderDesc(vehicleOrderDescUpdateRequest);
                     String businessErrorStr = vehicleOrderDescUpdateResponse.getMetadata().getOperationstatus().getBusinesserror();
@@ -173,7 +173,7 @@ public class MilesService {
                 VehicleDocumentAssignment vehicleDocumentAssignment = optionalVehicleDocumentAssignment.get();
                 registeredResponse.setLicenseSerialNumber(vehicleDocumentAssignment.getLicenseSerialNumber());
                 registeredResponse.setExpirationDate(vehicleDocumentAssignment.getExpirationDate());
-                registeredResponse.setHgsTagNo(vehicleDocumentAssignment.getHgsTagNo());
+                registeredResponse.setHgsCode(vehicleDocumentAssignment.getHgsCode());
                 registeredResponse.setHgsDate(vehicleDocumentAssignment.getExpirationDate());
                 registeredResponse.setLicensePlateEquipmentRequestDate(vehicleDocumentAssignment.getLicensePlateEquipmentRequestDate());
                 registeredResponse.setLicensePlateEquipmentTransferDate(vehicleDocumentAssignment.getLicensePlateEquipmentTransferDate());

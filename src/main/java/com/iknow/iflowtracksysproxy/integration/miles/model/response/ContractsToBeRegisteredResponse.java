@@ -61,7 +61,7 @@ public class ContractsToBeRegisteredResponse {
 
     private String licenseSerialNumber;
     private LocalDate expirationDate;
-    private String hgsTagNo;
+    private String hgsCode;
     private LocalDate hgsDate;
     private LocalDate licensePlateEquipmentRequestDate;
     private LocalDate licensePlateEquipmentTransferDate;

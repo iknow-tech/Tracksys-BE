@@ -33,18 +33,19 @@ public class VehicleDocumentService {
     private final MilesUpdateService milesUpdateService;
 
     @Transactional
-    public VehicleDocumentAssignment updateVehicleDocument(VehicleDocumentUpdateRequest request) {
-        VehicleDocumentAssignment vehicleDocumentAssignment = new VehicleDocumentAssignment();
+    public List<VehicleDocumentAssignment> updateVehicleDocument(VehicleDocumentUpdateRequest request) {
         if (request.getUpdates() == null || request.getUpdates().isEmpty()) {
             return null;
         }
+        List<VehicleDocumentAssignment> results = new ArrayList<>();
+
         try {
             for (VehicleDocumentUpdateItemRequest item : request.getUpdates()) {
                 MilesUpdatedDto milesUpdatedDto = new MilesUpdatedDto();
-                milesUpdatedDto.setContractId(item.getContractId());
-                vehicleDocumentAssignment = findByContractId(item.getContractId());
+                VehicleDocumentAssignment vehicleDocumentAssignment = findByContractId(item.getContractId());
 
                 if (vehicleDocumentAssignment == null) {
+                    vehicleDocumentAssignment = new VehicleDocumentAssignment();
                     vehicleDocumentAssignment.setContractId(item.getContractId());
                 }
                 if (item.getLicenseSerialNumber() != null) {
@@ -57,9 +58,9 @@ public class VehicleDocumentService {
                     milesUpdatedDto.setExpirationDate(item.getExpirationDate());
                 }
 
-                if (item.getHgsTagNo() != null) {
-                    vehicleDocumentAssignment.setHgsTagNo(item.getHgsTagNo());
-                    milesUpdatedDto.setHgsTagNo(item.getHgsTagNo());
+                if (item.getHgsCode() != null) {
+                    vehicleDocumentAssignment.setHgsCode(item.getHgsCode());
+                    milesUpdatedDto.setHgsCode(item.getHgsCode());
                 }
 
                 if (item.getHgsRequestedDate() != null) {
@@ -83,27 +84,25 @@ public class VehicleDocumentService {
                 }
 
                 milesUpdatedDto.setFleetVehicleId(item.getFleetVehicleId() != null ? item.getFleetVehicleId() : null);
-                vehicleDocumentAssignment.setCreatedAt(LocalDateTime.now());
                 milesUpdateService.update(milesUpdatedDto);
+                vehicleDocumentAssignment.setStatus("ACTIVE");
+                vehicleDocumentAssignment.setCreatedAt(LocalDateTime.now());
                 vehicleDocumentRepository.save(vehicleDocumentAssignment);
+                results.add(vehicleDocumentAssignment);
 
             }
         } catch (Exception e) {
-            log.error(e.getMessage());
-            throw new RuntimeException("Error updating dealer contracts", e);
+            log.error("VehicleDocument güncelleme hatası: {}", e.getMessage());
+            throw new RuntimeException("Error updating vehicle documents", e);
         }
 
-        return vehicleDocumentAssignment;
+        return results;
     }
 
     public VehicleDocumentAssignment findByContractId(String contractId) {
-        VehicleDocumentAssignment vehicleDocumentAssignment = new VehicleDocumentAssignment();
-        Optional<VehicleDocumentAssignment> optional = vehicleDocumentRepository.findByContractIdAndStatus(contractId, "ACTIVE");
-
-        if (optional.isPresent()) {
-            vehicleDocumentAssignment = optional.get();
-        }
-        return vehicleDocumentAssignment;
+        return vehicleDocumentRepository
+                .findByContractIdAndStatus(contractId, "ACTIVE")
+                .orElse(null);
     }
 
 

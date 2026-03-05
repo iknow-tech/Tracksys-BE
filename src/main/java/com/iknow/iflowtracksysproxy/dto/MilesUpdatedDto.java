@@ -31,7 +31,7 @@ public class MilesUpdatedDto {
     private String licenseSerialNumber;
     private String fleetVehicleId;
     private LocalDate expirationDate;
-    private String hgsTagNo;
+    private String hgsCode;
     private LocalDate hgsRequestedDate;
     private LocalDate licensePlateEquipmentRequestDate;
     private LocalDate licensePlateEquipmentTransferDate;

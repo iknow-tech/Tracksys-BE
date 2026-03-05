@@ -17,7 +17,7 @@ public class VehicleDocumentUpdateItemRequest {
     private String licencePlate;
     private String licenseSerialNumber;
     private LocalDate expirationDate;
-    private String hgsTagNo;
+    private String hgsCode;
     private LocalDate hgsRequestedDate;
     private LocalDate licensePlateEquipmentRequestDate;
     private LocalDate licensePlateEquipmentTransferDate;

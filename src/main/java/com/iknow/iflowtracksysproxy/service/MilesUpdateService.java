@@ -156,9 +156,9 @@ public class MilesUpdateService {
                 SasiNoUpdateResponse motorNoUpdateResponse = milesService.updateSasiNo(motorNoUpdateRequest);
                 milesUpdatedResponse.setMotorNoUpdateSuccess(!Boolean.parseBoolean(motorNoUpdateResponse.getResponsemetadata().getOperationStatus().getBusinessError()));
             }
+            VehicleInspectionUpdateResponse vehicleInspectionUpdateResponse = new VehicleInspectionUpdateResponse();
             VehicleInspectionUpdateRequest vehicleInspectionUpdateRequest = new VehicleInspectionUpdateRequest();
             vehicleInspectionUpdateRequest.setOrdersId(milesUpdatedDto.getFleetVehicleId());
-            VehicleInspectionUpdateResponse vehicleInspectionUpdateResponse = new VehicleInspectionUpdateResponse();
 
             if (milesUpdatedDto.getLicenseSerialNumber() != null && !milesUpdatedDto.getLicenseSerialNumber().equals("")) {
                 vehicleInspectionUpdateResponse= milesService.getVehicleInspection(vehicleInspectionUpdateRequest);
@@ -210,7 +210,7 @@ public class MilesUpdateService {
                 milesUpdatedResponse.setExpirationDateUpdateSuccess(!Boolean.parseBoolean(baseResponse.getMetadata().getOperationstatus().getBusinesserror()));
             }
 
-            if (milesUpdatedDto.getHgsTagNo() != null && !milesUpdatedDto.getHgsTagNo().equals("")) {
+            if (milesUpdatedDto.getHgsCode() != null && !milesUpdatedDto.getHgsCode().equals("")) {
                 String hgsTagNo = null;
                 vehicleInspectionUpdateResponse= milesService.getVehicleInspection(vehicleInspectionUpdateRequest);
                 if (vehicleInspectionUpdateResponse != null && vehicleInspectionUpdateResponse.getData() != null) {
@@ -228,7 +228,7 @@ public class MilesUpdateService {
                 hgsEtiketNoUpdateRequest.setVehiclePropertyId(hgsTagNo);
                 hgsEtiketNoUpdateRequest.setSroid("262");
                 hgsEtiketNoUpdateRequest.setFieldId("1326");
-                hgsEtiketNoUpdateRequest.setHgsEtiketNo(milesUpdatedDto.getHgsTagNo());
+                hgsEtiketNoUpdateRequest.setHgsEtiketNo(milesUpdatedDto.getHgsCode());
                 BaseResponse baseResponse = milesService.updateHgsEtiketNo(hgsEtiketNoUpdateRequest);
                 DataResponse.MWSBulkAttributeUpdate mwsBulkAttributeUpdate = baseResponse.getData().getMwsBulkAttributeUpdate();
                 milesUpdatedResponse.setHgsTagNoUpdateSuccess(!Boolean.parseBoolean(baseResponse.getMetadata().getOperationstatus().getBusinesserror()));
@@ -236,6 +236,7 @@ public class MilesUpdateService {
 
             if (milesUpdatedDto.getHgsRequestedDate() != null && !milesUpdatedDto.getHgsRequestedDate().equals("")) {
                 String hgsTagNo = null;
+                vehicleInspectionUpdateResponse= milesService.getVehicleInspection(vehicleInspectionUpdateRequest);
                 if (vehicleInspectionUpdateResponse != null && vehicleInspectionUpdateResponse.getData() != null) {
                     VehicleInspectionUpdateResponse.VehicleDocument document =
                             vehicleInspectionUpdateResponse.getData()
@@ -247,6 +248,7 @@ public class MilesUpdateService {
                         hgsTagNo = document.getHgsTagNo().getValue();
                     }
                 }
+
                 HgsTalepTarihiUpdateRequest hgsTalepTarihiUpdateRequest = new HgsTalepTarihiUpdateRequest();
                 hgsTalepTarihiUpdateRequest.setVehiclePropertyId(hgsTagNo);
                 hgsTalepTarihiUpdateRequest.setSroid("262");
@@ -329,10 +331,9 @@ public class MilesUpdateService {
                 DataResponse.MWSBulkAttributeUpdate mwsBulkAttributeUpdate = baseResponse.getData().getMwsBulkAttributeUpdate();
                 milesUpdatedResponse.setTrafficInsuranceDateUpdateSuccess(!Boolean.parseBoolean(baseResponse.getMetadata().getOperationstatus().getBusinesserror()));
             }
-
-
         } catch (Exception e) {
-            log.error("Miles update error for contract {}", milesUpdatedDto.getContractId(), e);
+            log.error("Miles update error for contract {}", milesUpdatedDto.getContractId(), e.getMessage());
+            throw new RuntimeException("Error updating miles vehicle documents", e);
 
         }
 
@@ -541,7 +542,7 @@ public class MilesUpdateService {
                 milesUpdatedResponse.setExpirationDateUpdateSuccess(!Boolean.parseBoolean(baseResponse.getMetadata().getOperationstatus().getBusinesserror()));
             }
 
-            if (milesUpdatedDto.getHgsTagNo() != null && !milesUpdatedDto.getHgsTagNo().equals("")) {
+            if (milesUpdatedDto.getHgsCode()!= null && !milesUpdatedDto.getHgsCode().equals("")) {
                 String hgsTagNo = null;
                 if (vehicleInspectionUpdateResponse != null && vehicleInspectionUpdateResponse.getData() != null) {
                     VehicleInspectionUpdateResponse.VehicleDocument document =
@@ -558,7 +559,7 @@ public class MilesUpdateService {
                 hgsEtiketNoUpdateRequest.setVehiclePropertyId(hgsTagNo);
                 hgsEtiketNoUpdateRequest.setSroid("262");
                 hgsEtiketNoUpdateRequest.setFieldId("1326");
-                hgsEtiketNoUpdateRequest.setHgsEtiketNo(milesUpdatedDto.getHgsTagNo());
+                hgsEtiketNoUpdateRequest.setHgsEtiketNo(milesUpdatedDto.getHgsCode());
                 BaseResponse baseResponse = milesService.updateHgsEtiketNo(hgsEtiketNoUpdateRequest);
                 DataResponse.MWSBulkAttributeUpdate mwsBulkAttributeUpdate = baseResponse.getData().getMwsBulkAttributeUpdate();
                 milesUpdatedResponse.setHgsTagNoUpdateSuccess(!Boolean.parseBoolean(baseResponse.getMetadata().getOperationstatus().getBusinesserror()));

@@ -36,7 +36,7 @@ public class VehicleDocumentAssignment {
     private LocalDate expirationDate;
 
     @Column(name = "hgs_no")
-    private String hgsTagNo;
+    private String hgsCode;
 
     @Column(name = "hgs_date")
     private LocalDate hgsRequestedDate;
