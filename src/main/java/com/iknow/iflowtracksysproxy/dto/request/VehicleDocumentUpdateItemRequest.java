@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 public class VehicleDocumentUpdateItemRequest {
     private String contractId;
     private String fleetVehicleId;
-    private String licencePlate;
+    private String licensePlate;
     private String licenseSerialNumber;
     private LocalDate expirationDate;
     private String hgsCode;
@@ -22,5 +22,6 @@ public class VehicleDocumentUpdateItemRequest {
     private LocalDate licensePlateEquipmentRequestDate;
     private LocalDate licensePlateEquipmentTransferDate;
     private LocalDate trafficInsuranceDate;
+    private LocalDate registNoRequestDate;
 
 }

@@ -55,6 +55,13 @@ public class ContractsToBeRegisteredResponse {
     private String netPrice;
     @JsonAlias("logoservice")
     private String logoService;
+    @JsonAlias("property")
+    private String property; // mülk
+    @JsonAlias("ownership")
+    private String ownership; // mülkiyet
+    @JsonAlias("licenseplateaccessories")
+    private String licensePlateAccessories; // plaka avadanlık aksesuarları
+
 
     // satın alma birimin atadaığı bayi bilgisi
     private String assignedDealer;
@@ -67,8 +74,6 @@ public class ContractsToBeRegisteredResponse {
     private LocalDate licensePlateEquipmentTransferDate;
     private LocalDate trafficInsuranceDate;
     private LocalDate hgsRequestedDate;
-
-
-
+    private LocalDate registNoRequestDate;
 
 }

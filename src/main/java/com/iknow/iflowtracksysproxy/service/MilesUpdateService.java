@@ -261,6 +261,7 @@ public class MilesUpdateService {
             }
             if (milesUpdatedDto.getLicensePlateEquipmentRequestDate() != null && !milesUpdatedDto.getLicensePlateEquipmentRequestDate().equals("")) {
                 String LicensePlateEquipmentRequestDate = null;
+                vehicleInspectionUpdateResponse= milesService.getVehicleInspection(vehicleInspectionUpdateRequest);
                 if (vehicleInspectionUpdateResponse != null && vehicleInspectionUpdateResponse.getData() != null) {
                     VehicleInspectionUpdateResponse.VehicleDocument document =
                             vehicleInspectionUpdateResponse.getData()
@@ -286,6 +287,7 @@ public class MilesUpdateService {
 
             if (milesUpdatedDto.getLicensePlateEquipmentTransferDate() != null && !milesUpdatedDto.getLicensePlateEquipmentTransferDate().equals("")) {
                 String LicensePlateEquipmentRequestDate = null;
+                vehicleInspectionUpdateResponse= milesService.getVehicleInspection(vehicleInspectionUpdateRequest);
                 if (vehicleInspectionUpdateResponse != null && vehicleInspectionUpdateResponse.getData() != null) {
                     VehicleInspectionUpdateResponse.VehicleDocument document =
                             vehicleInspectionUpdateResponse.getData()
@@ -310,6 +312,7 @@ public class MilesUpdateService {
 
             if (milesUpdatedDto.getTrafficInsuranceDate() != null && !milesUpdatedDto.getTrafficInsuranceDate().equals("")) {
                 String trafficInsurance = null;
+                vehicleInspectionUpdateResponse= milesService.getVehicleInspection(vehicleInspectionUpdateRequest);
                 if (vehicleInspectionUpdateResponse != null && vehicleInspectionUpdateResponse.getData() != null) {
                     VehicleInspectionUpdateResponse.VehicleDocument document =
                             vehicleInspectionUpdateResponse.getData()
@@ -330,6 +333,31 @@ public class MilesUpdateService {
                 BaseResponse baseResponse = milesService.updateTrafikSigortasiTalepTarihi(trafikSigortasiTalepTarihiUpdateRequest);
                 DataResponse.MWSBulkAttributeUpdate mwsBulkAttributeUpdate = baseResponse.getData().getMwsBulkAttributeUpdate();
                 milesUpdatedResponse.setTrafficInsuranceDateUpdateSuccess(!Boolean.parseBoolean(baseResponse.getMetadata().getOperationstatus().getBusinesserror()));
+            }
+
+            if(milesUpdatedDto.getRegistNoRequestDate() != null && !milesUpdatedDto.getRegistNoRequestDate().equals("")) {
+                String trafficInsurance = null;
+                vehicleInspectionUpdateResponse= milesService.getVehicleInspection(vehicleInspectionUpdateRequest);
+                if (vehicleInspectionUpdateResponse != null && vehicleInspectionUpdateResponse.getData() != null) {
+                    VehicleInspectionUpdateResponse.VehicleDocument document =
+                            vehicleInspectionUpdateResponse.getData()
+                                    .getVehicleDocumentsSet()
+                                    .getVehicleDocuments()
+                                    .get(0);
+
+                    if (document.getTrafficInsurance() != null) {
+                        trafficInsurance = document.getTrafficInsurance().getValue();
+                    }
+                }
+
+                TrafficRegistrationNumberUpdaterequest trafficRegistrationNumberUpdaterequest = new TrafficRegistrationNumberUpdaterequest();
+                trafficRegistrationNumberUpdaterequest.setFieldId("2397");
+                trafficRegistrationNumberUpdaterequest.setOrderId("262");
+                String regTrafficInsuranceDate = milesUpdatedDto.getRegistNoRequestDate().atTime(LocalTime.now(zone).withNano(0)).atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                trafficRegistrationNumberUpdaterequest.setDateTime(regTrafficInsuranceDate);
+                trafficRegistrationNumberUpdaterequest.setVehiclePropertyId(trafficInsurance);
+                TrafficRegistrationNumberUpdateResponse trafficRegistrationNumberUpdateResponse =milesService.updateTrafficRegistrationNumber(trafficRegistrationNumberUpdaterequest);
+
             }
         } catch (Exception e) {
             log.error("Miles update error for contract {}", milesUpdatedDto.getContractId(), e.getMessage());

@@ -1207,32 +1207,33 @@ public class MilesApi {
     }
 
     public String SaveMWSFleetVehicle(String registrationDate, String licensePlate, String fleetVehicleId) {
-        String mwsFleetVehicleXml = GetMWSFleetVehicle(fleetVehicleId);
-        if (mwsFleetVehicleXml == null) {
-            throw new RuntimeException("GetMWSFleetVehicle response null geldi");
+        try {
+            String mwsFleetVehicleXml = GetMWSFleetVehicle(fleetVehicleId);
+            if (mwsFleetVehicleXml == null) {
+                throw new RuntimeException("GetMWSFleetVehicle response null geldi");
+            }
+            String template = loadSaveTemplate();
+
+
+            String usageBlock = template
+                    .replace("{registrationDate}", registrationDate)
+                    .replace("{licensePlate}", licensePlate);
+
+            String saveRequestXml = injectPlateBlock(mwsFleetVehicleXml, usageBlock);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_XML);
+
+            HttpEntity<String> entity = new HttpEntity<>(saveRequestXml, headers);
+
+            return xmlRestTemplate.postForObject(
+                    baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/SaveMWSFleetVehicle",
+                    entity,
+                    String.class);
+        } catch (Exception e) {
+            throw new RuntimeException("SaveMWSFleetVehicle işlemi başarısız", e);
+
         }
-        String template = loadSaveTemplate();
-
-        String regRegistrationDate = LocalDate.parse(registrationDate)
-                .atTime(LocalTime.now(ZoneId.of("Europe/Istanbul")))
-                .atZone(ZoneOffset.UTC)
-                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-
-        String usageBlock = template
-                .replace("{registrationDate}", regRegistrationDate)
-                .replace("{licensePlate}", licensePlate);
-
-        String saveRequestXml = injectPlateBlock(mwsFleetVehicleXml, usageBlock);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_XML);
-
-        HttpEntity<String> entity = new HttpEntity<>(saveRequestXml, headers);
-
-        return xmlRestTemplate.postForObject(
-                baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/SaveMWSFleetVehicle",
-                entity,
-                String.class);
 
     }
 

@@ -17,7 +17,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +35,7 @@ public class VehicleDocumentService {
 
     private final VehicleDocumentRepository vehicleDocumentRepository;
     private final MilesUpdateService milesUpdateService;
+    private final MilesService milesService;
 
     @Transactional
     public List<VehicleDocumentAssignment> updateVehicleDocument(VehicleDocumentUpdateRequest request) {
@@ -83,6 +88,22 @@ public class VehicleDocumentService {
                     milesUpdatedDto.setTrafficInsuranceDate(item.getTrafficInsuranceDate());
                 }
 
+                if (item.getRegistNoRequestDate() != null) {
+                    vehicleDocumentAssignment.setRegistNoRequestDate(item.getRegistNoRequestDate());
+                    milesUpdatedDto.setRegistNoRequestDate(item.getRegistNoRequestDate());
+                }
+
+                if (item.getLicensePlate() != null && vehicleDocumentAssignment.getRegistNoRequestDate() != null) {
+                    vehicleDocumentAssignment.setLicensePlate(item.getLicensePlate());
+                    // Fleet Vehicle Üzerinde Kayıtlı Plakalar Alanına Plaka Satırı Eklenmesi
+                    LocalDate localDate = vehicleDocumentAssignment.getRegistNoRequestDate();
+                    OffsetDateTime offsetDateTime = vehicleDocumentAssignment.getRegistNoRequestDate()
+                            .atStartOfDay()
+                            .atOffset(ZoneOffset.of("+03:00"));
+
+                    String formatted = offsetDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX"));
+                    milesService.saveMWSFleetVehicle(formatted, item.getLicensePlate(), item.getFleetVehicleId());
+                }
                 milesUpdatedDto.setFleetVehicleId(item.getFleetVehicleId() != null ? item.getFleetVehicleId() : null);
                 milesUpdateService.update(milesUpdatedDto);
                 vehicleDocumentAssignment.setStatus("ACTIVE");

@@ -15,7 +15,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping(
-        value = "/api/auth",
+        value = "/api/v1/auth",
         produces = MediaType.APPLICATION_JSON_VALUE
 )
 @RequiredArgsConstructor

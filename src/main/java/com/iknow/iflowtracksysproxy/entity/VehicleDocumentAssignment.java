@@ -50,6 +50,9 @@ public class VehicleDocumentAssignment {
     @Column(name = "traffic_insurance_date")
     private LocalDate trafficInsuranceDate;
 
+    @Column(name = "registno_date")
+    private LocalDate registNoRequestDate;
+
     @Column(name = "status", length = 20)
     @Builder.Default
     private String status = "ACTIVE";

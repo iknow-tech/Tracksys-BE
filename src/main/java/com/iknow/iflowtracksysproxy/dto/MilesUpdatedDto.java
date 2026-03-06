@@ -36,12 +36,5 @@ public class MilesUpdatedDto {
     private LocalDate licensePlateEquipmentRequestDate;
     private LocalDate licensePlateEquipmentTransferDate;
     private LocalDate trafficInsuranceDate;
-
-
-
-
-
-
-
-
+    private LocalDate registNoRequestDate;
 }

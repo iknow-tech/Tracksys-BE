@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -128,7 +130,7 @@ public class MilesService {
                     VehicleOrderDescUpdateRequest vehicleOrderDescUpdateRequest = new VehicleOrderDescUpdateRequest();
                     vehicleOrderDescUpdateRequest.setVehicleOrderId(contractResponse.getOrdersId());
                     vehicleOrderDescUpdateRequest.setSroid("266");
-                    vehicleOrderDescUpdateRequest.setValue("Leasing- "+leasing.getLeasingName() + " " + dealer.getLeasingInvoiceDate() + " Fatura");
+                    vehicleOrderDescUpdateRequest.setValue("Leasing- " + leasing.getLeasingName() + " " + dealer.getLeasingInvoiceDate() + " Fatura");
                     vehicleOrderDescUpdateRequest.setFieldId("1371");
                     VehicleOrderDescUpdateResponse vehicleOrderDescUpdateResponse = updateVehicleOrderDesc(vehicleOrderDescUpdateRequest);
                     String businessErrorStr = vehicleOrderDescUpdateResponse.getMetadata().getOperationstatus().getBusinesserror();
@@ -179,6 +181,8 @@ public class MilesService {
                 registeredResponse.setLicensePlateEquipmentTransferDate(vehicleDocumentAssignment.getLicensePlateEquipmentTransferDate());
                 registeredResponse.setTrafficInsuranceDate(vehicleDocumentAssignment.getTrafficInsuranceDate());
                 registeredResponse.setHgsRequestedDate(vehicleDocumentAssignment.getHgsRequestedDate());
+                registeredResponse.setRegistNoRequestDate(vehicleDocumentAssignment.getRegistNoRequestDate());
+                registeredResponse.setLicensePlate(vehicleDocumentAssignment.getLicensePlate());
 
             }
 
@@ -297,6 +301,10 @@ public class MilesService {
     }
 
     public TriggerMWSBulkProcessor_ApproveContractResponse triggerMWSBulkProcessor(TriggerMWSBulkProcessor_ApproveContractRequest request) {
+        LocalDateTime deliveryDate = OffsetDateTime.parse(request.getDeliveryDate())
+                .toLocalDateTime();
+        String formatted = deliveryDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        request.setDeliveryDate(formatted);
         return milesApi.approveContract(request);
     }
 
@@ -325,8 +333,8 @@ public class MilesService {
         return triggerMWSBulkProcessorResponse;
     }
 
-    public String SaveMWSFleetVehicle(String registrationDate, String licensePlate, String fleetVehicleId) {
-      return milesApi.SaveMWSFleetVehicle(registrationDate, licensePlate, fleetVehicleId);
+    public String saveMWSFleetVehicle(String registrationDate, String licensePlate, String fleetVehicleId) {
+            return milesApi.SaveMWSFleetVehicle(registrationDate, licensePlate, fleetVehicleId);
     }
 
     /**
@@ -344,7 +352,7 @@ public class MilesService {
         private String sessionId;
     }
 
-    public SaveLicenseCertificateResponse add (SaveLicenseCertificateRequest request) {
+    public SaveLicenseCertificateResponse add(SaveLicenseCertificateRequest request) {
         return milesApi.saveLicenseCertificate(request);
     }
 

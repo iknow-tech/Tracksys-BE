@@ -1,10 +1,10 @@
 <SofEnvelope>
-    <bulkprocessorid>1005840</bulkprocessorid>
+    <bulkprocessorid>1005976</bulkprocessorid>
     <sessionID>{sessionId}</sessionID>
     <action>action</action>
     <data>
         <MWSBulkProcessorArgument_Set>
-            <id>1005840</id>
+            <id>1005976</id>
             <MWSBulkProcessorArgument>
                 <name>contract_id</name>
                 <value>1|{contractId}</value>
