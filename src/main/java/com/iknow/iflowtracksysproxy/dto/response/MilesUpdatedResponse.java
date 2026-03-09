@@ -11,19 +11,23 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MilesUpdatedResponse {
-    Boolean netAmountUpdateSuccess;
-    Boolean otvUpdateSuccess;
-    Boolean discountUpdateSuccess;
-    Boolean creditApprovalUpdateSuccess;
-    Boolean bulkProcessorSuccess;
-    Boolean chassisNoUpdateSuccess;
-    Boolean motorNoUpdateSuccess;
-    Boolean licenceSerialNumberUpdateSuccess;
-    Boolean expirationDateUpdateSuccess;
-    Boolean hgsTagNoUpdateSuccess;
-    Boolean hgsDateUpdateSuccess;
-    Boolean licensePlataEquipmentUpdateSucceess;
-    Boolean licensePlataEquipmentTransferUpdateSucceess;
-    Boolean trafficInsuranceDateUpdateSuccess;
-    Boolean deliverySupplierUpdateSuccess;
+    boolean netAmountUpdateSuccess;
+    boolean otvUpdateSuccess;
+    boolean discountUpdateSuccess;
+    boolean creditApprovalUpdateSuccess;
+    boolean bulkProcessorSuccess;
+    boolean chassisNoUpdateSuccess;
+    boolean motorNoUpdateSuccess;
+    boolean licenceSerialNumberUpdateSuccess;
+    boolean expirationDateUpdateSuccess;
+    boolean hgsTagNoUpdateSuccess;
+    boolean hgsDateUpdateSuccess;
+    boolean licensePlataEquipmentUpdateSucceess;
+    boolean licensePlataEquipmentTransferUpdateSucceess;
+    boolean trafficInsuranceDateUpdateSuccess;
+    boolean deliverySupplierUpdateSuccess;
+    boolean registrationDateUpdateSuccess;
+    boolean shipmentStartDateUpdateSuccess;
+    boolean shipmentEndDateUpdateSuccess;
+
 }

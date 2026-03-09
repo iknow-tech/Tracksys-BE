@@ -81,6 +81,9 @@ public class ContractDealerAssignment {
     @Column(name = "delivery_method")
     private String deliveryMethod;
 
+    @Column(name = "dealer_email")
+    private String dealerEmail;
+
     @Column(name = "status", length = 20)
     @Builder.Default
     private String status = "ACTIVE";
@@ -104,6 +107,8 @@ public class ContractDealerAssignment {
 
     // bayinin keseceği fatura için; satın alma biriminin bayiye gönderdiği mail tarihi
     private LocalDateTime dealerInvoiceMailSentAt;
+    private ContractOrderStatus contractOrderStatus; // sipariş statüsü
+
 
 
 }

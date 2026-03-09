@@ -15,6 +15,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -1215,7 +1216,7 @@ public class MilesApi {
             String template = loadSaveTemplate();
 
 
-            String usageBlock = template
+            String usageBlock = SaveMWSFleetVehicleRequest
                     .replace("{registrationDate}", registrationDate)
                     .replace("{licensePlate}", licensePlate);
 
@@ -1261,7 +1262,28 @@ public class MilesApi {
             Document tempDoc = builder.parse(
                     new InputSource(new StringReader(usageSetXml)));
 
-            Node newUsageNode = tempDoc.getDocumentElement().getFirstChild();
+            Node newUsageNode = null;
+            NodeList children = tempDoc.getDocumentElement().getChildNodes();
+            for (int i = 0; i < children.getLength(); i++) {
+                if (children.item(i).getNodeType() == Node.ELEMENT_NODE) {
+                    newUsageNode = children.item(i);
+                    break;
+                }
+            }
+            if (newUsageNode == null) {
+                throw new RuntimeException("Inject edilecek node bulunamadı");
+            }
+
+            String newNodeName = newUsageNode.getNodeName(); // → "MWSLicensePlateUsage"
+            Node duplicate = (Node) xPath.evaluate(
+                    "//" + newNodeName,
+                    originalDoc,
+                    XPathConstants.NODE);
+
+            if (duplicate != null) {
+                throw new RuntimeException(
+                        "'" + newNodeName + "' zaten mevcut");
+            }
 
             Node importedNode = originalDoc.importNode(newUsageNode, true);
 

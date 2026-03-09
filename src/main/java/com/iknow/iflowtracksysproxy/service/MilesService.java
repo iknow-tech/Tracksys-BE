@@ -1,6 +1,7 @@
 package com.iknow.iflowtracksysproxy.service;
 
 import com.iknow.iflowtracksysproxy.cache.CustomerContractCache;
+import com.iknow.iflowtracksysproxy.dto.request.DealerInvoiceMailRequest;
 import com.iknow.iflowtracksysproxy.entity.*;
 import com.iknow.iflowtracksysproxy.integration.miles.MilesApi;
 import com.iknow.iflowtracksysproxy.integration.miles.model.request.*;
@@ -33,7 +34,7 @@ public class MilesService {
     private final ContractProformaRepository contractProformaRepository;
     private final DeliveryDocumentRepository deliveryDocumentRepository;
     private final VehicleDocumentRepository vehicleDocumentRepository;
-
+    private final MailService mailService;
     /**
      * Get current session ID
      *
@@ -117,11 +118,6 @@ public class MilesService {
             }
             ContractDealerAssignment dealer = dealerMap.get(contractResponse.getId());
             if (dealer != null && dealer.getStatus().equals("ACTIVE")) {
-                if (contractResponse.getTreasuryApprovalDate() != null && contractResponse.getOrdersId() != null) {
-                    // milestan gelen bu 2 değer dolu ise ilgili bayiye mail gönderilmelidir.
-
-
-                }
                 contractResponse.setAssignedDealer(dealer.getDealerName());
                 contractResponse.setDeliveryMethod(dealer.getDeliveryMethod());
                 if (dealer.getLeasingInvoiceDate() != null) { // leasing fatura tarihi
@@ -143,9 +139,27 @@ public class MilesService {
                     contractResponse.setDeliveredBy(null);
                     contractResponse.setOrderDeliveredDate(LocalDateTime.now());
                 }
+                contractResponse.setContractOrderStatus(dealer.getContractOrderStatus());
             }
             boolean hasProforma = contractProformaRepository.existsByContractId(contractResponse.getId());
             contractResponse.setHasProforma(hasProforma);
+
+            if (contractResponse.getTreasuryApprovalDate() != null && contractResponse.getOrdersId() != null) {
+                if (dealer != null && dealer.getDealerEmail() != null) {
+                    DealerInvoiceMailRequest mailRequest = DealerInvoiceMailRequest.builder()
+                            .ordersId(contractResponse.getOrdersId())
+                            .vehicleDescription(contractResponse.getVersion())
+                            .customerTradingName(contractResponse.getCustomer())
+                            .supplierTradingName(contractResponse.getAssignedDealer())
+                            .color(contractResponse.getColor())
+                            .deliveryLocation(contractResponse.getDeliveryLocation())
+                            .build();
+
+                    mailService.sendDealerInvoiceInstruction("sevgigundogdu01@gmail.com", mailRequest);
+                } else {
+                    log.warn("Bayi email adresi bulunamadı. ContractId: {}", contractResponse.getId());
+                }
+            }
         }
         return contracts;
     }
@@ -305,7 +319,15 @@ public class MilesService {
                 .toLocalDateTime();
         String formatted = deliveryDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         request.setDeliveryDate(formatted);
-        return milesApi.approveContract(request);
+        TriggerMWSBulkProcessor_ApproveContractResponse response = milesApi.approveContract(request);
+        String businessErrorStr = response.getMetadata().getOperationStatus().getBusinessError();
+        ContractDealerAssignment contractDealerAssignment = contractDealerAssignmentRepository.findByContractId(request.getContractId()).isPresent() ? contractDealerAssignmentRepository.findByContractId(request.getContractId()).get() : null;
+        boolean hasBusinessError = Boolean.parseBoolean(businessErrorStr);
+        if (!hasBusinessError) {
+            contractDealerAssignment.setContractOrderStatus(ContractOrderStatus.ORDER_DELIVERED);
+            contractDealerAssignment.setStatus(ContractStatus.DELIVERED.toString());
+        }
+        return response;
     }
 
     public PRJ_SM_OwnerShipResponse getOwnerShip() {
@@ -334,7 +356,7 @@ public class MilesService {
     }
 
     public String saveMWSFleetVehicle(String registrationDate, String licensePlate, String fleetVehicleId) {
-            return milesApi.SaveMWSFleetVehicle(registrationDate, licensePlate, fleetVehicleId);
+        return milesApi.SaveMWSFleetVehicle(registrationDate, licensePlate, fleetVehicleId);
     }
 
     /**

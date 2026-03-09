@@ -1,6 +1,7 @@
 package com.iknow.iflowtracksysproxy.integration.miles.model.response;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.iknow.iflowtracksysproxy.entity.ContractOrderStatus;
 import lombok.Data;
 
 import java.time.LocalDate;

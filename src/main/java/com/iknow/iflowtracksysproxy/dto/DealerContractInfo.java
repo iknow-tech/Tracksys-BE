@@ -1,5 +1,6 @@
 package com.iknow.iflowtracksysproxy.dto;
 
+import com.iknow.iflowtracksysproxy.entity.ContractOrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -53,4 +54,5 @@ public class DealerContractInfo {
     private String deliveryDocumentName;
     private String vehicleOrderItemId;
     private String fleetVehicleId;
+    private ContractOrderStatus contractOrderStatus;
 }

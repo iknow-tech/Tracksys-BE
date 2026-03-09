@@ -106,7 +106,7 @@ public class MilesUpdateService {
                 BaseResponse baseResponse = milesService.updateSevkBaslangicTarihi(sevkBaslangicTarihiUpdateRequest);
                 String businessErrorStr = baseResponse.getMetadata().getOperationstatus().getBusinesserror();
                 boolean hasBusinessError = Boolean.parseBoolean(businessErrorStr);
-                milesUpdatedResponse.setDeliverySupplierUpdateSuccess(!hasBusinessError);
+                milesUpdatedResponse.setShipmentStartDateUpdateSuccess(!hasBusinessError);
             }
             // sevk bitiş tarihi alanının güncellenmesi
             if (milesUpdatedDto.getShipmentEndDate()!= null && !milesUpdatedDto.getShipmentEndDate().equals("")) {
@@ -117,6 +117,9 @@ public class MilesUpdateService {
                 String regShipmentEndDate =milesUpdatedDto.getShipmentEndDate().atTime(LocalTime.now(zone).withNano(0)).atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
                 sevkBitisTarihiUpdateRequest.setDateTimeValue(regShipmentEndDate);
                 BaseResponse baseResponse = milesService.updateSevkBitisTarihi(sevkBitisTarihiUpdateRequest);
+                String businessErrorStr = baseResponse.getMetadata().getOperationstatus().getBusinesserror();
+                boolean hasBusinessError = Boolean.parseBoolean(businessErrorStr);
+                milesUpdatedResponse.setShipmentEndDateUpdateSuccess(!hasBusinessError);
             }
 
             if (milesUpdatedDto.getCreditApprovalCheck()) {
@@ -357,6 +360,8 @@ public class MilesUpdateService {
                 trafficRegistrationNumberUpdaterequest.setDateTime(regTrafficInsuranceDate);
                 trafficRegistrationNumberUpdaterequest.setVehiclePropertyId(trafficInsurance);
                 TrafficRegistrationNumberUpdateResponse trafficRegistrationNumberUpdateResponse =milesService.updateTrafficRegistrationNumber(trafficRegistrationNumberUpdaterequest);
+                milesUpdatedResponse.setRegistrationDateUpdateSuccess(!Boolean.parseBoolean(trafficRegistrationNumberUpdateResponse.getMetadata().getOperationStatus().getBusinessError()));
+
 
             }
         } catch (Exception e) {

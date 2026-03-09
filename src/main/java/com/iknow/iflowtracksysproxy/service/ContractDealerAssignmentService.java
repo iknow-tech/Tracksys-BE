@@ -8,6 +8,7 @@ import com.iknow.iflowtracksysproxy.dto.request.DealerContractUpdateItemRequest;
 import com.iknow.iflowtracksysproxy.dto.request.DealerContractUpdateRequest;
 import com.iknow.iflowtracksysproxy.dto.request.UnassignDealerRequest;
 import com.iknow.iflowtracksysproxy.dto.response.AssignDealerResponse;
+import com.iknow.iflowtracksysproxy.dto.response.MilesUpdatedResponse;
 import com.iknow.iflowtracksysproxy.entity.*;
 import com.iknow.iflowtracksysproxy.integration.miles.MilesApi;
 import com.iknow.iflowtracksysproxy.integration.miles.model.request.VehicleOrderSupplierUpdateRequest;
@@ -70,6 +71,7 @@ public class ContractDealerAssignmentService {
                     contractDealerAssignment.setAssignedDate(LocalDateTime.now());
                     contractDealerAssignment.setStatus("ACTIVE");
                     contractDealerAssignment.setNotes("Web UI  üzerinden atama.");
+                    contractDealerAssignment.setDealerEmail("");
                     assignmentRepository.save(contractDealerAssignment);
                 } else {
                     ContractDealerAssignment newAssignment = ContractDealerAssignment.builder()
@@ -87,7 +89,7 @@ public class ContractDealerAssignmentService {
                     newAssignment = assignmentRepository.save(newAssignment);
                 }
 
-                if(contract.getOrdersId() != null) {
+                if (contract.getOrdersId() != null) {
                     // Supplier ve Contact Bilgisinin Güncellenmesi
                     VehicleOrderSupplierUpdateRequest vehicleOrderSupplierUpdateRequest = new VehicleOrderSupplierUpdateRequest();
                     vehicleOrderSupplierUpdateRequest.setOrdersId(contract.getOrdersId());
@@ -104,8 +106,7 @@ public class ContractDealerAssignmentService {
                             .getResult().equals("1");
 
                     updatedMilesSupplier.add(isMilesUpdateSuccess);
-                }
-                else {
+                } else {
                     throw new IllegalArgumentException(
                             "OrdersId bulunamadı. Bu kontrat için önce Miles sipariş kaydı oluşmalıdır."
                     );
@@ -251,6 +252,7 @@ public class ContractDealerAssignmentService {
                         .hasProforma(hasProforma)
                         .deliveryDocumentId(deliveryDocumentId)
                         .deliveryDocumentName(deliveryDocumentName)
+                        .contractOrderStatus(assignment.getContractOrderStatus())
                         .build();
 
                 detailedContracts.add(contractInfo);
@@ -360,10 +362,35 @@ public class ContractDealerAssignmentService {
                 if (item.getDeliveryMethod() != null && !item.getDeliveryMethod().isBlank()) {
                     contractDealerAssignment.setDeliveryMethod(item.getDeliveryMethod());
                 }
+                MilesUpdatedResponse milesUpdatedResponse = milesUpdateService.update(milesUpdatedDto);
 
+                if (milesUpdatedResponse != null) {
+                    if (milesUpdatedResponse.isDeliverySupplierUpdateSuccess()) {
+                        contractDealerAssignment.setContractOrderStatus(ContractOrderStatus.SHIPMENT_WILL_START);
+                        contractResponse.setContractOrderStatus(ContractOrderStatus.SHIPMENT_WILL_START);
+                    }
+                    if (milesUpdatedResponse.isShipmentStartDateUpdateSuccess()) {
+                        contractDealerAssignment.setContractOrderStatus(ContractOrderStatus.SHIPMENT_IN_PROGRESS);
+                        contractResponse.setContractOrderStatus(ContractOrderStatus.SHIPMENT_IN_PROGRESS);
+                    }
+                    if (milesUpdatedResponse.isShipmentEndDateUpdateSuccess()) {
+                        if (contractResponse.getDeliveryTerms() != null && !contractResponse.getDeliveryTerms().isEmpty()) {
+                            contractDealerAssignment.setContractOrderStatus(ContractOrderStatus.SHIPMENT_DONE_WAITING_DELIVERY_CONDITION);
+                            contractResponse.setContractOrderStatus(ContractOrderStatus.SHIPMENT_DONE_WAITING_DELIVERY_CONDITION);
+                        } else {
+                            contractDealerAssignment.setContractOrderStatus(ContractOrderStatus.SHIPMENT_DONE_DELIVERY_TO_BE_PLANNED);
+                            contractResponse.setContractOrderStatus(ContractOrderStatus.SHIPMENT_DONE_DELIVERY_TO_BE_PLANNED);
+                        }
+                    }
+// teslimat tarihi
+//                    if (milesUpdatedResponse.getShipmentStartDateUpdateSuccess()) {
+//                        contractDealerAssignment.setContractOrderStatus(ContractOrderStatus.SHIPMENT_IN_PROGRESS);
+//                        contractResponse.setContractOrderStatus(ContractOrderStatus.SHIPMENT_IN_PROGRESS);
+//                    }
+
+                }
                 contractDealerAssignment.setUpdatedBy(null);
                 contractDealerAssignment.setUpdatedDate(LocalDateTime.now());
-                milesUpdateService.update(milesUpdatedDto);
                 assignmentRepository.save(contractDealerAssignment);
             }
         } catch (Exception e) {
@@ -541,6 +568,8 @@ public class ContractDealerAssignmentService {
                         .deliveryDocumentName(deliveryDocumentName)
                         .vehicleOrderItemId(contract.getVehicleOrderItemId())
                         .fleetVehicleId(contract.getFleetVehicleId())
+                        .contractOrderStatus(assignment.getContractOrderStatus())
+
                         .build();
 
                 detailedContracts.add(contractInfo);

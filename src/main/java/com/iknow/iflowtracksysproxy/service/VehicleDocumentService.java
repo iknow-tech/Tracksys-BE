@@ -5,6 +5,7 @@ import com.iknow.iflowtracksysproxy.dto.DealerContractInfo;
 import com.iknow.iflowtracksysproxy.dto.MilesUpdatedDto;
 import com.iknow.iflowtracksysproxy.dto.request.*;
 import com.iknow.iflowtracksysproxy.dto.response.AssignDealerResponse;
+import com.iknow.iflowtracksysproxy.dto.response.MilesUpdatedResponse;
 import com.iknow.iflowtracksysproxy.entity.*;
 import com.iknow.iflowtracksysproxy.integration.miles.MilesApi;
 import com.iknow.iflowtracksysproxy.integration.miles.model.request.VehicleOrderSupplierUpdateRequest;
@@ -54,12 +55,12 @@ public class VehicleDocumentService {
                     vehicleDocumentAssignment.setContractId(item.getContractId());
                 }
                 if (item.getLicenseSerialNumber() != null) {
-                    vehicleDocumentAssignment.setLicenseSerialNumber(item.getLicenseSerialNumber());
+                    //vehicleDocumentAssignment.setLicenseSerialNumber(item.getLicenseSerialNumber());
                     milesUpdatedDto.setLicenseSerialNumber(item.getLicenseSerialNumber());
                 }
 
                 if (item.getExpirationDate() != null) {
-                    vehicleDocumentAssignment.setExpirationDate(item.getExpirationDate());
+                    //vehicleDocumentAssignment.setExpirationDate(item.getExpirationDate());
                     milesUpdatedDto.setExpirationDate(item.getExpirationDate());
                 }
 
@@ -89,23 +90,37 @@ public class VehicleDocumentService {
                 }
 
                 if (item.getRegistNoRequestDate() != null) {
-                    vehicleDocumentAssignment.setRegistNoRequestDate(item.getRegistNoRequestDate());
+                    //vehicleDocumentAssignment.setRegistNoRequestDate(item.getRegistNoRequestDate());
                     milesUpdatedDto.setRegistNoRequestDate(item.getRegistNoRequestDate());
                 }
 
-                if (item.getLicensePlate() != null && vehicleDocumentAssignment.getRegistNoRequestDate() != null) {
-                    vehicleDocumentAssignment.setLicensePlate(item.getLicensePlate());
-                    // Fleet Vehicle Üzerinde Kayıtlı Plakalar Alanına Plaka Satırı Eklenmesi
-                    LocalDate localDate = vehicleDocumentAssignment.getRegistNoRequestDate();
-                    OffsetDateTime offsetDateTime = vehicleDocumentAssignment.getRegistNoRequestDate()
-                            .atStartOfDay()
-                            .atOffset(ZoneOffset.of("+03:00"));
+//                if (item.getLicensePlate() != null && vehicleDocumentAssignment.getRegistNoRequestDate() != null) {
+//                    vehicleDocumentAssignment.setLicensePlate(item.getLicensePlate());
+//                    // Fleet Vehicle Üzerinde Kayıtlı Plakalar Alanına Plaka Satırı Eklenmesi
+//                    LocalDate localDate = vehicleDocumentAssignment.getRegistNoRequestDate();
+//                    OffsetDateTime offsetDateTime = vehicleDocumentAssignment.getRegistNoRequestDate()
+//                            .atStartOfDay()
+//                            .atOffset(ZoneOffset.of("+03:00"));
+//
+//                    String formatted = offsetDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX"));
+//                    milesService.saveMWSFleetVehicle(formatted, item.getLicensePlate(), item.getFleetVehicleId());
+//                }
 
-                    String formatted = offsetDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX"));
-                    milesService.saveMWSFleetVehicle(formatted, item.getLicensePlate(), item.getFleetVehicleId());
-                }
                 milesUpdatedDto.setFleetVehicleId(item.getFleetVehicleId() != null ? item.getFleetVehicleId() : null);
-                milesUpdateService.update(milesUpdatedDto);
+                MilesUpdatedResponse milesUpdatedResponse= milesUpdateService.update(milesUpdatedDto);
+
+                if(milesUpdatedResponse != null && milesUpdatedResponse.isLicenceSerialNumberUpdateSuccess()) {
+                    vehicleDocumentAssignment.setLicenseSerialNumber(item.getLicenseSerialNumber());
+                }
+
+                if(milesUpdatedResponse != null && milesUpdatedResponse.isRegistrationDateUpdateSuccess()) {
+                    vehicleDocumentAssignment.setRegistNoRequestDate(item.getRegistNoRequestDate());
+                }
+
+                if(milesUpdatedResponse != null && milesUpdatedResponse.isExpirationDateUpdateSuccess()) {
+                    vehicleDocumentAssignment.setExpirationDate(item.getExpirationDate());
+                }
+
                 vehicleDocumentAssignment.setStatus("ACTIVE");
                 vehicleDocumentAssignment.setCreatedAt(LocalDateTime.now());
                 vehicleDocumentRepository.save(vehicleDocumentAssignment);

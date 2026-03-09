@@ -1,6 +1,7 @@
 package com.iknow.iflowtracksysproxy.integration.miles.model.response;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.iknow.iflowtracksysproxy.entity.ContractOrderStatus;
 import com.iknow.iflowtracksysproxy.entity.ContractStatus;
 import lombok.Builder;
 import lombok.Data;
@@ -110,6 +111,9 @@ public class CustomerContractResponse {
 
     // fleet vehicle üzerinde mülk alanı update
     private boolean mulkUpdateSuccess;
+
+    private ContractOrderStatus contractOrderStatus;
+
 
 
 
