@@ -94,17 +94,17 @@ public class VehicleDocumentService {
                     milesUpdatedDto.setRegistNoRequestDate(item.getRegistNoRequestDate());
                 }
 
-//                if (item.getLicensePlate() != null && vehicleDocumentAssignment.getRegistNoRequestDate() != null) {
-//                    vehicleDocumentAssignment.setLicensePlate(item.getLicensePlate());
-//                    // Fleet Vehicle Üzerinde Kayıtlı Plakalar Alanına Plaka Satırı Eklenmesi
-//                    LocalDate localDate = vehicleDocumentAssignment.getRegistNoRequestDate();
-//                    OffsetDateTime offsetDateTime = vehicleDocumentAssignment.getRegistNoRequestDate()
-//                            .atStartOfDay()
-//                            .atOffset(ZoneOffset.of("+03:00"));
-//
-//                    String formatted = offsetDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX"));
-//                    milesService.saveMWSFleetVehicle(formatted, item.getLicensePlate(), item.getFleetVehicleId());
-//                }
+                if (item.getLicensePlate() != null && (vehicleDocumentAssignment.getRegistNoRequestDate() != null)) {
+                    vehicleDocumentAssignment.setLicensePlate(item.getLicensePlate());
+                    // Fleet Vehicle Üzerinde Kayıtlı Plakalar Alanına Plaka Satırı Eklenmesi
+                    LocalDate localDate = vehicleDocumentAssignment.getRegistNoRequestDate();
+                    OffsetDateTime offsetDateTime = vehicleDocumentAssignment.getRegistNoRequestDate()
+                            .atStartOfDay()
+                            .atOffset(ZoneOffset.of("+03:00"));
+
+                    String formatted = offsetDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX"));
+                    milesService.saveMWSFleetVehicle(formatted, item.getLicensePlate(), item.getFleetVehicleId());
+                }
 
                 milesUpdatedDto.setFleetVehicleId(item.getFleetVehicleId() != null ? item.getFleetVehicleId() : null);
                 MilesUpdatedResponse milesUpdatedResponse= milesUpdateService.update(milesUpdatedDto);

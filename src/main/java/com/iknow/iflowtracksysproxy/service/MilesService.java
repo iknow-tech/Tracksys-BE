@@ -35,6 +35,7 @@ public class MilesService {
     private final DeliveryDocumentRepository deliveryDocumentRepository;
     private final VehicleDocumentRepository vehicleDocumentRepository;
     private final MailService mailService;
+
     /**
      * Get current session ID
      *
@@ -155,7 +156,7 @@ public class MilesService {
                             .deliveryLocation(contractResponse.getDeliveryLocation())
                             .build();
 
-                    mailService.sendDealerInvoiceInstruction("sevgigundogdu01@gmail.com", mailRequest);
+                    mailService.sendDealerInvoiceInstruction("umitguldemir@gmail.com", mailRequest);
                 } else {
                     log.warn("Bayi email adresi bulunamadı. ContractId: {}", contractResponse.getId());
                 }
@@ -355,8 +356,8 @@ public class MilesService {
         return triggerMWSBulkProcessorResponse;
     }
 
-    public String saveMWSFleetVehicle(String registrationDate, String licensePlate, String fleetVehicleId) {
-        return milesApi.SaveMWSFleetVehicle(registrationDate, licensePlate, fleetVehicleId);
+    public void saveMWSFleetVehicle(String registrationDate, String licensePlate, String fleetVehicleId) {
+        milesApi.SaveMWSFleetVehicle(registrationDate, licensePlate, fleetVehicleId);
     }
 
     /**

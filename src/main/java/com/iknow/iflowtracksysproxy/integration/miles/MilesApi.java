@@ -28,9 +28,9 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -39,6 +39,8 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.List;
+
+import static org.apache.catalina.manager.JspHelper.escapeXml;
 
 @Slf4j
 @Service
@@ -112,6 +114,9 @@ public class MilesApi {
     private static final String TriggerMWSBulkProcessor = ResourceReader.asString("xml/TriggerMWSBulkProcessor.xml");
     private static final String GetMWSFleetVehicleRequest = ResourceReader.asString("xml/GetMWSFleetVehicle.xml");
     private static final String SaveMWSFleetVehicleRequest = ResourceReader.asString("xml/SaveMWSFleetVehicle.xml");
+
+    private static final String SAVE_ENDPOINT = "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/SaveMWSFleetVehicle";
+    private static final String BASE_URL = "https://mws.hedeffilotest.com:4443";
 
 
     private final RestTemplate xmlRestTemplate;
@@ -1207,112 +1212,130 @@ public class MilesApi {
         }
     }
 
-    public String SaveMWSFleetVehicle(String registrationDate, String licensePlate, String fleetVehicleId) {
+    public void  SaveMWSFleetVehicle(String registrationDate, String licensePlate, String fleetVehicleId) {
         try {
+            // 1. Araç bilgilerini çek
             String mwsFleetVehicleXml = GetMWSFleetVehicle(fleetVehicleId);
             if (mwsFleetVehicleXml == null) {
                 throw new RuntimeException("GetMWSFleetVehicle response null geldi");
             }
-            String template = loadSaveTemplate();
 
+            // 2. Plaka satırını XML'e ekle
+            String updatedXml = injectLicensePlateUsage(mwsFleetVehicleXml, licensePlate, registrationDate);
 
-            String usageBlock = SaveMWSFleetVehicleRequest
-                    .replace("{registrationDate}", registrationDate)
-                    .replace("{licensePlate}", licensePlate);
+            saveFleetVehicle(updatedXml);
 
-            String saveRequestXml = injectPlateBlock(mwsFleetVehicleXml, usageBlock);
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_XML);
-
-            HttpEntity<String> entity = new HttpEntity<>(saveRequestXml, headers);
-
-            return xmlRestTemplate.postForObject(
-                    baseUrl + "/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/SaveMWSFleetVehicle",
-                    entity,
-                    String.class);
         } catch (Exception e) {
             throw new RuntimeException("SaveMWSFleetVehicle işlemi başarısız", e);
 
         }
 
     }
+    private void saveFleetVehicle(String requestXml) throws Exception {
+        String response = sendRequest(SAVE_ENDPOINT, requestXml);
+        checkForErrors(response);
+    }
 
-    private String injectPlateBlock(String originalXml, String usageSetXml) {
+    private String sendRequest(String endpoint, String body) throws Exception {
+        body = body.replace("<data>",
+                "<action>execute</action>" +
+                        "<sessionID>" + sessionId + "</sessionID>" +
+                        "<data>");
 
-        try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setNamespaceAware(false);
-            DocumentBuilder builder = factory.newDocumentBuilder();
+        URL url = new URL(BASE_URL + endpoint);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("POST");
+        connection.setDoOutput(true);
+        connection.setRequestProperty("Content-Type", "application/xml; charset=utf-8");
+        connection.setConnectTimeout(15000);
+        connection.setReadTimeout(30000);
 
-            Document originalDoc = builder.parse(
-                    new InputSource(new StringReader(originalXml)));
+        try (OutputStream os = connection.getOutputStream()) {
+            os.write(body.getBytes("UTF-8"));
+            os.flush();
+        }
 
-            XPath xPath = XPathFactory.newInstance().newXPath();
+        int responseCode = connection.getResponseCode();
+        StringBuilder response = new StringBuilder();
 
-            Node usageSetNode = (Node) xPath.evaluate(
-                    "//MWSLicensePlateUsage_Set",
-                    originalDoc,
-                    XPathConstants.NODE);
-
-            if (usageSetNode == null) {
-                throw new RuntimeException("MWSLicensePlateUsage_Set bulunamadı");
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(
+                        responseCode == 200 ? connection.getInputStream() : connection.getErrorStream(),
+                        "UTF-8"
+                )
+        )) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                response.append(line).append("\n");
             }
+        }
 
-            Document tempDoc = builder.parse(
-                    new InputSource(new StringReader(usageSetXml)));
+        if (responseCode != 200) {
+            throw new RuntimeException("HTTP " + responseCode + " hatası:\n" + response);
+        }
 
-            Node newUsageNode = null;
-            NodeList children = tempDoc.getDocumentElement().getChildNodes();
-            for (int i = 0; i < children.getLength(); i++) {
-                if (children.item(i).getNodeType() == Node.ELEMENT_NODE) {
-                    newUsageNode = children.item(i);
-                    break;
-                }
-            }
-            if (newUsageNode == null) {
-                throw new RuntimeException("Inject edilecek node bulunamadı");
-            }
+        return response.toString();
+    }
 
-            String newNodeName = newUsageNode.getNodeName(); // → "MWSLicensePlateUsage"
-            Node duplicate = (Node) xPath.evaluate(
-                    "//" + newNodeName,
-                    originalDoc,
-                    XPathConstants.NODE);
+    private void checkForErrors(String responseXml) {
+        String lowerXml = responseXml.toLowerCase();
 
-            if (duplicate != null) {
-                throw new RuntimeException(
-                        "'" + newNodeName + "' zaten mevcut");
-            }
-
-            Node importedNode = originalDoc.importNode(newUsageNode, true);
-
-            usageSetNode.appendChild(importedNode);
-
-            Transformer transformer = TransformerFactory.newInstance().newTransformer();
-            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-
-            StringWriter writer = new StringWriter();
-            transformer.transform(new DOMSource(originalDoc), new StreamResult(writer));
-
-            return writer.toString();
-
-        } catch (Exception e) {
-            throw new RuntimeException("Inject işlemi başarısız", e);
+        if (lowerXml.contains("<exception>") || lowerXml.contains("<error>") || lowerXml.contains("<faultstring>")) {
+            throw new RuntimeException("Miles SaveMWSFleetVehicle başarısız. Response:\n" + responseXml);
         }
     }
 
+    private String injectLicensePlateUsage(String vehicleXml, String licenseNumber, String registrationDate) {
+        String formattedDate = formatToMilesDate(registrationDate);
 
-    private String loadSaveTemplate() {
-        try (InputStream inputStream =
-                     getClass().getClassLoader()
-                             .getResourceAsStream("xml/SaveMWSFleetVehicle.xml")) {
+        String licensePlateUsageXml =
+                "<MWSLicensePlateUsage>" +
+                        "<id></id>" +
+                        "<fromDate>" + formattedDate + "</fromDate>" +
+                        "<toDate>3000-12-31T00:00:00+03:00</toDate>" +
+                        "<businessPartnerId/>" +
+                        "<MWSLicensePlate>" +
+                        "<id></id>" +
+                        "<licenseNumber>" + escapeXml(licenseNumber) + "</licenseNumber>" +
+                        "<registrationDate>" + formattedDate + "</registrationDate>" +
+                        "<cancellationDate>1900-01-01T00:00:00+01:56</cancellationDate>" +
+                        "<region/>" +
+                        "<licensePlateStatus/>" +
+                        "<countryId/>" +
+                        "</MWSLicensePlate>" +
+                        "</MWSLicensePlateUsage>";
 
-            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        int idx = vehicleXml.indexOf("MWSLicensePlateUsage_Set");
+        log.info(">>> Tam içerik: [{}]", vehicleXml.substring(idx - 1, idx + 30));
 
-        } catch (Exception e) {
-            throw new RuntimeException("SaveMWSFleetVehicle.xml okunamadı", e);
+        if (vehicleXml.contains("<MWSLicensePlateUsage_Set />") || vehicleXml.contains("<MWSLicensePlateUsage_Set/>")) {
+            return vehicleXml
+                    .replace("<MWSLicensePlateUsage_Set />",
+                            "<MWSLicensePlateUsage_Set>" + licensePlateUsageXml + "</MWSLicensePlateUsage_Set>")
+                    .replace("<MWSLicensePlateUsage_Set/>",
+                            "<MWSLicensePlateUsage_Set>" + licensePlateUsageXml + "</MWSLicensePlateUsage_Set>");
         }
+
+        if (vehicleXml.contains("<MWSLicensePlateUsage_Set />") || vehicleXml.contains("<MWSLicensePlateUsage_Set/>")) {
+            // self-closing → açıp kapat ve içine ekle
+            return vehicleXml.replaceFirst(
+                    "<MWSLicensePlateUsage_Set\\s*/>",
+                    "<MWSLicensePlateUsage_Set>" + licensePlateUsageXml + "</MWSLicensePlateUsage_Set>"
+            );
+        } else {
+            // zaten açık/kapalı tag var → içine ekle
+            return vehicleXml.replace(
+                    "<MWSLicensePlateUsage_Set>",
+                    "<MWSLicensePlateUsage_Set>" + licensePlateUsageXml
+            );
+        }
+
+    }
+
+    private String formatToMilesDate(String date) {
+        if (date == null || date.isBlank()) return "";
+        if (date.contains("T")) return date;
+        return date + "T00:00:00+03:00";
     }
 
     public String GetMWSFleetVehicle(String fleetVehicleId) {

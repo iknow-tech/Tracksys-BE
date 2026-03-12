@@ -20,6 +20,8 @@ public class RegistrationController {
 
     private final OcrService ocrService;
     private final AIService aiService;
+    private static final String ENDPOINT = "http://ts021hfistpw01.hedeffilotest.net:81/SaveRuhsatBelgesiDGA.asmx";
+    private static final String SOAP_ACTION = "http://tempuri.org/SaveRuhsatBelgesi";
 
     @PostMapping(value = "/analiz-et", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> ruhsatYukleVeAnalizEt(@RequestParam("file") MultipartFile file, @RequestParam("contractId") String contractId) {
