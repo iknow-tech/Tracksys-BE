@@ -37,6 +37,7 @@ public class VehicleDocumentService {
     private final VehicleDocumentRepository vehicleDocumentRepository;
     private final MilesUpdateService milesUpdateService;
     private final MilesService milesService;
+    private final AdvisorReportRepository advisorReportRepository;
 
     @Transactional
     public List<VehicleDocumentAssignment> updateVehicleDocument(VehicleDocumentUpdateRequest request) {
@@ -124,6 +125,27 @@ public class VehicleDocumentService {
                 vehicleDocumentAssignment.setStatus("ACTIVE");
                 vehicleDocumentAssignment.setCreatedAt(LocalDateTime.now());
                 vehicleDocumentRepository.save(vehicleDocumentAssignment);
+                AdvisorReport advisorReport = advisorReportRepository
+                        .findByContractId(item.getContractId())
+                        .orElse(new AdvisorReport());
+
+                advisorReport.setContractId(item.getContractId());
+                advisorReport.setLicensePlate(item.getLicensePlate());
+                advisorReport.setStatus("ACTIVE");
+
+                if (item.getLicensePlateEquipmentRequestDate() != null) {
+                    advisorReport.setLicensePlateEquipmentRequestDate(
+                            item.getLicensePlateEquipmentRequestDate().atStartOfDay()
+                    );
+                }
+
+                if (item.getLicensePlateEquipmentTransferDate() != null) {
+                    advisorReport.setLicensePlateEquipmentShipmentDate(
+                            item.getLicensePlateEquipmentTransferDate().atStartOfDay()
+                    );
+                }
+
+                advisorReportRepository.save(advisorReport);
                 results.add(vehicleDocumentAssignment);
 
             }
