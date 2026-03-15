@@ -14,10 +14,7 @@ import com.iknow.iflowtracksysproxy.integration.miles.MilesApi;
 import com.iknow.iflowtracksysproxy.integration.miles.model.request.VehicleOrderSupplierUpdateRequest;
 import com.iknow.iflowtracksysproxy.integration.miles.model.response.CustomerContractResponse;
 import com.iknow.iflowtracksysproxy.integration.miles.model.response.VehicleOrderSupplierUpdateBaseResponse;
-import com.iknow.iflowtracksysproxy.respository.ContractDealerAssignmentRepository;
-import com.iknow.iflowtracksysproxy.respository.ContractLeasingAssignmentRepository;
-import com.iknow.iflowtracksysproxy.respository.ContractProformaRepository;
-import com.iknow.iflowtracksysproxy.respository.DeliveryDocumentRepository;
+import com.iknow.iflowtracksysproxy.respository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -46,6 +43,7 @@ public class ContractDealerAssignmentService {
     private final ProformaReviewService proformaReviewService;
     private final MilesUpdateService milesUpdateService;
     private final MilesApi milesApi;
+    private final DealerReportRepository dealerReportRepository;
 
     @Transactional
     public AssignDealerResponse assignDealerToContracts(AssignDealerRequest request) throws Exception {
@@ -111,6 +109,24 @@ public class ContractDealerAssignmentService {
                             "OrdersId bulunamadı. Bu kontrat için önce Miles sipariş kaydı oluşmalıdır."
                     );
                 }
+
+
+                // raporlama için eklendi
+                DealerReport dealerReport = dealerReportRepository
+                        .findByContractId(contract.getId())
+                        .orElse(new DealerReport());
+
+                dealerReport.setContractId(contract.getId());
+                dealerReport.setCustomer(contract.getCustomer());
+                dealerReport.setVehicleDescription(contract.getMake() + " " + contract.getModel() + " " + contract.getVersion());
+                dealerReport.setColor(contract.getColor());
+                dealerReport.setDealer(request.getDealerName());
+                dealerReport.setDeliveryDealer(contract.getDeliveryPerson());
+                dealerReport.setShipmentCityContract(contract.getDeliveryLocation());
+                dealerReport.setStatus("ACTIVE");
+
+                dealerReportRepository.save(dealerReport);
+
 
                 assignedCount++;
 
@@ -392,6 +408,29 @@ public class ContractDealerAssignmentService {
                 contractDealerAssignment.setUpdatedBy(null);
                 contractDealerAssignment.setUpdatedDate(LocalDateTime.now());
                 assignmentRepository.save(contractDealerAssignment);
+                // Dealer report için eklendi
+                dealerReportRepository.findByContractId(item.getContractId()).ifPresent(dealerReport -> {
+                    if (item.getChassisNumber() != null) {
+                        dealerReport.setChassisNumber(item.getChassisNumber());
+                    }
+                    if (item.getMotorNumber() != null) {
+                        dealerReport.setEngineNumber(item.getMotorNumber());
+                    }
+                    if (item.getShipmentStartDate() != null) {
+                        dealerReport.setShipmentStartDate(LocalDateTime.parse(item.getShipmentStartDate()));
+                    }
+                    if (item.getShipmentEndDate() != null) {
+                        dealerReport.setShipmentEndDate(LocalDateTime.parse(item.getShipmentEndDate()));
+                    }
+                    if (item.getDeliverySupplier() != null) {
+                        dealerReport.setDeliveryDealer(item.getDeliverySupplier());
+                    }
+                    if (item.getNetPrice() != null) {
+                        dealerReport.setProformaTotal(item.getNetPrice());
+                    }
+
+                    dealerReportRepository.save(dealerReport);
+                });
             }
         } catch (Exception e) {
             log.error("Error updating dealer contracts: {}", e.getMessage(), e);
