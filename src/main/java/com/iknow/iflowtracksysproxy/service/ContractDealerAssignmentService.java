@@ -59,33 +59,22 @@ public class ContractDealerAssignmentService {
 
         for (CustomerContractResponse contract : contracts) {
             try {
-                Optional<ContractDealerAssignment> existingAssignment = assignmentRepository.findByContractId(contract.getId());
-                if (existingAssignment.isPresent()) {
-                    ContractDealerAssignment contractDealerAssignment = existingAssignment.get();
-                    contractDealerAssignment.setContractId(contract.getId());
-                    contractDealerAssignment.setDealerBusinessPartnerId(request.getDealerId());
-                    contractDealerAssignment.setDealerName(request.getDealerName());
-                    contractDealerAssignment.setAssignedBy(request.getAssignedBy());
-                    contractDealerAssignment.setAssignedDate(LocalDateTime.now());
-                    contractDealerAssignment.setStatus("ACTIVE");
-                    contractDealerAssignment.setNotes("Web UI  üzerinden atama.");
-                    contractDealerAssignment.setDealerEmail("");
-                    assignmentRepository.save(contractDealerAssignment);
-                } else {
-                    ContractDealerAssignment newAssignment = ContractDealerAssignment.builder()
-                            .contractId(contract.getId())
-                            .dealerBusinessPartnerId(request.getDealerId())
-                            .dealerContactId(request.getDealerContactId())
-                            .dealerName(request.getDealerName())
-                            .assignedBy(request.getAssignedBy())
-                            .assignedDate(LocalDateTime.now())
-                            .status("ACTIVE")
-                            .notes("Web UI  üzerinden atama.")
-                            .build();
+                ContractDealerAssignment assignment = assignmentRepository
+                        .findByContractId(contract.getId())
+                        .orElseGet(ContractDealerAssignment::new);
 
-                    contract.setAssignedDealer(request.getDealerName());
-                    newAssignment = assignmentRepository.save(newAssignment);
-                }
+                assignment.setContractId(contract.getId());
+                assignment.setDealerBusinessPartnerId(request.getDealerId());
+                assignment.setDealerContactId(request.getDealerContactId());
+                assignment.setDealerName(request.getDealerName());
+                assignment.setAssignedBy(request.getAssignedBy());
+                assignment.setAssignedDate(LocalDateTime.now());
+                assignment.setStatus("ACTIVE");
+                assignment.setNotes("Web UI üzerinden atama.");
+                assignment.setDealerEmail("");
+
+                contract.setAssignedDealer(request.getDealerName());
+                assignmentRepository.save(assignment);
 
                 if (contract.getOrdersId() != null) {
                     // Supplier ve Contact Bilgisinin Güncellenmesi
@@ -109,7 +98,6 @@ public class ContractDealerAssignmentService {
                             "OrdersId bulunamadı. Bu kontrat için önce Miles sipariş kaydı oluşmalıdır."
                     );
                 }
-
 
                 // raporlama için eklendi
                 DealerReport dealerReport = dealerReportRepository
@@ -136,7 +124,6 @@ public class ContractDealerAssignmentService {
                 log.error("Failed to assign contract {}: {}", contract.getId(), e.getMessage(), e);
                 failedCount++;
                 failedContractIds.add(contract.getId());
-                throw new Exception("Atama sırasında bir hata oluştu");
 
             }
         }

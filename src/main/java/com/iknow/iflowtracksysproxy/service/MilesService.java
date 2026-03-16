@@ -71,8 +71,13 @@ public class MilesService {
                 contractProformaRepository.findContractIdsByContractIdIn(contractIds)
         );
 
-        Map<String, ContractDealerAssignment> dealerMap = dealerAssignments.stream()
-                .collect(Collectors.toMap(ContractDealerAssignment::getContractId, a -> a));
+        Map<String, ContractDealerAssignment> dealerMap =
+                dealerAssignments.stream()
+                        .collect(Collectors.toMap(
+                                ContractDealerAssignment::getContractId,
+                                a -> a,
+                                (a, b) -> a
+                        ));
 
         Map<String, ContractLeasingAssignment> leasingMap = leasingAssignments.stream()
                 .collect(Collectors.toMap(ContractLeasingAssignment::getContractId, a -> a));
