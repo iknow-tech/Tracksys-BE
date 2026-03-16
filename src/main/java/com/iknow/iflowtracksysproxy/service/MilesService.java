@@ -11,14 +11,18 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,6 +39,10 @@ public class MilesService {
     private final DeliveryDocumentRepository deliveryDocumentRepository;
     private final VehicleDocumentRepository vehicleDocumentRepository;
     private final MailService mailService;
+    @Value("${miles.customer-contracts.cache-seconds:120}")
+    private long customerContractsCacheSeconds;
+
+    private final Object customerContractsRefreshLock = new Object();
 
     /**
      * Get current session ID
@@ -52,87 +60,134 @@ public class MilesService {
 
 
     public List<CustomerContractResponse> getCustomerContracts() {
-
-        if (customerContractCache.isEmpty()) {
-            log.info("Cache boş, Miles'tan senkron ediliyor");
-            milesContractSyncService.syncFromMiles("API_CALL");
+        Duration cacheTtl = Duration.ofSeconds(customerContractsCacheSeconds);
+        if (!customerContractCache.isFresh(cacheTtl)) {
+            synchronized (customerContractsRefreshLock) {
+                if (!customerContractCache.isFresh(cacheTtl)) {
+                    log.info("Customer contract cache stale/empty, Miles'tan senkron ediliyor");
+                    milesContractSyncService.syncFromMiles("API_CALL");
+                }
+            }
         }
-        List<CustomerContractResponse> contracts = customerContractCache.get();
+
+        List<CustomerContractResponse> contracts = customerContractCache.snapshot();
         if (contracts == null || contracts.isEmpty()) {
             return contracts;
         }
-        List<ContractDealerAssignment> dealerAssignments = contractDealerAssignmentRepository.findAll();
-        List<ContractLeasingAssignment> leasingAssigments = contractLeasingAssignmentRepository.findByStatus("ACTIVE");
+
+        List<String> contractIds = contracts.stream()
+                .map(CustomerContractResponse::getId)
+                .filter(id -> id != null && !id.isBlank())
+                .toList();
+        if (contractIds.isEmpty()) {
+            return contracts;
+        }
+
+        List<ContractDealerAssignment> dealerAssignments =
+                contractDealerAssignmentRepository.findByContractIdIn(contractIds);
+        List<ContractLeasingAssignment> leasingAssigments =
+                contractLeasingAssignmentRepository.findByStatusAndContractIdIn("ACTIVE", contractIds);
+        Map<String, DeliveryDocument> deliveryDocumentMap =
+                deliveryDocumentRepository.findByContractIdIn(contractIds)
+                        .stream()
+                        .collect(Collectors.toMap(
+                                DeliveryDocument::getContractId,
+                                document -> document,
+                                (existing, replacement) -> existing
+                        ));
+        Set<String> proformaContractIds = new HashSet<>(
+                contractProformaRepository.findContractIdsByContractIdIn(contractIds)
+        );
+
         Map<String, ContractDealerAssignment> dealerMap =
                 dealerAssignments.stream()
                         .collect(Collectors.toMap(
                                 ContractDealerAssignment::getContractId,
-                                a -> a
+                                a -> a,
+                                (existing, replacement) -> existing
                         ));
 
         Map<String, ContractLeasingAssignment> leasingMap =
                 leasingAssigments.stream()
                         .collect(Collectors.toMap(
                                 ContractLeasingAssignment::getContractId,
-                                a -> a
+                                a -> a,
+                                (existing, replacement) -> existing
                         ));
+
         for (CustomerContractResponse contractResponse : contracts) {
             ContractLeasingAssignment leasing = leasingMap.get(contractResponse.getId());
-            Optional<DeliveryDocument> deliveryDocumentOptional = deliveryDocumentRepository.findByContractId(contractResponse.getId());
-            if (deliveryDocumentOptional.isPresent()) {
-                DeliveryDocument deliveryDocument = deliveryDocumentOptional.get();
+            DeliveryDocument deliveryDocument = deliveryDocumentMap.get(contractResponse.getId());
+            if (deliveryDocument != null) {
                 contractResponse.setDeliveryDocumentId(deliveryDocument.getId().toString());
                 contractResponse.setDeliveryDocumentName(deliveryDocument.getFileName());
             }
+
             if (leasing != null) {
                 contractResponse.setAssignedLeasing(leasing.getLeasingName());
                 contractResponse.setSysEnumerationId(leasing.getLeasingEnumId());
 
-                // miles update (Leasing ile Satın Alınan Araçlarda Vehicle Order Statüsünün Güncellenmesi) -- Finansal Kiralama
-                PropertyTypeUpdateRequest propertyTypeUpdateRequest = new PropertyTypeUpdateRequest("266", "10282", "1005943");
-                PropertyTypeUpdateResponse propertyTypeUpdateResponse = updateProperty(propertyTypeUpdateRequest, contractResponse.getOrdersId());
-                String businessErrorStr = propertyTypeUpdateResponse.getMetadata().getOperationStatus().getBusinessError();
-                boolean hasBusinessError = Boolean.parseBoolean(businessErrorStr);
-                contractResponse.setUpdateVehicleOrderItemStatu(!hasBusinessError);
+                if (!contractResponse.isUpdateVehicleOrderItemStatu() && contractResponse.getOrdersId() != null) {
+                    PropertyTypeUpdateRequest propertyTypeUpdateRequest =
+                            new PropertyTypeUpdateRequest("266", "10282", "1005943");
+                    PropertyTypeUpdateResponse propertyTypeUpdateResponse =
+                            updateProperty(propertyTypeUpdateRequest, contractResponse.getOrdersId());
+                    String businessErrorStr = propertyTypeUpdateResponse.getMetadata().getOperationStatus().getBusinessError();
+                    boolean hasBusinessError = Boolean.parseBoolean(businessErrorStr);
+                    contractResponse.setUpdateVehicleOrderItemStatu(!hasBusinessError);
+                }
 
-                // Fleet Vehicle Üzerinde Mülkiyet Türünün Güncellenmesi - AK Leasing
-                MulkUpdateRequest mulkiyetUpdateRequest = new MulkUpdateRequest();
-                mulkiyetUpdateRequest.setFleetVehicleId(contractResponse.getFleetVehicleId());
-                mulkiyetUpdateRequest.setFieldId("2942");
-                mulkiyetUpdateRequest.setSroid("68");
-                mulkiyetUpdateRequest.setValue(leasing.getLeasingEnumId());
-                MulkUpdateResponse mulkiyetUpdateResponse = updateMulk(mulkiyetUpdateRequest);
-                contractResponse.setMulkiyetUpdateSuccess(!Boolean.parseBoolean(mulkiyetUpdateResponse.getResponsemetadata().getOperationStatus().getBusinessError()));
+                if (!contractResponse.isMulkiyetUpdateSuccess() && contractResponse.getFleetVehicleId() != null) {
+                    MulkUpdateRequest mulkiyetUpdateRequest = new MulkUpdateRequest();
+                    mulkiyetUpdateRequest.setFleetVehicleId(contractResponse.getFleetVehicleId());
+                    mulkiyetUpdateRequest.setFieldId("2942");
+                    mulkiyetUpdateRequest.setSroid("68");
+                    mulkiyetUpdateRequest.setValue(leasing.getLeasingEnumId());
+                    MulkUpdateResponse mulkiyetUpdateResponse = updateMulk(mulkiyetUpdateRequest);
+                    contractResponse.setMulkiyetUpdateSuccess(
+                            !Boolean.parseBoolean(mulkiyetUpdateResponse.getResponsemetadata().getOperationStatus().getBusinessError())
+                    );
+                }
 
-                // Fleet Vehicle Üzerinde Mülk Alanının Güncellenmesi
-                MulkUpdateRequest mulkUpdateRequest = new MulkUpdateRequest();
-                mulkUpdateRequest.setFleetVehicleId(contractResponse.getFleetVehicleId());
-                mulkUpdateRequest.setFieldId("1001733");
-                mulkUpdateRequest.setSroid("68");
-                mulkUpdateRequest.setValue("1006514");
-                MulkUpdateResponse mulkUpdateResponse = updateMulk(mulkUpdateRequest);
-                contractResponse.setMulkUpdateSuccess(!Boolean.parseBoolean(mulkUpdateResponse.getResponsemetadata().getOperationStatus().getBusinessError()));
+                if (!contractResponse.isMulkUpdateSuccess() && contractResponse.getFleetVehicleId() != null) {
+                    MulkUpdateRequest mulkUpdateRequest = new MulkUpdateRequest();
+                    mulkUpdateRequest.setFleetVehicleId(contractResponse.getFleetVehicleId());
+                    mulkUpdateRequest.setFieldId("1001733");
+                    mulkUpdateRequest.setSroid("68");
+                    mulkUpdateRequest.setValue("1006514");
+                    MulkUpdateResponse mulkUpdateResponse = updateMulk(mulkUpdateRequest);
+                    contractResponse.setMulkUpdateSuccess(
+                            !Boolean.parseBoolean(mulkUpdateResponse.getResponsemetadata().getOperationStatus().getBusinessError())
+                    );
+                }
 
             } else {
                 contractResponse.setAssignedLeasing(null);
                 contractResponse.setSysEnumerationId(null);
             }
+
             ContractDealerAssignment dealer = dealerMap.get(contractResponse.getId());
             if (dealer != null && dealer.getStatus().equals("ACTIVE")) {
                 contractResponse.setAssignedDealer(dealer.getDealerName());
                 contractResponse.setDeliveryMethod(dealer.getDeliveryMethod());
                 if (dealer.getLeasingInvoiceDate() != null) { // leasing fatura tarihi
                     contractResponse.setLeasingInvoiceDate(dealer.getLeasingInvoiceDate());
-                    // miles update(Leasing ile Satın Alınan Araçlarda Vehicle Order Açıklamasının Finansal Kiralama Olarak Güncellenmesi)
-                    VehicleOrderDescUpdateRequest vehicleOrderDescUpdateRequest = new VehicleOrderDescUpdateRequest();
-                    vehicleOrderDescUpdateRequest.setVehicleOrderId(contractResponse.getOrdersId());
-                    vehicleOrderDescUpdateRequest.setSroid("266");
-                    vehicleOrderDescUpdateRequest.setValue("Leasing- " + leasing.getLeasingName() + " " + dealer.getLeasingInvoiceDate() + " Fatura");
-                    vehicleOrderDescUpdateRequest.setFieldId("1371");
-                    VehicleOrderDescUpdateResponse vehicleOrderDescUpdateResponse = updateVehicleOrderDesc(vehicleOrderDescUpdateRequest);
-                    String businessErrorStr = vehicleOrderDescUpdateResponse.getMetadata().getOperationstatus().getBusinesserror();
-                    boolean hasBusinessError = Boolean.parseBoolean(businessErrorStr);
-                    contractResponse.setUpdateVehicleOrderDesc(!hasBusinessError);
+                    if (!contractResponse.isUpdateVehicleOrderDesc()
+                            && leasing != null
+                            && contractResponse.getOrdersId() != null) {
+                        VehicleOrderDescUpdateRequest vehicleOrderDescUpdateRequest = new VehicleOrderDescUpdateRequest();
+                        vehicleOrderDescUpdateRequest.setVehicleOrderId(contractResponse.getOrdersId());
+                        vehicleOrderDescUpdateRequest.setSroid("266");
+                        vehicleOrderDescUpdateRequest.setValue(
+                                "Leasing- " + leasing.getLeasingName() + " " + dealer.getLeasingInvoiceDate() + " Fatura"
+                        );
+                        vehicleOrderDescUpdateRequest.setFieldId("1371");
+                        VehicleOrderDescUpdateResponse vehicleOrderDescUpdateResponse =
+                                updateVehicleOrderDesc(vehicleOrderDescUpdateRequest);
+                        String businessErrorStr = vehicleOrderDescUpdateResponse.getMetadata().getOperationstatus().getBusinesserror();
+                        boolean hasBusinessError = Boolean.parseBoolean(businessErrorStr);
+                        contractResponse.setUpdateVehicleOrderDesc(!hasBusinessError);
+                    }
                 }
                 // sipariş telim mi edildi?
                 if (dealer.getStatus().equals(ContractStatus.DELIVERED.toString())) {
@@ -142,11 +197,13 @@ public class MilesService {
                 }
                 contractResponse.setContractOrderStatus(dealer.getContractOrderStatus());
             }
-            boolean hasProforma = contractProformaRepository.existsByContractId(contractResponse.getId());
-            contractResponse.setHasProforma(hasProforma);
+
+            contractResponse.setHasProforma(proformaContractIds.contains(contractResponse.getId()));
 
             if (contractResponse.getTreasuryApprovalDate() != null && contractResponse.getOrdersId() != null) {
-                if (dealer != null && dealer.getDealerEmail() != null) {
+                if (dealer != null
+                        && dealer.getDealerEmail() != null
+                        && dealer.getDealerInvoiceMailSentAt() == null) {
                     DealerInvoiceMailRequest mailRequest = DealerInvoiceMailRequest.builder()
                             .ordersId(contractResponse.getOrdersId())
                             .vehicleDescription(contractResponse.getVersion())
@@ -157,6 +214,8 @@ public class MilesService {
                             .build();
 
                     mailService.sendDealerInvoiceInstruction("umitguldemir@gmail.com", mailRequest);
+                    dealer.setDealerInvoiceMailSentAt(LocalDateTime.now());
+                    contractDealerAssignmentRepository.save(dealer);
                 } else {
                     log.warn("Bayi email adresi bulunamadı. ContractId: {}", contractResponse.getId());
                 }

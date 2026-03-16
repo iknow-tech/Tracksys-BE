@@ -27,5 +27,7 @@ public interface ContractLeasingAssignmentRepository extends JpaRepository<Contr
 """)
     void passiveAllActiveByContractId(@Param("contractId") String contractId);
 
+    List<ContractLeasingAssignment> findByStatusAndContractIdIn(String status, List<String> contractIds);
+
 
 }

@@ -4,6 +4,7 @@ import com.iknow.iflowtracksysproxy.integration.miles.model.response.CustomerCon
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,6 +36,14 @@ public class CustomerContractCache {
     public List<CustomerContractResponse> snapshot() {
         List<CustomerContractResponse> data=  cache.get();
         return data == null ? new ArrayList<>() : new ArrayList<>(data);
+    }
+
+    public boolean isFresh(Duration ttl) {
+        if (ttl == null || ttl.isNegative() || ttl.isZero()) {
+            return !isEmpty();
+        }
+        LocalDateTime updatedAt = lastUpdatedAt;
+        return updatedAt != null && updatedAt.plus(ttl).isAfter(LocalDateTime.now());
     }
 
     public void clear() {

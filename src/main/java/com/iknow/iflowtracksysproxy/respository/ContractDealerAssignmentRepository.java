@@ -42,6 +42,8 @@ public interface ContractDealerAssignmentRepository extends JpaRepository<Contra
     List<ContractDealerAssignment> findByDealerBusinessPartnerIdAndStatus(
             String dealerId, String status);
 
+    List<ContractDealerAssignment> findByContractIdIn(List<String> contractIds);
+
 
 
 }
