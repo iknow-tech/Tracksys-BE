@@ -161,23 +161,15 @@ public class ContractDealerAssignmentService {
                         dealerId,
                         "ACTIVE"
                 );
-
         if (assignments.isEmpty()) {
             log.info("No active assignments found for dealer: {}", dealerId);
             return new ArrayList<>();
         }
-
-        List<CustomerContractResponse> allContracts = customerContractCache.get();
-
-        if (allContracts == null || allContracts.isEmpty()) {
-            milesContractSyncService.syncFromMiles("DEALER_ON_DEMAND");
-            allContracts = customerContractCache.get();
-        }
+        List<CustomerContractResponse> allContracts = milesService.getCustomerContracts();
 
         if (allContracts == null || allContracts.isEmpty()) {
             return new ArrayList<>();
         }
-
         Map<String, CustomerContractResponse> contractMap = allContracts.stream()
                 .collect(Collectors.toMap(
                         CustomerContractResponse::getId,
@@ -185,10 +177,7 @@ public class ContractDealerAssignmentService {
                         (existing, replacement) -> existing
                 ));
 
-
         List<DealerContractInfo> detailedContracts = new ArrayList<>();
-
-
         for (ContractDealerAssignment assignment : assignments) {
             String deliveryDocumentId = null;
             String deliveryDocumentName = null;
@@ -203,29 +192,22 @@ public class ContractDealerAssignmentService {
                     log.warn("⚠️ Contract {} not found in MilesApi response", contractId);
                     continue;
                 }
-
                 boolean hasProforma = contractProformaRepository.existsByContractId(contractId);
-
                 Optional<ContractLeasingAssignment> leasingAssignmentOptional = contractLeasingAssignmentRepository.findByContractIdAndStatus(contractId, "ACTIVE");
                 if (leasingAssignmentOptional.isPresent()) {
                     leasingAssignment = leasingAssignmentOptional.get();
                 }
-
                 Optional<DeliveryDocument> deliveryDocumentOptional = deliveryDocumentRepository.findByContractId(contractId);
                 if (deliveryDocumentOptional.isPresent()) {
                     deliveryDocument = deliveryDocumentOptional.get();
                 }
-
-
                 if (deliveryDocument != null) {
                     deliveryDocumentId = deliveryDocument.getId() != null ? deliveryDocument.getId().toString() : null;
                     deliveryDocumentName = deliveryDocument.getFileName();
                 }
-
                 if (assignment.getDealerInvoiceMailSentAt() == null && contract.getTreasuryApprovalDate() != null && contract.getOrdersId() != null) {
 
                 }
-
                 DealerContractInfo contractInfo = DealerContractInfo.builder()
                         .id(contract.getId())
                         .contractId(contract.getId())
@@ -272,7 +254,6 @@ public class ContractDealerAssignmentService {
                         .build();
 
                 detailedContracts.add(contractInfo);
-
                 log.debug(" Contract {} processed successfully", contractId);
 
             } catch (Exception e) {
@@ -280,10 +261,8 @@ public class ContractDealerAssignmentService {
                         assignment.getContractId(), e.getMessage(), e);
             }
         }
-
         log.info("Returning {} detailed contracts for dealer {}",
                 detailedContracts.size(), dealerId);
-
         return detailedContracts;
     }
 
@@ -519,12 +498,7 @@ public class ContractDealerAssignmentService {
             return new ArrayList<>();
         }
 
-        List<CustomerContractResponse> allContracts = customerContractCache.get();
-
-        if (allContracts == null || allContracts.isEmpty()) {
-            milesContractSyncService.syncFromMiles("ADMIN_ON_DEMAND");
-            allContracts = customerContractCache.get();
-        }
+        List<CustomerContractResponse> allContracts = milesService.getCustomerContracts();
 
         if (allContracts == null || allContracts.isEmpty()) {
             return new ArrayList<>();

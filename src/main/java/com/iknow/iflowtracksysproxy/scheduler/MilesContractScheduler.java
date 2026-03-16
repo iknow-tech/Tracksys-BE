@@ -13,11 +13,9 @@ public class MilesContractScheduler {
 
     private final MilesContractSyncService syncService;
 
-//    @Scheduled(cron = "0 */2 * * * *") 2 dakikada bir çalışıyordu 1 saatte 1 çalışacak şekilde güncelledim
-@Scheduled(cron = "${miles.sync.cron}")
     public void run() {
         log.info("⏰ Scheduler başlatıldı...");
-        syncService.syncFromMiles("SCHEDULER_1_HOUR");
+       // syncService.syncFromMiles("SCHEDULER_1_HOUR");
     }
 
 }

@@ -35,8 +35,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/proforma/review/**", "/api/v1/ruhsat/analiz-et").permitAll()
-                        .requestMatchers("/api/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/miles/dealer").permitAll()
+                        .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
