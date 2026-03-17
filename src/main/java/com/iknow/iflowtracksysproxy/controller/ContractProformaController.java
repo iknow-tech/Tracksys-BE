@@ -30,6 +30,14 @@ public class ContractProformaController {
             @RequestParam("contractIds") List<String> contractIdsJson,
             @RequestParam("dealerBusinessPartnerId") String dealerId
     ) {
+        log.info(
+                "Proforma upload request received fileName={} size={} contentType={} contractIdsCount={} dealerBusinessPartnerId={}",
+                file != null ? file.getOriginalFilename() : null,
+                file != null ? file.getSize() : null,
+                file != null ? file.getContentType() : null,
+                contractIdsJson != null ? contractIdsJson.size() : null,
+                dealerId
+        );
         List<ContractProforma> proforma = proformaService.upload(file, contractIdsJson, dealerId);
         return new ResponseEntity<>(proforma, HttpStatus.OK);
     }
@@ -45,7 +53,7 @@ public class ContractProformaController {
     @GetMapping("/download/{proformaId}")
     public ResponseEntity<Resource> download(@PathVariable String proformaId) {
 
-        ContractProforma proforma = proformaService.findById(Long.getLong(proformaId))
+        ContractProforma proforma = proformaService.findById(Long.valueOf(proformaId))
                 .orElseThrow(() -> new RuntimeException("Proforma bulunamadı"));
 
         Resource resource = proformaService.loadProformaFile(proformaId);

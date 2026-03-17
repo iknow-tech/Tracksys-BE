@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,31 +29,64 @@ public class ContractProformaService {
 
     @Transactional
     public List<ContractProforma> upload( MultipartFile file,  List<String> contractIds, String dealerId) {
+        log.info(
+                "ContractProformaService.upload start fileName={} size={} contentType={} contractIdsCount={} dealerBusinessPartnerId={}",
+                file != null ? file.getOriginalFilename() : null,
+                file != null ? file.getSize() : null,
+                file != null ? file.getContentType() : null,
+                contractIds != null ? contractIds.size() : null,
+                dealerId
+        );
 
         if (contractIds == null || contractIds.isEmpty()) {
             throw new IllegalArgumentException("En az bir kontrat seçilmelidir.");
         }
 
-        String filePath = saveFile(file);
-        List<ContractProforma> contractProformaList = new ArrayList<>();
+        try {
+            String filePath = saveFile(file);
+            log.info("ContractProformaService.upload file saved path={}", filePath);
 
-        for (String contractId : contractIds) {
-            ContractProforma contractProforma = new ContractProforma();
-            contractProforma.setContractId(contractId);
-            contractProforma.setDealerBusinessPartnerId(dealerId);
-            contractProforma.setFileName(file.getOriginalFilename())   ;
-            contractProforma.setFilePath(filePath);
-            contractProforma.setContentType(file.getContentType());
-            contractProforma.setFileSize(file.getSize());
-            contractProforma.setStatus("UPLOADED");
-            contractProforma.setUploadedAt(LocalDateTime.now());
+            List<ContractProforma> contractProformaList = new ArrayList<>();
 
-            contractProforma= repository.save(contractProforma);
-            contractProformaList.add(contractProforma);
+            for (String contractId : contractIds) {
+                log.info(
+                        "ContractProformaService.upload persisting contractId={} dealerBusinessPartnerId={} filePath={}",
+                        contractId,
+                        dealerId,
+                        filePath
+                );
+
+                ContractProforma contractProforma = new ContractProforma();
+                contractProforma.setContractId(contractId);
+                contractProforma.setDealerBusinessPartnerId(dealerId);
+                contractProforma.setFileName(file.getOriginalFilename());
+                contractProforma.setFilePath(filePath);
+                contractProforma.setContentType(file.getContentType());
+                contractProforma.setFileSize(file.getSize());
+                contractProforma.setStatus("UPLOADED");
+                contractProforma.setUploadedAt(LocalDateTime.now());
+
+                contractProforma = repository.save(contractProforma);
+                contractProformaList.add(contractProforma);
+                log.info(
+                        "ContractProformaService.upload persisted id={} contractId={}",
+                        contractProforma.getId(),
+                        contractId
+                );
+            }
+
+            log.info("Proforma uploaded for {} contracts", contractIds.size());
+            return contractProformaList;
+        } catch (Exception e) {
+            log.error(
+                    "ContractProformaService.upload failed fileName={} dealerBusinessPartnerId={} contractIds={}",
+                    file != null ? file.getOriginalFilename() : null,
+                    dealerId,
+                    contractIds,
+                    e
+            );
+            throw e;
         }
-
-        log.info("Proforma uploaded for {} contracts", contractIds.size());
-        return contractProformaList;
 
     }
 
@@ -71,6 +103,13 @@ public class ContractProformaService {
 
             return path.toString();
         } catch (IOException e) {
+            log.error(
+                    "ContractProformaService.saveFile failed fileName={} contentType={} size={}",
+                    file != null ? file.getOriginalFilename() : null,
+                    file != null ? file.getContentType() : null,
+                    file != null ? file.getSize() : null,
+                    e
+            );
             throw new RuntimeException("Dosya kaydedilemedi", e);
         }
     }
@@ -85,7 +124,7 @@ public class ContractProformaService {
 
     public Resource loadProformaFile(String proformaId) {
 
-        ContractProforma proforma = findById(Long.getLong(proformaId))
+        ContractProforma proforma = findById(Long.valueOf(proformaId))
                 .orElseThrow(() -> new RuntimeException("Proforma bulunamadı"));
 
         try {
