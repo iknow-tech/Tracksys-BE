@@ -25,21 +25,18 @@ public class MilesUpdateService {
     private final MilesService milesService;
     private final MilesApi milesApi;
     private final ContractDealerAssignmentRepository contractDealerAssignmentRepository;
+    private final MilesContractSyncService milesContractSyncService;
 
 
     public MilesUpdatedResponse update(MilesUpdatedDto milesUpdatedDto) {
         MilesUpdatedResponse milesUpdatedResponse = new MilesUpdatedResponse();
-        List<CustomerContractResponse> allContracts = milesService.getCustomerContracts();
         CustomerContractResponse contractResponse = new CustomerContractResponse();
         ZoneId zone = ZoneId.of("Europe/Istanbul");
 
         try {
             if (milesUpdatedDto.getContractId() != null) {
-                Optional<CustomerContractResponse> optionalCustomerContractResponse = allContracts.stream().filter(
-                        contract -> contract.getId().equals(milesUpdatedDto.getContractId())).findFirst();
-                if (optionalCustomerContractResponse.isPresent()) {
-                    contractResponse = optionalCustomerContractResponse.get();
-                }
+                contractResponse = milesService.findCustomerContractById(milesUpdatedDto.getContractId())
+                        .orElse(contractResponse);
             }
             // net price update
             if (milesUpdatedDto.getNetPrice() != null && !milesUpdatedDto.getNetPrice().equals("")) {
@@ -370,6 +367,8 @@ public class MilesUpdateService {
 
         }
 
+        syncCustomerContractsAfterSave(milesUpdatedDto.getContractId());
+
         return milesUpdatedResponse;
 
     }
@@ -400,15 +399,11 @@ public class MilesUpdateService {
 
     public MilesUpdatedResponse addLicensePlateRow (MilesUpdatedDto milesUpdatedDto) {
         MilesUpdatedResponse milesUpdatedResponse = new MilesUpdatedResponse();
-        List<CustomerContractResponse> allContracts = milesService.getCustomerContracts();
         CustomerContractResponse contractResponse = new CustomerContractResponse();
         try {
             if (milesUpdatedDto.getContractId() != null) {
-                Optional<CustomerContractResponse> optionalCustomerContractResponse = allContracts.stream().filter(
-                        contract -> contract.getId().equals(milesUpdatedDto.getContractId())).findFirst();
-                if (optionalCustomerContractResponse.isPresent()) {
-                    contractResponse = optionalCustomerContractResponse.get();
-                }
+                contractResponse = milesService.findCustomerContractById(milesUpdatedDto.getContractId())
+                        .orElse(contractResponse);
             }
             // net price update
             if (milesUpdatedDto.getNetPrice() != null && !milesUpdatedDto.getNetPrice().equals("")) {
@@ -697,6 +692,18 @@ public class MilesUpdateService {
 
         return milesUpdatedResponse;
 
+    }
+
+    private void syncCustomerContractsAfterSave(String contractId) {
+        if (contractId == null || contractId.isBlank()) {
+            return;
+        }
+
+        try {
+            milesContractSyncService.syncFromMiles("SAVE_CHANGES");
+        } catch (Exception e) {
+            log.warn("Customer contract sync after save failed for contract {}", contractId, e);
+        }
     }
 
 

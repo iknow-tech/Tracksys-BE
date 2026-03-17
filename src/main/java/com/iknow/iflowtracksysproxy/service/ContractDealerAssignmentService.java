@@ -170,7 +170,7 @@ public class ContractDealerAssignmentService {
         List<CustomerContractResponse> allContracts = customerContractCache.get();
 
         if (allContracts == null || allContracts.isEmpty()) {
-            milesContractSyncService.syncFromMiles("DEALER_ON_DEMAND");
+            milesContractSyncService.refreshCacheFromMiles("DEALER_ON_DEMAND");
             allContracts = customerContractCache.get();
         }
 
@@ -312,18 +312,12 @@ public class ContractDealerAssignmentService {
         if (request.getUpdates() == null || request.getUpdates().isEmpty()) {
             return;
         }
-        List<CustomerContractResponse> allContracts = milesService.getCustomerContracts();
-        CustomerContractResponse contractResponse = new CustomerContractResponse();
 
         try {
             for (DealerContractUpdateItemRequest item : request.getUpdates()) {
-                if (item.getContractId() != null) {
-                    Optional<CustomerContractResponse> optionalCustomerContractResponse = allContracts.stream().filter(
-                            contract -> contract.getId().equals(item.getContractId())).findFirst();
-                    if (optionalCustomerContractResponse.isPresent()) {
-                        contractResponse = optionalCustomerContractResponse.get();
-                    }
-                }
+                CustomerContractResponse contractResponse =
+                        milesService.findCustomerContractById(item.getContractId())
+                                .orElse(new CustomerContractResponse());
 
                 MilesUpdatedDto milesUpdatedDto = new MilesUpdatedDto();
                 milesUpdatedDto.setContractId(item.getContractId());
@@ -455,13 +449,8 @@ public class ContractDealerAssignmentService {
         DeliveryDocument deliveryDocument = new DeliveryDocument();
 
         try {
-
-            List<CustomerContractResponse> allContracts = milesService.getCustomerContracts();
-
-            CustomerContractResponse contractResponse = allContracts.stream().filter(
-                            contract -> contract.getId().equals(contractId)).findFirst()
+            milesService.findCustomerContractById(contractId)
                     .orElseThrow(() -> new Exception("İlgili Contract Bulunamadı"));
-
 
             ContractDealerAssignment assignment =
                     assignmentRepository.findByContractIdAndStatus(contractId, "ACTIVE")
@@ -522,7 +511,7 @@ public class ContractDealerAssignmentService {
         List<CustomerContractResponse> allContracts = customerContractCache.get();
 
         if (allContracts == null || allContracts.isEmpty()) {
-            milesContractSyncService.syncFromMiles("ADMIN_ON_DEMAND");
+            milesContractSyncService.refreshCacheFromMiles("ADMIN_ON_DEMAND");
             allContracts = customerContractCache.get();
         }
 

@@ -1,7 +1,6 @@
 package com.iknow.iflowtracksysproxy.service;
 
 import com.iknow.iflowtracksysproxy.cache.CustomerContractCache;
-import com.iknow.iflowtracksysproxy.dto.request.DealerInvoiceMailRequest;
 import com.iknow.iflowtracksysproxy.entity.*;
 import com.iknow.iflowtracksysproxy.integration.miles.MilesApi;
 import com.iknow.iflowtracksysproxy.integration.miles.model.request.*;
@@ -18,11 +17,11 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,17 +31,17 @@ public class MilesService {
 
     private final MilesApi milesApi;
     private final ContractDealerAssignmentRepository contractDealerAssignmentRepository;
-    private final ContractLeasingAssignmentRepository contractLeasingAssignmentRepository;
     private final CustomerContractCache customerContractCache;
     private final MilesContractSyncService milesContractSyncService;
-    private final ContractProformaRepository contractProformaRepository;
-    private final DeliveryDocumentRepository deliveryDocumentRepository;
     private final VehicleDocumentRepository vehicleDocumentRepository;
-    private final MailService mailService;
+    private final CustomerContractEnrichmentService customerContractEnrichmentService;
     @Value("${miles.customer-contracts.cache-seconds:120}")
     private long customerContractsCacheSeconds;
-
+    @Value("${miles.customer-contracts-response-cache-seconds:3600}")
+    private long customerContractsResponseCacheSeconds;
     private final Object customerContractsRefreshLock = new Object();
+    private final AtomicBoolean customerContractsRequestInFlight = new AtomicBoolean(false);
+    private final AtomicBoolean customerContractsRefreshInFlight = new AtomicBoolean(false);
 
     /**
      * Get current session ID
@@ -60,178 +59,146 @@ public class MilesService {
 
 
     public List<CustomerContractResponse> getCustomerContracts() {
-        Duration cacheTtl = Duration.ofSeconds(customerContractsCacheSeconds);
-        if (!customerContractCache.isFresh(cacheTtl)) {
-            synchronized (customerContractsRefreshLock) {
+        logHeapUsage("getCustomerContracts:start", null);
+        if (!customerContractsRequestInFlight.compareAndSet(false, true)) {
+            log.info("getCustomerContracts request already in progress, returning current cache snapshot");
+            List<CustomerContractResponse> currentSnapshot = enrichCurrentCustomerContracts();
+            logHeapUsage("getCustomerContracts:inflight-cache-return", currentSnapshot.size());
+            return currentSnapshot;
+        }
+
+        try {
+            Duration responseCacheTtl = Duration.ofSeconds(customerContractsResponseCacheSeconds);
+            Duration cacheTtl = Duration.ofSeconds(customerContractsCacheSeconds);
+
+            List<CustomerContractResponse> currentSnapshot = getCurrentCustomerContractsSnapshot();
+            if (!currentSnapshot.isEmpty() && customerContractCache.isFresh(responseCacheTtl)) {
                 if (!customerContractCache.isFresh(cacheTtl)) {
-                    log.info("Customer contract cache stale/empty, Miles'tan senkron ediliyor");
-                    milesContractSyncService.syncFromMiles("API_CALL");
+                    triggerAsyncCustomerContractsRefresh(cacheTtl);
                 }
+                List<CustomerContractResponse> enrichedContracts =
+                        customerContractEnrichmentService.enrich(currentSnapshot);
+                log.info("getCustomerContracts returning current cache snapshot");
+                logHeapUsage("getCustomerContracts:fresh-cache-return", enrichedContracts.size());
+                return enrichedContracts;
             }
+
+            if (currentSnapshot.isEmpty()) {
+                refreshCustomerContracts(cacheTtl, "API_CALL_EMPTY");
+            } else if (!customerContractCache.isFresh(cacheTtl)) {
+                triggerAsyncCustomerContractsRefresh(cacheTtl);
+            }
+
+            List<CustomerContractResponse> enrichedContracts = enrichCurrentCustomerContracts();
+            logHeapUsage("getCustomerContracts:before-return", enrichedContracts.size());
+            return enrichedContracts;
+        } finally {
+            customerContractsRequestInFlight.set(false);
+        }
+    }
+
+    public Optional<CustomerContractResponse> findCustomerContractById(String contractId) {
+        if (contractId == null || contractId.isBlank()) {
+            return Optional.empty();
         }
 
-        List<CustomerContractResponse> contracts = customerContractCache.snapshot();
-        if (contracts == null || contracts.isEmpty()) {
-            return contracts;
+        Optional<CustomerContractResponse> cachedContract = findInCurrentCache(contractId);
+        if (cachedContract.isPresent()) {
+            return cachedContract;
         }
 
-        List<String> contractIds = contracts.stream()
-                .map(CustomerContractResponse::getId)
-                .filter(id -> id != null && !id.isBlank())
-                .toList();
-        if (contractIds.isEmpty()) {
-            return contracts;
+        forceRefreshCustomerContracts("CONTRACT_LOOKUP_MISS");
+        return findInCurrentCache(contractId);
+    }
+
+    private List<CustomerContractResponse> getCurrentCustomerContractsSnapshot() {
+        List<CustomerContractResponse> snapshot = customerContractCache.snapshot();
+        if (snapshot == null || snapshot.isEmpty()) {
+            return List.of();
+        }
+        return snapshot;
+    }
+
+    private List<CustomerContractResponse> enrichCurrentCustomerContracts() {
+        List<CustomerContractResponse> currentSnapshot = getCurrentCustomerContractsSnapshot();
+        if (currentSnapshot.isEmpty()) {
+            return currentSnapshot;
+        }
+        return customerContractEnrichmentService.enrich(currentSnapshot);
+    }
+
+    private Optional<CustomerContractResponse> findInCurrentCache(String contractId) {
+        return customerContractCache.get().stream()
+                .filter(contract -> contractId.equals(contract.getId()))
+                .findFirst()
+                .map(customerContractEnrichmentService::copyOf);
+    }
+
+    private void refreshCustomerContracts(Duration cacheTtl, String trigger) {
+        synchronized (customerContractsRefreshLock) {
+            if (customerContractCache.isFresh(cacheTtl)) {
+                return;
+            }
+            log.info("Customer contract cache stale/empty, Miles'tan cache refresh ediliyor (trigger={})", trigger);
+            logHeapUsage("getCustomerContracts:before-cache-refresh", null);
+            milesContractSyncService.refreshCacheFromMiles(trigger);
+            logHeapUsage("getCustomerContracts:after-cache-refresh", null);
+        }
+    }
+
+    private void forceRefreshCustomerContracts(String trigger) {
+        synchronized (customerContractsRefreshLock) {
+            log.info("Customer contract cache force refresh started (trigger={})", trigger);
+            logHeapUsage("getCustomerContracts:before-cache-refresh", null);
+            milesContractSyncService.refreshCacheFromMiles(trigger);
+            logHeapUsage("getCustomerContracts:after-cache-refresh", null);
+        }
+    }
+
+    private void triggerAsyncCustomerContractsRefresh(Duration cacheTtl) {
+        if (!customerContractsRefreshInFlight.compareAndSet(false, true)) {
+            return;
         }
 
-        List<ContractDealerAssignment> dealerAssignments =
-                contractDealerAssignmentRepository.findByContractIdIn(contractIds);
-        List<ContractLeasingAssignment> leasingAssigments =
-                contractLeasingAssignmentRepository.findByStatusAndContractIdIn("ACTIVE", contractIds);
-        Map<String, DeliveryDocument> deliveryDocumentMap =
-                deliveryDocumentRepository.findByContractIdIn(contractIds)
-                        .stream()
-                        .collect(Collectors.toMap(
-                                DeliveryDocument::getContractId,
-                                document -> document,
-                                (existing, replacement) -> existing
-                        ));
-        Set<String> proformaContractIds = new HashSet<>(
-                contractProformaRepository.findContractIdsByContractIdIn(contractIds)
-        );
-
-        Map<String, ContractDealerAssignment> dealerMap =
-                dealerAssignments.stream()
-                        .collect(Collectors.toMap(
-                                ContractDealerAssignment::getContractId,
-                                a -> a,
-                                (existing, replacement) -> existing
-                        ));
-
-        Map<String, ContractLeasingAssignment> leasingMap =
-                leasingAssigments.stream()
-                        .collect(Collectors.toMap(
-                                ContractLeasingAssignment::getContractId,
-                                a -> a,
-                                (existing, replacement) -> existing
-                        ));
-
-        for (CustomerContractResponse contractResponse : contracts) {
-            ContractLeasingAssignment leasing = leasingMap.get(contractResponse.getId());
-            DeliveryDocument deliveryDocument = deliveryDocumentMap.get(contractResponse.getId());
-            if (deliveryDocument != null) {
-                contractResponse.setDeliveryDocumentId(deliveryDocument.getId().toString());
-                contractResponse.setDeliveryDocumentName(deliveryDocument.getFileName());
+        CompletableFuture.runAsync(() -> {
+            try {
+                refreshCustomerContracts(cacheTtl, "API_CALL_ASYNC");
+            } catch (Exception e) {
+                log.error("Async customer contract refresh failed", e);
+            } finally {
+                customerContractsRefreshInFlight.set(false);
             }
-
-            if (leasing != null) {
-                contractResponse.setAssignedLeasing(leasing.getLeasingName());
-                contractResponse.setSysEnumerationId(leasing.getLeasingEnumId());
-
-                if (!contractResponse.isUpdateVehicleOrderItemStatu() && contractResponse.getOrdersId() != null) {
-                    PropertyTypeUpdateRequest propertyTypeUpdateRequest =
-                            new PropertyTypeUpdateRequest("266", "10282", "1005943");
-                    PropertyTypeUpdateResponse propertyTypeUpdateResponse =
-                            updateProperty(propertyTypeUpdateRequest, contractResponse.getOrdersId());
-                    String businessErrorStr = propertyTypeUpdateResponse.getMetadata().getOperationStatus().getBusinessError();
-                    boolean hasBusinessError = Boolean.parseBoolean(businessErrorStr);
-                    contractResponse.setUpdateVehicleOrderItemStatu(!hasBusinessError);
-                }
-
-                if (!contractResponse.isMulkiyetUpdateSuccess() && contractResponse.getFleetVehicleId() != null) {
-                    MulkUpdateRequest mulkiyetUpdateRequest = new MulkUpdateRequest();
-                    mulkiyetUpdateRequest.setFleetVehicleId(contractResponse.getFleetVehicleId());
-                    mulkiyetUpdateRequest.setFieldId("2942");
-                    mulkiyetUpdateRequest.setSroid("68");
-                    mulkiyetUpdateRequest.setValue(leasing.getLeasingEnumId());
-                    MulkUpdateResponse mulkiyetUpdateResponse = updateMulk(mulkiyetUpdateRequest);
-                    contractResponse.setMulkiyetUpdateSuccess(
-                            !Boolean.parseBoolean(mulkiyetUpdateResponse.getResponsemetadata().getOperationStatus().getBusinessError())
-                    );
-                }
-
-                if (!contractResponse.isMulkUpdateSuccess() && contractResponse.getFleetVehicleId() != null) {
-                    MulkUpdateRequest mulkUpdateRequest = new MulkUpdateRequest();
-                    mulkUpdateRequest.setFleetVehicleId(contractResponse.getFleetVehicleId());
-                    mulkUpdateRequest.setFieldId("1001733");
-                    mulkUpdateRequest.setSroid("68");
-                    mulkUpdateRequest.setValue("1006514");
-                    MulkUpdateResponse mulkUpdateResponse = updateMulk(mulkUpdateRequest);
-                    contractResponse.setMulkUpdateSuccess(
-                            !Boolean.parseBoolean(mulkUpdateResponse.getResponsemetadata().getOperationStatus().getBusinessError())
-                    );
-                }
-
-            } else {
-                contractResponse.setAssignedLeasing(null);
-                contractResponse.setSysEnumerationId(null);
-            }
-
-            ContractDealerAssignment dealer = dealerMap.get(contractResponse.getId());
-            if (dealer != null && dealer.getStatus().equals("ACTIVE")) {
-                contractResponse.setAssignedDealer(dealer.getDealerName());
-                contractResponse.setDeliveryMethod(dealer.getDeliveryMethod());
-                if (dealer.getLeasingInvoiceDate() != null) { // leasing fatura tarihi
-                    contractResponse.setLeasingInvoiceDate(dealer.getLeasingInvoiceDate());
-                    if (!contractResponse.isUpdateVehicleOrderDesc()
-                            && leasing != null
-                            && contractResponse.getOrdersId() != null) {
-                        VehicleOrderDescUpdateRequest vehicleOrderDescUpdateRequest = new VehicleOrderDescUpdateRequest();
-                        vehicleOrderDescUpdateRequest.setVehicleOrderId(contractResponse.getOrdersId());
-                        vehicleOrderDescUpdateRequest.setSroid("266");
-                        vehicleOrderDescUpdateRequest.setValue(
-                                "Leasing- " + leasing.getLeasingName() + " " + dealer.getLeasingInvoiceDate() + " Fatura"
-                        );
-                        vehicleOrderDescUpdateRequest.setFieldId("1371");
-                        VehicleOrderDescUpdateResponse vehicleOrderDescUpdateResponse =
-                                updateVehicleOrderDesc(vehicleOrderDescUpdateRequest);
-                        String businessErrorStr = vehicleOrderDescUpdateResponse.getMetadata().getOperationstatus().getBusinesserror();
-                        boolean hasBusinessError = Boolean.parseBoolean(businessErrorStr);
-                        contractResponse.setUpdateVehicleOrderDesc(!hasBusinessError);
-                    }
-                }
-                // sipariş telim mi edildi?
-                if (dealer.getStatus().equals(ContractStatus.DELIVERED.toString())) {
-                    contractResponse.setStatus(ContractStatus.DELIVERED);
-                    contractResponse.setDeliveredBy(null);
-                    contractResponse.setOrderDeliveredDate(LocalDateTime.now());
-                }
-                contractResponse.setContractOrderStatus(dealer.getContractOrderStatus());
-            }
-
-            contractResponse.setHasProforma(proformaContractIds.contains(contractResponse.getId()));
-
-            if (contractResponse.getTreasuryApprovalDate() != null && contractResponse.getOrdersId() != null) {
-                if (dealer != null
-                        && dealer.getDealerEmail() != null
-                        && dealer.getDealerInvoiceMailSentAt() == null) {
-                    DealerInvoiceMailRequest mailRequest = DealerInvoiceMailRequest.builder()
-                            .ordersId(contractResponse.getOrdersId())
-                            .vehicleDescription(contractResponse.getVersion())
-                            .customerTradingName(contractResponse.getCustomer())
-                            .supplierTradingName(contractResponse.getAssignedDealer())
-                            .color(contractResponse.getColor())
-                            .deliveryLocation(contractResponse.getDeliveryLocation())
-                            .build();
-
-                    mailService.sendDealerInvoiceInstruction("umitguldemir@gmail.com", mailRequest);
-                    dealer.setDealerInvoiceMailSentAt(LocalDateTime.now());
-                    contractDealerAssignmentRepository.save(dealer);
-                } else {
-                    log.warn("Bayi email adresi bulunamadı. ContractId: {}", contractResponse.getId());
-                }
-            }
-        }
-        return contracts;
+        });
     }
 
 
     public List<StockVehicleContractResponse> getStockVehicleContracts() {
-        return milesApi.getStockVehicleContracts();
+        logHeapUsage("getStockVehicleContracts:start", null);
+        List<StockVehicleContractResponse> responses = milesApi.getStockVehicleContracts();
+        logHeapUsage("getStockVehicleContracts:after-miles",
+                responses == null ? null : responses.size());
+        return responses;
     }
 
     public List<ContractsToBeRegisteredResponse> getContractsRegistered() {
+        logHeapUsage("getContractsRegistered:start", null);
         List<ContractsToBeRegisteredResponse> contractsToBeRegisteredResponseList = milesApi.getContractsRegistered();
-        List<ContractDealerAssignment> dealerAssignments = contractDealerAssignmentRepository.findAll();
+        logHeapUsage("getContractsRegistered:after-miles", contractsToBeRegisteredResponseList.size());
+        List<String> contractIds = contractsToBeRegisteredResponseList.stream()
+                .map(ContractsToBeRegisteredResponse::getContractId)
+                .filter(java.util.Objects::nonNull)
+                .toList();
+
+        if (contractIds.isEmpty()) {
+            return contractsToBeRegisteredResponseList;
+        }
+
+        logHeapUsage("getContractsRegistered:before-batch-fetch", contractIds.size());
+        List<ContractDealerAssignment> dealerAssignments =
+                contractDealerAssignmentRepository.findByStatusAndContractIdIn("ACTIVE", contractIds);
+        List<VehicleDocumentAssignment> vehicleDocumentAssignments =
+                vehicleDocumentRepository.findByStatusAndContractIdIn("ACTIVE", contractIds);
+        logHeapUsage("getContractsRegistered:after-batch-fetch", contractIds.size());
 
         Map<String, ContractDealerAssignment> dealerMap =
                 dealerAssignments.stream()
@@ -239,14 +206,21 @@ public class MilesService {
                                 ContractDealerAssignment::getContractId,
                                 a -> a
                         ));
+        Map<String, VehicleDocumentAssignment> vehicleDocumentMap =
+                vehicleDocumentAssignments.stream()
+                        .collect(Collectors.toMap(
+                                VehicleDocumentAssignment::getContractId,
+                                document -> document,
+                                (first, second) -> first
+                        ));
+        logHeapUsage("getContractsRegistered:after-map-build", contractIds.size());
         for (ContractsToBeRegisteredResponse registeredResponse : contractsToBeRegisteredResponseList) {
             ContractDealerAssignment dealer = dealerMap.get(registeredResponse.getContractId());
             if (dealer != null) {
                 registeredResponse.setAssignedDealer(dealer.getDealerName());
             }
-            Optional<VehicleDocumentAssignment> optionalVehicleDocumentAssignment = vehicleDocumentRepository.findByContractIdAndStatus(registeredResponse.getContractId(), "ACTIVE");
-            if (optionalVehicleDocumentAssignment.isPresent()) {
-                VehicleDocumentAssignment vehicleDocumentAssignment = optionalVehicleDocumentAssignment.get();
+            VehicleDocumentAssignment vehicleDocumentAssignment = vehicleDocumentMap.get(registeredResponse.getContractId());
+            if (vehicleDocumentAssignment != null) {
                 registeredResponse.setLicenseSerialNumber(vehicleDocumentAssignment.getLicenseSerialNumber());
                 registeredResponse.setExpirationDate(vehicleDocumentAssignment.getExpirationDate());
                 registeredResponse.setHgsCode(vehicleDocumentAssignment.getHgsCode());
@@ -261,7 +235,22 @@ public class MilesService {
             }
 
         }
+        logHeapUsage("getContractsRegistered:before-return", contractsToBeRegisteredResponseList.size());
         return contractsToBeRegisteredResponseList;
+    }
+
+    private void logHeapUsage(String phase, Integer itemCount) {
+        Runtime runtime = Runtime.getRuntime();
+        long usedMb = (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024);
+        long totalMb = runtime.totalMemory() / (1024 * 1024);
+        long maxMb = runtime.maxMemory() / (1024 * 1024);
+
+        if (itemCount == null) {
+            log.info("HEAP phase={} usedMb={} totalMb={} maxMb={}", phase, usedMb, totalMb, maxMb);
+            return;
+        }
+
+        log.info("HEAP phase={} items={} usedMb={} totalMb={} maxMb={}", phase, itemCount, usedMb, totalMb, maxMb);
     }
 
     public NetAmountUpdateResponse updateNetAmount(NetAmountUpdateRequest request) {
@@ -359,7 +348,11 @@ public class MilesService {
     }
 
     public List<GetDealerResponse> getDealerResponseList() {
-        return milesApi.getDealerList();
+        logHeapUsage("getDealerResponseList:start", null);
+        List<GetDealerResponse> responses = milesApi.getDealerList();
+        logHeapUsage("getDealerResponseList:after-miles",
+                responses == null ? null : responses.size());
+        return responses;
     }
 
     public List<ResponsibleDealerResponse> getResponsibleDealerList() {
@@ -371,7 +364,11 @@ public class MilesService {
     }
 
     public List<GetLeasingResponse> getLeasingResponseList() {
-        return milesApi.getLeasingsList();
+        logHeapUsage("getLeasingResponseList:start", null);
+        List<GetLeasingResponse> responses = milesApi.getLeasingsList();
+        logHeapUsage("getLeasingResponseList:after-miles",
+                responses == null ? null : responses.size());
+        return responses;
     }
 
     public TriggerMWSBulkProcessor_ApproveContractResponse triggerMWSBulkProcessor(TriggerMWSBulkProcessor_ApproveContractRequest request) {

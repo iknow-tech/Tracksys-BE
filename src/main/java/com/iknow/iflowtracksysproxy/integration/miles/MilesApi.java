@@ -157,6 +157,7 @@ public class MilesApi {
     public List<CustomerContractResponse> getCustomerContracts() {
         log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch?sessionId={}",
                 sessionId);
+        logHeapUsage("MilesApi.getCustomerContracts:before-request", null);
         String body = PRJ_SM_CustomerContractRequest
                 .replace("{sessionId}", sessionId);
         try {
@@ -169,6 +170,7 @@ public class MilesApi {
                     .getBody()
                     .getData()
                     .getCustomerContracts();
+            logHeapUsage("MilesApi.getCustomerContracts:after-response", baseResponseResponseEntity == null ? null : baseResponseResponseEntity.size());
             return baseResponseResponseEntity;
         } catch (Exception e) {
             log.error("MilesApi.getCustomerContracts", e.getStackTrace());
@@ -179,6 +181,7 @@ public class MilesApi {
     public List<StockVehicleContractResponse> getStockVehicleContracts() {
         log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch?sessionId={}",
                 sessionId);
+        logHeapUsage("MilesApi.getStockVehicleContracts:before-request", null);
         String body = PRJ_SM_StockVehicleContractRequest
                 .replace("{sessionId}", sessionId);
         try {
@@ -191,6 +194,8 @@ public class MilesApi {
                     .getBody()
                     .getData()
                     .getStockVehicleContracts();
+            logHeapUsage("MilesApi.getStockVehicleContracts:after-response",
+                    baseResponseResponseEntity == null ? null : baseResponseResponseEntity.size());
             return baseResponseResponseEntity;
         } catch (Exception e) {
             log.error("MilesApi.getStockVehicleContracts", e.getStackTrace());
@@ -201,6 +206,7 @@ public class MilesApi {
     public List<ContractsToBeRegisteredResponse> getContractsRegistered() {
         log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch?sessionId={}",
                 sessionId);
+        logHeapUsage("MilesApi.getContractsRegistered:before-request", null);
         String body = PRJ_SM_ContractsToBeRegisteredRequest
                 .replace("{sessionId}", sessionId);
         try {
@@ -214,11 +220,26 @@ public class MilesApi {
                     .getBody()
                     .getData()
                     .getContractsToBeRegistered();
+            logHeapUsage("MilesApi.getContractsRegistered:after-response", baseResponseResponseEntity == null ? null : baseResponseResponseEntity.size());
             return baseResponseResponseEntity;
         } catch (Exception e) {
             log.error("MilesApi.getContractsRegistered", e.getStackTrace());
             return null;
         }
+    }
+
+    private void logHeapUsage(String phase, Integer itemCount) {
+        Runtime runtime = Runtime.getRuntime();
+        long usedMb = (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024);
+        long totalMb = runtime.totalMemory() / (1024 * 1024);
+        long maxMb = runtime.maxMemory() / (1024 * 1024);
+
+        if (itemCount == null) {
+            log.info("HEAP phase={} usedMb={} totalMb={} maxMb={}", phase, usedMb, totalMb, maxMb);
+            return;
+        }
+
+        log.info("HEAP phase={} items={} usedMb={} totalMb={} maxMb={}", phase, itemCount, usedMb, totalMb, maxMb);
     }
 
     //net bedel alanının güncellenmesi
@@ -947,6 +968,7 @@ public class MilesApi {
     public List<GetDealerResponse> getDealerList() {
         log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch?sessionId={}",
                 sessionId);
+        logHeapUsage("MilesApi.getDealerList:before-request", null);
         String body = PRJ_SM_DealerListRequest
                 .replace("{sessionId}", sessionId);
         try {
@@ -959,12 +981,21 @@ public class MilesApi {
                     .getBody()
                     .getData()
                     .getDealerList();
+
+            int rawDealerCount = dealerResponseList == null ? 0 : dealerResponseList.size();
+            log.info("MilesApi.getDealerList raw dealer count={}", rawDealerCount);
+
+            log.info("MilesApi.getDealerList returning dealer count={}",
+                    dealerResponseList == null ? 0 : dealerResponseList.size());
+            logHeapUsage("MilesApi.getDealerList:after-response",
+                    dealerResponseList == null ? null : dealerResponseList.size());
             return dealerResponseList;
         } catch (Exception e) {
             log.error("MilesApi.getStockVehicleContracts", e.getStackTrace());
             return null;
         }
     }
+
 
     public List<ResponsibleDealerResponse> getResponsibleDealerList() {
         log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch?sessionId={}",
@@ -1072,6 +1103,7 @@ public class MilesApi {
     public List<GetLeasingResponse> getLeasingsList() {
         log.info("{}/miles/servlet/be.sofico.basecamp.servlet.tools.CommandServlet/MWS/NativeSearch?sessionId={}",
                 sessionId);
+        logHeapUsage("MilesApi.getLeasingsList:before-request", null);
         String body = PRJ_SM_LeasingListRequest
                 .replace("{sessionId}", sessionId);
         try {
@@ -1084,6 +1116,8 @@ public class MilesApi {
                     .getBody()
                     .getData()
                     .getLeasings();
+            logHeapUsage("MilesApi.getLeasingsList:after-response",
+                    leasingResponseList == null ? null : leasingResponseList.size());
             return leasingResponseList;
         } catch (Exception e) {
             log.error("MilesApi.getLeasingsList", e.getStackTrace());

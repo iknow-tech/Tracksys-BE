@@ -31,14 +31,14 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/api/v1/proforma/review/**", "/api/v1/ruhsat/analiz-et").permitAll()
-                        .requestMatchers("/api/**").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/miles/dealer").permitAll()
-                        .anyRequest().permitAll())
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                 .authorizeHttpRequests(auth -> auth
+                         .requestMatchers("/api/v1/auth/**").permitAll()
+                         .requestMatchers("/api/v1/proforma/review/**", "/api/v1/ruhsat/analiz-et").permitAll()
+                         .requestMatchers(HttpMethod.GET, "/api/v1/miles/dealer").permitAll()
+                         .requestMatchers("/api/**").authenticated()
+                         .anyRequest().permitAll())
+                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
