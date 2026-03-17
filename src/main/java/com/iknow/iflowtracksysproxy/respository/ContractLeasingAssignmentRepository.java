@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +27,9 @@ public interface ContractLeasingAssignmentRepository extends JpaRepository<Contr
      AND c.status = 'ACTIVE'
 """)
     void passiveAllActiveByContractId(@Param("contractId") String contractId);
+
+    List<ContractLeasingAssignment> findByStatusAndContractIdIn(
+            String status, Collection<String> contractIds);
 
 
 }

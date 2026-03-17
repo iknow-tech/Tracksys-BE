@@ -4,6 +4,7 @@ import com.iknow.iflowtracksysproxy.entity.ContractProforma;
 import com.iknow.iflowtracksysproxy.respository.ContractProformaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ public class ContractProformaService {
     private final ContractProformaRepository repository;
 
     @Transactional
+    @CacheEvict(value = "customerContracts", allEntries = true) // ✅ cache temizle
     public List<ContractProforma> upload( MultipartFile file,  List<String> contractIds, String dealerId) {
 
         if (contractIds == null || contractIds.isEmpty()) {

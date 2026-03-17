@@ -24,11 +24,12 @@ public class ContractProformaController {
 
     private final ContractProformaService proformaService;
 
+
     @PostMapping("/upload")
     public ResponseEntity<List<ContractProforma>> upload(
             @RequestParam("file") MultipartFile file,
             @RequestParam("contractIds") List<String> contractIdsJson,
-            @RequestParam("dealerBusinessPartnerId") String dealerId
+            @RequestParam(value = "dealerBusinessPartnerId",  required = false) String dealerId
     ) {
         List<ContractProforma> proforma = proformaService.upload(file, contractIdsJson, dealerId);
         return new ResponseEntity<>(proforma, HttpStatus.OK);

@@ -55,4 +55,5 @@ public class DealerContractInfo {
     private String vehicleOrderItemId;
     private String fleetVehicleId;
     private ContractOrderStatus contractOrderStatus;
+    private String dealerBusinessPartnerId;
 }
