@@ -13,17 +13,13 @@ import java.util.List;
 @Repository
 public interface ReviewRepository extends JpaRepository<ProformaReview, Long> {
 
-    List<ProformaReview> findByStatusOrderByCreatedAtDesc(ReviewStatus status);
-
     List<ProformaReview> findByTargetAndStatusAndNotificationStatusOrderByCreatedAtDesc(ReviewType target, ReviewStatus status, NotificationStatus notificationStatus);
-
-    List<ProformaReview> findByContractIdAndStatus(String contractId, ReviewStatus status);
-
-    List<ProformaReview> findByContractIdAndTargetAndStatus(String contractId, ReviewType target, ReviewStatus status);
 
     List<ProformaReview> findByTargetAndNotificationStatusOrderByCreatedAtDesc(ReviewType target, NotificationStatus notificationStatus);
 
     List<ProformaReview> findByNotificationStatusOrderByCreatedAtDesc(NotificationStatus notificationStatus);
+
+    List<ProformaReview> findByContractIdAndAdditionalDocumentPathIsNotNull(String contractId);
 
 
 

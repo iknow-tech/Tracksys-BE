@@ -9,7 +9,11 @@ import com.iknow.iflowtracksysproxy.dto.response.AssignLeasingResponse;
 import com.iknow.iflowtracksysproxy.entity.ContractDealerAssignment;
 import com.iknow.iflowtracksysproxy.entity.ContractLeasingAssignment;
 import com.iknow.iflowtracksysproxy.integration.miles.MilesApi;
+import com.iknow.iflowtracksysproxy.integration.miles.model.request.MulkUpdateRequest;
+import com.iknow.iflowtracksysproxy.integration.miles.model.request.PropertyTypeUpdateRequest;
 import com.iknow.iflowtracksysproxy.integration.miles.model.response.CustomerContractResponse;
+import com.iknow.iflowtracksysproxy.integration.miles.model.response.MulkUpdateResponse;
+import com.iknow.iflowtracksysproxy.integration.miles.model.response.PropertyTypeUpdateResponse;
 import com.iknow.iflowtracksysproxy.respository.ContractDealerAssignmentRepository;
 import com.iknow.iflowtracksysproxy.respository.ContractLeasingAssignmentRepository;
 import lombok.RequiredArgsConstructor;
@@ -59,8 +63,46 @@ public class ContracLeasingAssignmentService {
                     assignment.setStatus("ACTIVE");
                     contract.setAssignedLeasing(request.getDescription());
                     contract.setSysEnumerationId(request.getSysEnumerationId());
-                    assignmentRepository.save(assignment);
 
+                    // ✅ ÖNCE miles update — başarılı olursa kaydet
+                    // Vehicle Order Statüsü Güncelleme
+                    PropertyTypeUpdateRequest propertyTypeUpdateRequest = new PropertyTypeUpdateRequest("266", "10282", "1005943");
+                    PropertyTypeUpdateResponse propertyTypeUpdateResponse = milesApi.updateProperty(propertyTypeUpdateRequest, contract.getOrdersId());
+                    boolean hasBusinessError = Boolean.parseBoolean(propertyTypeUpdateResponse.getMetadata().getOperationStatus().getBusinessError());
+                    if (hasBusinessError) {
+                        throw new RuntimeException("Vehicle order statüsü güncellenemedi: " + contract.getId());
+                    }
+                    contract.setUpdateVehicleOrderItemStatu(true);
+
+                    // Mülkiyet Türü Güncelleme
+                    MulkUpdateRequest mulkiyetUpdateRequest = new MulkUpdateRequest();
+                    mulkiyetUpdateRequest.setFleetVehicleId(contract.getFleetVehicleId());
+                    mulkiyetUpdateRequest.setFieldId("2942");
+                    mulkiyetUpdateRequest.setSroid("68");
+                    mulkiyetUpdateRequest.setValue(assignment.getLeasingEnumId());
+                    MulkUpdateResponse mulkiyetUpdateResponse = milesApi.updateMulk(mulkiyetUpdateRequest);
+                    boolean mulkiyetError = Boolean.parseBoolean(mulkiyetUpdateResponse.getResponsemetadata().getOperationStatus().getBusinessError());
+                    if (mulkiyetError) {
+                        throw new RuntimeException("Mülkiyet türü güncellenemedi: " + contract.getId());
+                    }
+                    contract.setMulkiyetUpdateSuccess(true);
+
+                    // Mülk Alanı Güncelleme
+                    MulkUpdateRequest mulkUpdateRequest = new MulkUpdateRequest();
+                    mulkUpdateRequest.setFleetVehicleId(contract.getFleetVehicleId());
+                    mulkUpdateRequest.setFieldId("1001733");
+                    mulkUpdateRequest.setSroid("68");
+                    mulkUpdateRequest.setValue("1006514");
+                    MulkUpdateResponse mulkUpdateResponse = milesApi.updateMulk(mulkUpdateRequest);
+                    boolean mulkError = Boolean.parseBoolean(mulkUpdateResponse.getResponsemetadata().getOperationStatus().getBusinessError());
+                    if (mulkError) {
+                        throw new RuntimeException("Mülk alanı güncellenemedi: " + contract.getId());
+                    }
+                    contract.setMulkUpdateSuccess(true);
+
+                    // ✅ Tüm miles update'ler başarılıysa kaydet
+                    assignmentRepository.save(assignment);
+                    log.info("Contract {} leasing assigned and miles updated successfully", contract.getId());
                 } else {
                     contract.setAssignedLeasing(null);
                     contract.setSysEnumerationId(null);
@@ -70,11 +112,8 @@ public class ContracLeasingAssignmentService {
                     assignment.setAssignedBy(request.getAssignedBy());
                     assignment.setStatus("CANCELED");
                     assignmentRepository.save(assignment);
-
                 }
-
                 assignedCount++;
-
                 log.info(" Contract {} assigned leasing successfully", contract.getId());
 
             } catch (Exception e) {

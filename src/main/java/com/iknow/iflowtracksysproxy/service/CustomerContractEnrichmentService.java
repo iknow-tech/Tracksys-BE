@@ -1,15 +1,8 @@
 package com.iknow.iflowtracksysproxy.service;
 
-import com.iknow.iflowtracksysproxy.entity.ContractDealerAssignment;
-import com.iknow.iflowtracksysproxy.entity.ContractLeasingAssignment;
-import com.iknow.iflowtracksysproxy.entity.ContractOrderStatus;
-import com.iknow.iflowtracksysproxy.entity.ContractStatus;
-import com.iknow.iflowtracksysproxy.entity.DeliveryDocument;
+import com.iknow.iflowtracksysproxy.entity.*;
 import com.iknow.iflowtracksysproxy.integration.miles.model.response.CustomerContractResponse;
-import com.iknow.iflowtracksysproxy.respository.ContractDealerAssignmentRepository;
-import com.iknow.iflowtracksysproxy.respository.ContractLeasingAssignmentRepository;
-import com.iknow.iflowtracksysproxy.respository.ContractProformaRepository;
-import com.iknow.iflowtracksysproxy.respository.DeliveryDocumentRepository;
+import com.iknow.iflowtracksysproxy.respository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -29,6 +22,7 @@ public class CustomerContractEnrichmentService {
     private final ContractLeasingAssignmentRepository contractLeasingAssignmentRepository;
     private final ContractProformaRepository contractProformaRepository;
     private final DeliveryDocumentRepository deliveryDocumentRepository;
+    private final VehicleDocumentRepository vehicleDocumentRepository;
 
     public List<CustomerContractResponse> enrich(List<CustomerContractResponse> contracts) {
         List<CustomerContractResponse> copies = copyContracts(contracts);
@@ -61,6 +55,7 @@ public class CustomerContractEnrichmentService {
                 contractProformaRepository.findContractIdsByContractIdIn(contractIds)
         );
 
+
         Map<String, ContractDealerAssignment> dealerMap =
                 dealerAssignments.stream()
                         .collect(Collectors.toMap(
@@ -82,6 +77,8 @@ public class CustomerContractEnrichmentService {
 
             ContractLeasingAssignment leasing = leasingMap.get(contractId);
             DeliveryDocument deliveryDocument = deliveryDocumentMap.get(contractId);
+            VehicleDocumentAssignment vehicleDocumentAssignment = vehicleDocumentRepository.findByContractIdAndStatus(contractId,"ACTIVE").orElse(null);
+
             if (deliveryDocument != null) {
                 contractResponse.setDeliveryDocumentId(deliveryDocument.getId().toString());
                 contractResponse.setDeliveryDocumentName(deliveryDocument.getFileName());
@@ -111,6 +108,7 @@ public class CustomerContractEnrichmentService {
             }
 
             contractResponse.setHasProforma(proformaContractIds.contains(contractId));
+            contractResponse.setLicensePlate(vehicleDocumentAssignment != null ? vehicleDocumentAssignment.getLicensePlate() : null);
         }
 
         return copies;

@@ -123,20 +123,17 @@ public class ContractProformaService {
     }
 
     public Resource loadProformaFile(String proformaId) {
-
         ContractProforma proforma = findById(Long.valueOf(proformaId))
                 .orElseThrow(() -> new RuntimeException("Proforma bulunamadı"));
-
         try {
             Path filePath = Paths.get(proforma.getFilePath()).normalize();
             Resource resource = new UrlResource(filePath.toUri());
-
             if (!resource.exists()) {
                 throw new RuntimeException("Dosya bulunamadı");
             }
-
             return resource;
         } catch (Exception e) {
+            log.error("loadProformaFile failed proformaId={}", proformaId, e);
             throw new RuntimeException("Dosya okunamadı", e);
         }
     }

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -28,8 +29,8 @@ public class DealerReport extends ReportBase {
     private BigDecimal proformaTotal;
 
     @Column(name = "shipment_start_date")
-    private LocalDateTime shipmentStartDate;
+    private LocalDate shipmentStartDate;
 
     @Column(name = "shipment_end_date")
-    private LocalDateTime shipmentEndDate;
+    private LocalDate shipmentEndDate;
 }

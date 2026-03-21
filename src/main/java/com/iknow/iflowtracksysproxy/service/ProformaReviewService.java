@@ -30,30 +30,30 @@ public class ProformaReviewService {
         if (proformaReview.getDescription() == null || proformaReview.getDescription().trim().length() < 5) {
             throw new RuntimeException("Açıklama zorunlu");
         }
-        try{
-        ProformaReview entity =
-                ProformaReview.builder()
-                        .contractId(proformaReview.getContractId())
-                        .description(proformaReview.getDescription().trim())
-                        .status(ReviewStatus.OPEN)
-                        .notificationStatus(NotificationStatus.NEW)
-                        .target(proformaReview.getTarget())
-                        .createdAt(LocalDateTime.now())
-                        .build();
+        try {
+            ProformaReview entity =
+                    ProformaReview.builder()
+                            .contractId(proformaReview.getContractId())
+                            .description(proformaReview.getDescription().trim())
+                            .status(ReviewStatus.OPEN)
+                            .notificationStatus(NotificationStatus.NEW)
+                            .target(proformaReview.getTarget())
+                            .createdAt(LocalDateTime.now())
+                            .build();
 
-        return proformaReviewRepository.save(entity); }
-        catch(Exception e){
+            return proformaReviewRepository.save(entity);
+        } catch (Exception e) {
             log.error(e.getMessage());
             return null;
         }
     }
 
     public List<ProformaReview> getOpenReviewsForDealer() {
-        return proformaReviewRepository.findByTargetAndStatusAndNotificationStatusOrderByCreatedAtDesc(ReviewType.DEALER,ReviewStatus.OPEN, NotificationStatus.NEW);
+        return proformaReviewRepository.findByTargetAndStatusAndNotificationStatusOrderByCreatedAtDesc(ReviewType.DEALER, ReviewStatus.OPEN, NotificationStatus.NEW);
     }
 
     public List<ProformaReview> getOpenReviewsForPurchasing() {
-        return proformaReviewRepository.findByTargetAndStatusAndNotificationStatusOrderByCreatedAtDesc(ReviewType.PURCHASING,ReviewStatus.OPEN, NotificationStatus.NEW);
+        return proformaReviewRepository.findByTargetAndStatusAndNotificationStatusOrderByCreatedAtDesc(ReviewType.PURCHASING, ReviewStatus.OPEN, NotificationStatus.NEW);
     }
 
     @Transactional
@@ -75,11 +75,11 @@ public class ProformaReviewService {
 
 
     public List<ProformaReview> getReadReviewsForPurchasing() {
-        return proformaReviewRepository.findByTargetAndNotificationStatusOrderByCreatedAtDesc(ReviewType.PURCHASING,NotificationStatus.READ);
+        return proformaReviewRepository.findByTargetAndNotificationStatusOrderByCreatedAtDesc(ReviewType.PURCHASING, NotificationStatus.READ);
     }
 
     public List<ProformaReview> getReadReviewsForDealer() {
-        return proformaReviewRepository.findByTargetAndNotificationStatusOrderByCreatedAtDesc(ReviewType.DEALER,NotificationStatus.READ);
+        return proformaReviewRepository.findByTargetAndNotificationStatusOrderByCreatedAtDesc(ReviewType.DEALER, NotificationStatus.READ);
     }
 
     public List<ProformaReview> getReadReviews() {
@@ -97,11 +97,11 @@ public class ProformaReviewService {
         ProformaReview entity = ProformaReview.builder()
                 .contractId(req.getContractId())
                 .description(req.getDescription())
-                .target(req.getTarget() !=null ? req.getTarget() : ReviewType.DEALER)
-                .source(req.getSource() != null ? req.getSource(): ReviewType.PURCHASING)
+                .target(req.getTarget() != null ? req.getTarget() : ReviewType.DEALER)
+                .source(req.getSource() != null ? req.getSource() : ReviewType.PURCHASING)
                 .status(ReviewStatus.OPEN)
                 .notificationStatus(NotificationStatus.NEW)
-               // .additionalDocumentRequested(true)
+                // .additionalDocumentRequested(true)
                 .additionalDocumentPath(path)
                 .additionalDocumentName(file.getOriginalFilename())
                 .createdAt(LocalDateTime.now())
@@ -110,7 +110,13 @@ public class ProformaReviewService {
         return proformaReviewRepository.save(entity);
     }
 
-    public Optional<ProformaReview> findById (Long id){
+    public Optional<ProformaReview> findById(Long id) {
         return proformaReviewRepository.findById(id);
 
-}}
+    }
+
+    public List<ProformaReview> getAdditionalDocumentsByContractId(String contractId) {
+        return proformaReviewRepository.findByContractIdAndAdditionalDocumentPathIsNotNull(contractId);
+    }
+
+}

@@ -121,8 +121,8 @@ public class MilesUpdateService {
 
             if (milesUpdatedDto.getCreditApprovalCheck()) {
                 // kredi onay tarihi alanının güncellenemsi
-                ApprovalDateUpdateRequest approvalDateUpdateRequest = new ApprovalDateUpdateRequest();
-                approvalDateUpdateRequest.setApprovalDate(LocalDateTime.now().toString());
+                ApprovalDateUpdateRequest approvalDateUpdateRequest = new ApprovalDateUpdateRequest();;
+                approvalDateUpdateRequest.setApprovalDate(LocalDateTime.now(zone).withNano(0).atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME).toString());
                 approvalDateUpdateRequest.setFieldId("1000062");
                 approvalDateUpdateRequest.setOrderId("205");
                 approvalDateUpdateRequest.setVehicleOrderItemId(contractResponse.getVehicleOrderId());

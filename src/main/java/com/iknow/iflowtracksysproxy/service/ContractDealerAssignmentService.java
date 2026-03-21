@@ -44,6 +44,8 @@ public class ContractDealerAssignmentService {
     private final MilesUpdateService milesUpdateService;
     private final MilesApi milesApi;
     private final DealerReportRepository dealerReportRepository;
+    private final VehicleDocumentService vehicleDocumentService;
+    private final VehicleDocumentRepository vehicleDocumentRepository;
 
     @Transactional
     public AssignDealerResponse assignDealerToContracts(AssignDealerRequest request) throws Exception {
@@ -225,6 +227,7 @@ public class ContractDealerAssignmentService {
                 if (assignment.getDealerInvoiceMailSentAt() == null && contract.getTreasuryApprovalDate() != null && contract.getOrdersId() != null) {
 
                 }
+                VehicleDocumentAssignment vehicleDocumentAssignment = vehicleDocumentRepository.findByContractIdAndStatus(contractId,"ACTIVE").orElse(null);
 
                 DealerContractInfo contractInfo = DealerContractInfo.builder()
                         .id(contract.getId())
@@ -258,6 +261,7 @@ public class ContractDealerAssignmentService {
                         .deliveryMethod(assignment.getDeliveryMethod())
                         .vehicleOrderItemId(contract.getVehicleOrderItemId())
                         .fleetVehicleId(contract.getFleetVehicleId())
+                        .licensePlate(vehicleDocumentAssignment != null ? vehicleDocumentAssignment.getLicensePlate(): null)
 
 
                         // Atama Bilgileri (assignment objesinden)
@@ -411,10 +415,10 @@ public class ContractDealerAssignmentService {
                         dealerReport.setEngineNumber(item.getMotorNumber());
                     }
                     if (item.getShipmentStartDate() != null) {
-                        dealerReport.setShipmentStartDate(LocalDateTime.parse(item.getShipmentStartDate()));
+                        dealerReport.setShipmentStartDate(LocalDate.parse(item.getShipmentStartDate()));
                     }
                     if (item.getShipmentEndDate() != null) {
-                        dealerReport.setShipmentEndDate(LocalDateTime.parse(item.getShipmentEndDate()));
+                        dealerReport.setShipmentEndDate(LocalDate.parse(item.getShipmentEndDate()));
                     }
                     if (item.getDeliverySupplier() != null) {
                         dealerReport.setDeliveryDealer(item.getDeliverySupplier());

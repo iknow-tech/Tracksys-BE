@@ -103,4 +103,9 @@ public class ProformaReviewController {
                 .body(resource);
     }
 
+    @GetMapping("/contracts/{contractId}/additional-documents")
+    public ResponseEntity<List<ProformaReview>> getAdditionalDocuments(@PathVariable String contractId) {
+        return ResponseEntity.ok(reviewService.getAdditionalDocumentsByContractId(contractId));
+    }
+
 }
